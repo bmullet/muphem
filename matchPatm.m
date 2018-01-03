@@ -17,7 +17,7 @@ function [ resid ] = matchPatm(v,A)
      [zvec,pvec,~,~,~,~,~,~,~,A] = incoodes(A);
     if max(zvec) < A.depth
         % did not make it to surface
-        resid = A.depth-max(zvec);
+        resid = (A.depth-max(zvec))*10;
     else
         % made it to surface but pressure is too high
         resid = (A.Patm_-pvec(end))/1e5;      

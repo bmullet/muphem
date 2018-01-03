@@ -1,4 +1,4 @@
-function [A] = initA(A)
+function [A] = initA_Andesite(A)
 %% USED FOR FAILURE MODELS
 
 %INITA Sets up struct A with constants and containers

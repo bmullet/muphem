@@ -7,7 +7,7 @@ rhom = A.rhom0;
 Qg = rhog*ug*phi;
 Qm = rhom*um*(1-phi);
 Qt = A.v_chamber_i*rhom;
-% 
+ 
 % if (abs(1- (Qm + Qg)/Qt) > .01) %throws error if continuity is off by 1% or more
 %     disp('[Qm, Qg, Qt]')
 %     disp([Qm, Qg, Qt])
@@ -42,14 +42,6 @@ dydz(1) = -p*G/Qg;
 dydz(2) = -phi*rhog*g + Fmg + G*ug - (1-delF)*Fgw;
 dydz(3) = -(1-phi)*rhom*g - Fmg - delF*Fmw;
 
-
-% %%%% INCORRECT EQNS
-%Set RHS of equations
-% dydz(1) = -p*G/Qg;
-% dydz(2) = -phi*rhog*g + Fmg + G*ug - phi*Fgw;
-% dydz(3) = -(1-phi)*rhom*g - Fmg - (1-phi)*Fmw;
-%%%% INCORECT
-
     function G = gasloss()
         % put gas loss function here
         d = A.depth - z; %depth
@@ -68,7 +60,7 @@ dydz(3) = -(1-phi)*rhom*g - Fmg - delF*Fmw;
         
         G = 2*rhog*phi*k*(p - ppore)/(A.mug*A.r^2);
         G(G<0) = 0; % Set no incoming gas
-      
+        G(:) = 0;
     end
 
     function Fmg = interphase()
@@ -91,8 +83,6 @@ dydz(3) = -(1-phi)*rhom*g - Fmg - delF*Fmw;
 
     function Fmw = meltwallfriction()
         Fmw = 8*A.mu*um/A.r^2;
-        
-        
     end
 
     function Fgw = gaswallfriction()

@@ -34,9 +34,9 @@ function [A] = initA(A)
     A.T = 900;          % K (temperature of magma) (RHYOLITE)
     
     %A.mu = 100;         % liquid viscosity, Pa s (BASALT)    
-    %A.mu = 1e5;         % liquid viscosity, Pa s (ANDESITE)
+    A.mu = 1e5;         % liquid viscosity, Pa s (ANDESITE)
     %A.mu = 1e6;         % liquid viscosity, Pa s (DACITE)
-    A.mu = 1e8;         % liquid viscosity, Pa s (RHYOLITE)
+    %A.mu = 1e8;         % liquid viscosity, Pa s (RHYOLITE)
     %A.mu = 1000;         % test vis a vis eric
     
     A.Rw = 461.5;       % J/kg-K Gas constant for water
@@ -48,7 +48,7 @@ function [A] = initA(A)
     %A.Bhc = 2e-10;      % compressibility of dissolved volatiles, Pa^-1
       
     % Kirsch Equations: Conduit Wall Rock 
-    A.k.p = .45;         % Poisson's ratio
+    A.k.p = .5;         % Poisson's ratio
     A.k.K = A.k.p/(1-A.k.p); % K constant
     A.k.rho = 3000;     % Rock Density
     A.k.P0 = []   ;     % Pore pressure

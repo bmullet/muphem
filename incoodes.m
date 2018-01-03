@@ -8,7 +8,7 @@ Qgprint = [];
 % First integrate until we reach p critical (where gas first exsolves)
 A.delF = 1; % Turns on/off mass transfer
 eos = eosf(A.delF);
-pcrit = A.Pcrit*.95; % allow pressure to drop slightly below exsolution so that Qg ~= 0 (overpressure develops)
+pcrit = A.Pcrit*.99; % allow pressure to drop slightly below exsolution so that Qg ~= 0 (overpressure develops)
 zspan = [0 A.depth];
 options = odeset('Events',@ExsolutionDepth,'NormControl','on','RelTol',2.5e-14,'AbsTol',1e-17);
 y0 = [A.Pchamber];
@@ -132,9 +132,12 @@ end
         I = -(Qm)/(1-chid)*A.hs*A.hb*p^(A.hb-1);
         
         M = zeros(3,3);
+%         M(1,:) = [1+I*p/Qg*(rhog*ug/(rhom*um)-1), p/ug, (1-phi)/phi*p/um]; %dpdz equation
+%         M(2,:) = [phi+I*ug, Qg, 0]; % Gas momentum balance
+%         M(3,:) = [1-phi-I*um,0, Qm]; % Melt momentum balance    
         M(1,:) = [1+I*p/Qg*(rhog*ug/(rhom*um)-1), p/ug, (1-phi)/phi*p/um]; %dpdz equation
-        M(2,:) = [phi+I*ug, Qg, 0]; % Gas momentum balance
-        M(3,:) = [1-phi-I*um,0, Qm]; % Melt momentum balance    
+        M(2,:) = [phi, 0, 0]; % Gas momentum balance
+        M(3,:) = [1-phi,0, Qm]; % Melt momentum balance  
         zprint =[zprint; z];
         Qmprint =[Qmprint; Qm];
         Qgprint = [Qgprint; Qg];
