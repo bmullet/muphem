@@ -13,5 +13,5 @@ function [Smax,Sfail,failure] = mcfailure(A,Srr,Szz,Stt,zvec)
     end
     
     Smax = Smax - ppore;
-       
+     
 end

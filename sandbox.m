@@ -174,10 +174,98 @@ Fmg2 = [Fmg2ex; Fmg2fr];
 testi = bgi | fi;
 
 %% Bring down overpressure 
-for p = 0e6:-1e6:-50e6
-    disp(p)
-    out = muphem('multiflow2',p);
+
+muvvec = [1e3, 1e4, 1e6, 1e8];
+rvvec = [5, 25, 50, 100];
+pvvec = [60e6:-30e6:-60e6];
+
+Nmu = length(muvvec);
+Nr = length(rvvec);
+Np = length(pvvec);
+
+it = 0;
+N = Nmu*Nr*Np;   
+
+vbot = nan(Nmu,Nr,Np);
+vgtop = nan(Nmu,Nr,Np);
+vmtop = nan(Nmu,Nr,Np);
+ptop = nan(Nmu,Nr,Np);
+
+for i = 1:length(muvvec)
+    for j = 1:length(rvvec)
+        for k = 1:length(pvvec)
+            it = it+1;
+            
+            A.mu = muvvec(i);
+            A.r = rvvec(j);
+            p = pvvec(k);
+            
+            disp([num2str(it) ' out of ' num2str(N)]);
+            disp(['Progress = ' num2str(it/N*100)]);
+            disp(['mu = ' num2str(A.mu)]);
+            disp(['p_ch = ' num2str(p)]);
+            disp(['R = ' num2str(A.r)]);
+            try
+                out = muphem('multiflow2',p,A);
+                A = out{1}; zvec = out{2}; pvec = out{3}; ugvec = out{4}; umvec = out{5};
+                phivec = out{6}; rhogvec = out{7}; chidvec = out{8}; Qmvec = out{9}; Qgvec = out{10}; failure = out{11};
+                disp('Output distributed')
+                vbot(i,j,k) = min(umvec);
+                vgtop(i,j,k) = max(ugvec);
+                vmtop(i,j,k) = max(umvec);
+                ptop(i,j,k) = min(pvec);
+            catch
+                disp('Code failed!')
+            end
+        end
+    end
 end
+%% Make plots of various viscosities and failure points
+
+A = initA();
+muvvec = [1e3, 1e4, 1e6, 1e8];
+r = 75;
+pvvec = [60e6:-2e6:-60e6];
+A.r = r;
+
+Nmu = length(muvvec);
+Np = length(pvvec);
+
+it = 0;
+N = Nmu*Np;   
+
+vbot = nan(Nmu,Np);
+vgtop = nan(Nmu,Np);
+vmtop = nan(Nmu,Np);
+ptop = nan(Nmu,Np);
+
+for i = 1:length(muvvec)
+        for k = 1:length(pvvec)
+            it = it+1;
+            
+            A.mu = muvvec(i);
+            p = pvvec(k);
+            
+            disp([num2str(it) ' out of ' num2str(N)]);
+            disp(['Progress = ' num2str(it/N*100)]);
+            disp(['mu = ' num2str(A.mu)]);
+            disp(['p_ch = ' num2str(p)]);
+            disp(['R = ' num2str(A.r)]);
+            try
+                out = muphem('multiflow2',p,A);
+                A = out{1}; zvec = out{2}; pvec = out{3}; ugvec = out{4}; umvec = out{5};
+                phivec = out{6}; rhogvec = out{7}; chidvec = out{8}; Qmvec = out{9}; Qgvec = out{10}; failure = out{11};
+                disp('Output distributed')
+                vbot(i,j,k) = min(umvec);
+                vgtop(i,j,k) = max(ugvec);
+                vmtop(i,j,k) = max(umvec);
+                ptop(i,j,k) = min(pvec);
+            catch
+                disp('Code failed!')
+            end
+        end
+end
+save('failureandviscosity.mat')
 
 %% Test for poissons ratio
 A = initA();
@@ -229,3 +317,16 @@ ylabel('Minimum Stable Radius (m)')
 legend('0.03','0.05','0.07')
 set(gca,'yscale','log')
 set(gca,'xscale','log')
+
+%% Test for failure
+[Srr, Szz, Stt] = kirsch(zvec,pvec,A);
+[Smax,Sfail,failure] = mcfailure(A,Srr,Szz,Stt,zvec);
+if (failure)
+    disp('we have a failure!')
+else
+    disp('no failure')
+end
+plot_failure(zvec,pvec,phivec,A,Srr,Szz,Stt,Smax,Sfail,op)
+disp('Pressure at conduit exit:')
+disp(min(pvec));
+vargout = {A,zvec,pvec,ugvec,umvec,phivec,rhogvec,chidvec,Qmvec,Qgvec,failure};

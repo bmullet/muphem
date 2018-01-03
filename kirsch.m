@@ -8,4 +8,6 @@ function [Srr, Szz, Stt] = kirsch (zvec,p,A)
     S = A.k.K*Szz;     % Poisson's ratio stress condition
     %S = Szz;            % Isotropic stress condition
     Stt = 2*(S)-p;
+    
+    
 end
