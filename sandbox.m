@@ -330,3 +330,41 @@ plot_failure(zvec,pvec,phivec,A,Srr,Szz,Stt,Smax,Sfail,op)
 disp('Pressure at conduit exit:')
 disp(min(pvec));
 vargout = {A,zvec,pvec,ugvec,umvec,phivec,rhogvec,chidvec,Qmvec,Qgvec,failure};
+
+%% Show plots of failure with changing overpressure
+close all;
+for i = 1:length(outvec)
+    out = outvec{i};
+    A = out{1}; zvec = out{2}; pvec = out{3}; ugvec = out{4}; umvec = out{5};
+phivec = out{6}; rhogvec = out{7}; chidvec = out{8}; Qmvec = out{9}; Qgvec = out{10}; failure = out{11};
+A.mu = @(x,y) A.mu;
+disp('Output distributed')
+% Test for failure
+[Srr, Szz, Stt, Srz] = kirsch(zvec,pvec,A,ugvec,umvec,rhogvec,phivec,pvec);
+[Smax,Sfail,failure] = mcfailure(A,Srr,Szz,Stt,Srz,zvec);
+if (failure)
+    disp('we have a failure!')
+else
+    disp('no failure')
+end
+plot_failure(zvec,pvec,phivec,A,Srr,Szz,Stt,Srz, Smax,Sfail)
+pause
+
+end
+
+%% Plot exit velocities and viscosities and pressure
+load('failureandviscosity3.mat')
+subplot(1,2,1)
+h = pcolor(pvvec./1e6,log10(muvvec(5:end)),vmtop(5:end,:));
+set(h, 'EdgeColor', 'none');
+ylabel('Log_{10} \mu (Pa-s)')
+xlabel('Chamber overpressure (MPa)')
+title('Melt exit velocity (m/s)')
+colorbar
+subplot(1,2,2)
+h = pcolor(pvvec./1e6,log10(muvvec(5:end)),vgtop(5:end,:));
+set(h, 'EdgeColor', 'none');
+colorbar
+xlabel('Chamber overpressure (MPa)')
+ylabel('Log_{10} \mu (Pa-s)')
+title('Gas exit velocity (m/s)')

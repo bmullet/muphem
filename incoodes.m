@@ -14,6 +14,10 @@ options = odeset('Events',@ExsolutionDepth,'NormControl','on','RelTol',2.5e-14,'
 y0 = [A.Pchamber];
 u0 = A.v_chamber_i;
 
+if A.Pchamber < pcrit
+    error('pcrit < A.pchamber!')
+end
+
 [z1,y1,ze,ze,ze] = ode45(@(z,y) singlephaseODE(z,y,u0,A),zspan,y0,options);
 p1 = y1(:,1); um1=u0*ones(size(z1)); ug1 = um1;
 phivec = zeros(size(z1));
@@ -40,7 +44,7 @@ ug0 = fzero(@(u) exslvv(u,u0,p0),u0); % Find v0 for exsolve phase
 
 y0 = [y1(nz) ug0 ug0]; % format is [p ug um];
 %warning on MATLAB:ode15s:IntegrationTolNotMet
-options = odeset('Events',@RegimeChangeDepth,'Mass',@mass, 'MStateDependence', 'strong', 'NormControl','on','RelTol',2.5e-9,'AbsTol',1e-10);
+options = odeset('Events',@RegimeChangeDepth,'Mass',@mass, 'MStateDependence', 'strong', 'NormControl','on','RelTol',2.5e-7,'AbsTol',1e-10);
 sol = ode15s(@(z,y) twophaseODE(z,y,A), zspan, y0, options);
 
 %p2 = y2(:,1);ug2 = y2(:,2); um2 = y2(:,3);
@@ -55,7 +59,7 @@ sol = ode15s(@(z,y) twophaseODE(z,y,A), zspan, y0, options);
 % rhogvec = [rhogvec; rhog2];
 % chidvec = [chidvec; chi_d2];
 
-options = odeset('Events',@FragmentationDepth,'Mass',@mass, 'MStateDependence', 'strong', 'NormControl','on','RelTol',2.5e-9,'AbsTol',1e-10);
+options = odeset('Events',@FragmentationDepth,'Mass',@mass, 'MStateDependence', 'strong', 'NormControl','on','RelTol',2.5e-7,'AbsTol',1e-10);
 
 solext = odextend(sol,[],A.depth,sol.y(:,end),options);
 p2e = solext.y(1,:)'; ug2e = solext.y(2,:)'; um2e = solext.y(3,:)'; 

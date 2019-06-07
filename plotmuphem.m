@@ -277,4 +277,5 @@ xl=xlim;
 hold on
 plot([min(xl) max(xl)],[zex zex],'k--')
 plot([min(xl) max(xl)],[A.fragdepth A.fragdepth],'r--')
+set(gca,'Ydir','reverse')
 

@@ -66,7 +66,7 @@ dydz(3) = -(1-phi)*rhom*g - Fmg - delF*Fmw;
     function Fmg = interphase()
      
             rb = (3*phi/(4*pi*A.nb))^(1/3); %bubble radius
-            Fmg1 = -(9/2*phi*(1-phi)*A.mu*(ug-um)/rb^2);
+            Fmg1 = -(9/2*phi*(1-phi)*A.mu(phi,p)*(ug-um)/rb^2);
             Fmg2 = -3/8*phi*(1-phi)*A.dragC/A.Rash*rhog*abs(ug-um)*(ug-um);
  
             pf = A.phiforce;
@@ -82,7 +82,7 @@ dydz(3) = -(1-phi)*rhom*g - Fmg - delF*Fmw;
     end
 
     function Fmw = meltwallfriction()
-        Fmw = 8*A.mu*um/A.r^2;
+        Fmw = 8*A.mu(phi,p)*um/A.r^2;
     end
 
     function Fgw = gaswallfriction()

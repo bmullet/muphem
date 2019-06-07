@@ -1,4 +1,4 @@
-function [] = plot_failure(z,pvec,phivec,A,Srr,Szz,Stt,Smax,Sfail,op)
+function [] = plot_failure(z,pvec,phivec,A,Srr,Szz,Stt,Srz,Smax,Sfail)
 %     Smin = min([Srr Szz Stt],[],2);
 %     Smax = max([Srr Szz Stt],[],2); 
 %     
@@ -11,18 +11,19 @@ function [] = plot_failure(z,pvec,phivec,A,Srr,Szz,Stt,Smax,Sfail,op)
     Srrplot = Srr/1e6;
     Szzplot = Szz/1e6;
     Sttplot = Stt/1e6;
+    Srzplot = Srz/1e6;
     pplot = pvec/1e6;
     figure()
 
     subplot(1,2,1);
-    plot(Srrplot,z,Szzplot,z,Sttplot,z,pplot,z);
+    plot(Srrplot,z,Szzplot,z,Sttplot,z,Srzplot,z);
     hold on
     set(gca,'Ydir','reverse')
     if any(Zfr)
         xl = xlim;
         plot(xl,[Zfr Zfr],'r--')
     end
-    legend('\sigma_{r}=p','\sigma_{z}','\sigma_{\theta}');
+    legend('\sigma_{r}=p','\sigma_{z}','\sigma_{\theta}','\sigma_{rz}');
     xlabel('MPa')
     ylabel('Depth (km)')
     
