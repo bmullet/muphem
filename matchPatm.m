@@ -12,9 +12,9 @@ function [ resid ] = matchPatm(v,A)
         resid = -20;
         return
     end
+     
+    [zvec,pvec,~,~,~,~,~,~,~,A] = incoodes(A);
     
-    
-     [zvec,pvec,~,~,~,~,~,~,~,A] = incoodes(A);
     if max(zvec) < A.depth
         % did not make it to surface
         resid = (A.depth-max(zvec))*10;

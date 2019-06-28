@@ -17,7 +17,6 @@ Qt = A.v_chamber_i*rhom;
 dydz = zeros(3,1);
 g = A.g;
 
-
 if (A.delF)
     %below fragmentation depth, no gas loss
     Fmg = interphase();
