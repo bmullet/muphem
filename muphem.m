@@ -23,31 +23,34 @@ A.Pchamber = max(plith)+op;    % Set chamber pressure = lithosatic + overpressur
 % Perform shooting method via fzero
 %c0 = findc0(A); 
 % %A.c0 = c0;
- vbounds = [5];            % Set upper boundary at 10% speed of sound at critical pressure       
+vbounds = [.15];            % Set upper boundary at 10% speed of sound at critical pressure       
 v_fzero = fzero(@(v) matchPatm(v,A),vbounds,optimset('Display','iter'));
 A.v_chamber_i = v_fzero;
 
-%A.v_chamber_i = 5;
-
 % Collect Solution
- [zvec,pvec,ugvec,umvec,phivec,rhogvec,chidvec,Qmvec,Qgvec,A] = incoodes(A);
+[zvec,pvec,ugvec,umvec,phivec,rhogvec,chidvec,Qmvec,Qgvec,A] = incoodes(A);
 
 % Output Solution
-plotmuphem(A,zvec,pvec,ugvec,umvec,phivec,rhogvec,chidvec)
-
+%plotmuphem(A,zvec,pvec,ugvec,umvec,phivec,rhogvec,chidvec)
 
 % Test for failure
 [Srr, Szz, Stt, Srz] = kirsch(zvec,pvec,A,ugvec,umvec,rhogvec,phivec,pvec);
-[Smax,Sfail,failure] = mcfailure(A,Srr,Szz,Stt,Srz,zvec);
+[Smax,Sfail,failure,Sprincipal] = mcfailure(A,Srr,Szz,Stt,Srz,zvec);
+
+% Plot slip directions
+plotslipsurfaces(zvec,Sprincipal,A);
+vargout = {zvec, Sprincipal}; 
+
 if (failure)
     disp('we have a failure!')
 else
     disp('no failure')
 end
+
 plot_failure(zvec,pvec,phivec,A,Srr,Szz,Stt,Srz, Smax,Sfail)
 disp('Pressure at conduit exit:')
 disp(min(pvec));
-vargout = {A,zvec,pvec,ugvec,umvec,phivec,rhogvec,chidvec,Qmvec,Qgvec,failure};
+vargout = {A,zvec,pvec,ugvec,umvec,phivec,rhogvec,chidvec,Qmvec,Qgvec,failure,Sprincipal};
 
 end
 

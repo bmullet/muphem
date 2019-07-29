@@ -5,7 +5,8 @@ function [zvec,pvec,ugvec,umvec,phivec,rhogvec,chidvec,Qmvec,Qgvec,A] = incoodes
 zprint =[];
 Qmprint =[];
 Qgprint = [];
-% First integrate until we reach p critical (where gas first exsolves)
+
+%% First integrate until we reach p critical (where gas first exsolves)
 A.delF = 1; % Turns on/off mass transfer
 eos = eosf(A.delF);
 pcrit = A.Pcrit*.99; % allow pressure to drop slightly below exsolution so that Qg ~= 0 (overpressure develops)
@@ -26,7 +27,7 @@ chidvec = zeros(size(z1));
 Qmvec = A.rhom0*u0*ones(size(z1));
 Qgvec = zeros(size(z1));
 
-% Now integrate to fragmentation depth using two phase model
+%% Now integrate to fragmentation depth using two phase model
 delF = 1; % Turns on/off mass transfer
 eos = eosf(A.delF);
 nz = length(z1);
@@ -43,21 +44,9 @@ end
 ug0 = fzero(@(u) exslvv(u,u0,p0),u0); % Find v0 for exsolve phase
 
 y0 = [y1(nz) ug0 ug0]; % format is [p ug um];
-%warning on MATLAB:ode15s:IntegrationTolNotMet
+
 options = odeset('Events',@RegimeChangeDepth,'Mass',@mass, 'MStateDependence', 'strong', 'NormControl','on','RelTol',2.5e-7,'AbsTol',1e-10);
 sol = ode15s(@(z,y) twophaseODE(z,y,A), zspan, y0, options);
-
-%p2 = y2(:,1);ug2 = y2(:,2); um2 = y2(:,3);
-% p2 = sol.y(1,:)'; ug2 = sol.y(2,:)'; um2 = sol.y(3,:)'; 
-% z2 = sol.x';
-% [ rhog2, chi_d2, phi2 ] = eos.calcvars(A,um2,p2);
-% Qm2 = (1-phi2).*um2.*A.rhom0;
-% Qg2 = phi2.*ug2.*rhog2;
-% phivec = [phivec; phi2];
-% Qmvec = [Qmvec; Qm2];
-% Qgvec = [Qgvec; Qg2];
-% rhogvec = [rhogvec; rhog2];
-% chidvec = [chidvec; chi_d2];
 
 options = odeset('Events',@FragmentationDepth,'Mass',@mass, 'MStateDependence', 'strong', 'NormControl','on','RelTol',2.5e-7,'AbsTol',1e-10);
 
@@ -73,14 +62,9 @@ Qgvec = [Qgvec; Qg2e];
 rhogvec = [rhogvec; rhog2e];
 chidvec = [chidvec; chi_d2e];
 
+% Do fragmentation depth to surface integration, if needed
 if max(z2e) == A.depth
     % We reached the surface with no fragmentation!
-    
-%     A.fragdepth = 10000;
-%     zvec  = [z1; z2; z2e];
-%     pvec = [p1; p2; p2e];
-%     ugvec = [ug1; ug2; ug2e];
-%     umvec = [um1; um2; um2e];
     
     A.fragdepth = 0;
     zvec  = [z1; z2e];

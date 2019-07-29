@@ -13,4 +13,5 @@ function [Srr, Szz, Stt, Srz] = kirsch (zvec,p,A,ugvec,umvec,rhogvec,phivec,pvec
     Srz(zvec<A.fragdepth) = 4*A.mu(phivec,pvec).*umvec(zvec<A.fragdepth)/A.r;
     Srz(zvec>=A.fragdepth) = A.f0*rhogvec(zvec>=A.fragdepth).*ugvec(zvec>=A.fragdepth).^2./2;
     Srz = Srz;
+    
 end

@@ -1,30 +1,23 @@
-function [A] = initA(A)
+function [A] = initA_Andesite(A)
 %% USED FOR FAILURE MODELS
 
 %INITA Sets up struct A with constants and containers
-% MODEL FLAGS (used to quickly change model)
-%VISCOSITY_MODEL_FLAG = 'Hess and Dingwell';
-%VISCOSITY_THETA_G_FLAG = 'Bagdassarove-Dingwell';
-VISCOSITY_MODEL_FLAG = 'None';
-VISCOSITY_THETA_G_FLAG = 'None';
 
     % Set some constants and containers
-    A.Patm_ = 1.013e5;     % pascals
+    A.Patm_ = 1.01e5;     % pascals
     A.vchamber_ = [];
     A.Ptop_ = [];
-    A.r = 30;             % Conduit radius
-    A.depth = 4000;          % Length
+    A.r = 10;             % Conduit radius
+    A.depth = 6000;          % Length
     A.Bchm = 1e-10;      % Chamber compressibility (sphere)
     %A.Bchm = 1e-7;       % Chamber compressibility (sill)
     A.Vchm = 3e10;        % Chamber volume
     A.nb = 1e15;        % Bubble concentration
-    A.Pchamber = 140000000; % Chamber pressure (Pa)
-    A.gamma = 4/3;
     
     % Henry's law constants
-    A.hs = 4.109999e-6;
+    A.hs = 4e-6;
     A.hb = 0.5;
-    A.hg = 0.035; %total volatile content
+    A.hg = 0.03; %total volatile content
     A.Pcrit = (A.hg/A.hs)^(1/A.hb);   % Pcrit is pressure when volatiles first exsolve
     
     %A.lam = 1-A.hg; % melt mass fraction (1-total volatile mass fraction)
@@ -38,13 +31,13 @@ VISCOSITY_THETA_G_FLAG = 'None';
     A.g = 9.81;         % N/kg (force/mass for gravity)
     
     %A.T = 1200;         % K (temperature of magma) (BASALT)
-    A.T = 1159;          % K (temperature of magma) (ANDESITE)
+    A.T = 1200;          % K (temperature of magma) (ANDESITE)
     %A.T = 1000;          % K (temperature of magma) (DACITE)
     %A.T = 900;          % K (temperature of magma) (RHYOLITE)
     
     %A.mu = 100;         % liquid viscosity, Pa s (BASALT)    
-    %A.mu = 1e6;         % liquid viscosity, Pa s (ANDESITE)
-    A.mu = 1e7;         % liquid viscosity, Pa s (DACITE)
+    A.mu = 1e4;         % liquid viscosity, Pa s (ANDESITE)
+    %A.mu = 1e6;         % liquid viscosity, Pa s (DACITE)
     %A.mu = 1e9;         % liquid viscosity, Pa s (RHYOLITE)
     %A.mu = 1000;         % test vis a vis eric
     
@@ -63,18 +56,17 @@ VISCOSITY_THETA_G_FLAG = 'None';
     A.k.P0 = []   ;     % Pore pressure
     
     % Mohr Coulomb Failure
-    A.mc.C = 9e6;
+    A.mc.C = 9e6; % cohesion
     %A.mc.C = 8e6;
-    A.mc.phi = deg2rad(15);
+    A.mc.phi = deg2rad(15); % angle of internal friction
     %A.mc.phi = deg2rad(35);
     
     % Fragmentation
     A.f0 = 0.01;  % Darcy-Weisbach friction factor
-    A.phi0 = .8; % critical gas volume fraction for fragmentation
-    A.phiforce = .85; % end of transition period
-    %A.mug = 1e-5; % gas viscosity
-    A.mug = 1.5e-2; % gas viscosity
-    A.Rash = 0.01; % ash radius
+    A.phi0 = .85; % critical gas volume fraction for fragmentation
+    A.phiforce = .6; % start of transition period
+    A.mug = 1e-5; % gas viscosity
+    A.Rash = 0.001; % ash radius
     A.dragC = 0.8; % drag coefficient
     
     % Lateral gas loss
@@ -91,31 +83,6 @@ VISCOSITY_THETA_G_FLAG = 'None';
 %     %A.Bchm = 1e-7;            % Chamber compressibility (sill)
 %     A.Bchm = 1e-9;             % Somewhere in between
      
-    A.mu0 = A.mu;
-    
-    switch VISCOSITY_THETA_G_FLAG
-        case 'Bagdassarove-Dingwell'
-            b = 22.4;
-            theta_g = @(phi) 1/(1+b*phi);
-        case 'Ducamp-Raj'
-            b = -3;
-            theta_g = @(phi) exp(b*phi/(1-phi));
-        case 'Mackenzie'
-            theta_g = @(phi) 1 - 5/3*phi;
-        case 'Taylor'
-            theta_g = @(phi) 1 + phi;
-        otherwise
-            % Default to no phi dependence
-            theta_g = @(phi) 1;
-    end
-   
-    switch VISCOSITY_MODEL_FLAG
-        case 'Hess and Dingwell'
-            mufunc = @(w) 10^(-3.545 + 0.833*log(w) + (9601 - 2368*log(w))/(A.T - (195.7 + 32.25*log(w))));
-            A.mu = @(phi,p) mufunc(w(p))*theta_g(phi);
-        otherwise
-            A.mu = @(phi,p) A.mu0*theta_g(phi);
-    end
-    
+
 end
 
