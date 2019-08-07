@@ -37,7 +37,7 @@ dydz(3) = -(1-phi)*rhom*g - Fmg - delF*Fmw;
 
     function G = gasloss()
         % put gas loss function here
-        d = A.depth - z; %depth
+        d = abs(z); %depth
         ppore = A.rhow*A.g*d+A.Patm_; % hyrdostatic pore pressure
         %ppore = A.Patm_ + 10000*d;
         %kw = A.kw0*exp(-ppore/A.Pstar);        

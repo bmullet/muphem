@@ -12,11 +12,6 @@ end
 function [ vargout ] = multiflow2(op,A)
 plot = true;
 
-% Initialize model parameters
-%A = initA();
-z = 1:A.depth;
-plith = 1.01e5+z*A.k.rho*A.g;
-
 %A.Pchamber = max(plith)+op;    % Set chamber pressure = lithosatic + overpressure
 A.Pchamber = 140000000;
 %A.kw0 = k;
@@ -24,10 +19,10 @@ A.Pchamber = 140000000;
 % Perform shooting method via fzero
 %c0 = findc0(A); 
 % %A.c0 = c0;
-vbounds = [14.1905];            % Set upper boundary at 10% speed of sound at critical pressure       
-%v_fzero = fzero(@(v) matchPatm(v,A),vbounds,optimset('Display','iter'));
+vbounds = [8.1905];            % Set upper boundary at 10% speed of sound at critical pressure       
+v_fzero = fzero(@(v) matchPatm(v,A),vbounds,optimset('Display','iter'));
 
-A.v_chamber_i = vbounds;
+A.v_chamber_i = v_fzero;
 
 % Collect Solution
 [zvec,pvec,ugvec,umvec,phivec,rhogvec,chidvec,Qmvec,Qgvec,A] = incoodes(A);

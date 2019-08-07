@@ -34,7 +34,7 @@ Qm = (1-phi).*rhom.*um;
 Qt = Qg+Qm;
 pplot = p/1e6;
 [~,i] = min(abs(p-A.Pcrit*0.99));
-z = A.depth-z;
+z = abs(z);
 zprint = z/1e3;
 zex = z(i)*ones(size(p))/1e3;
 
@@ -52,6 +52,7 @@ xlabel('Velocity (m/s)')
 set(gca,'Ydir','reverse')
 ylabel('depth (km)')
 legend('Melt', 'Gas')
+legend('show')
 
 % Pressure v. z
 subplot(1,6,2)
@@ -99,7 +100,7 @@ for i=1:6
   xl=xlim;
   hold on
   plot([min(xl) max(xl)],[zex zex],'k--')
-  plot([min(xl) max(xl)],[(A.depth - A.fragdepth)/1e3, (A.depth - A.fragdepth)/1e3],'r--')
+  plot([min(xl) max(xl)],[abs(A.fragdepth)/1e3, abs(A.fragdepth)/1e3],'r--')
   box('on')
   hold off
 end

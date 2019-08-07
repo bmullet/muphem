@@ -1,5 +1,5 @@
 function [Srr, Szz, Stt, Srz] = kirsch (zvec,p,A,ugvec,umvec,rhogvec,phivec,pvec)
-    z = A.depth - zvec; % Change into depth
+    z = abs(zvec); % Change into depth
     %P0 = 1.01e5+10000*z;       % Pore Pressure gradient = 5 kPa/m
     
     Srr = p;    

@@ -1,7 +1,7 @@
 function [zvec,pvec,ugvec,umvec,phivec,rhogvec,chidvec,Qmvec,Qgvec,A] = incoodes(A)
 %INCOODES: (In)tegrate (Co)nduit (ODEs)
-%   Integrates conduit ODEs from base of conduit (z=0) to top of
-%   conduit (z=A.depth)
+%   Integrates conduit ODEs from base of conduit (z=-A.depth) to top of
+%   conduit (z=0)
 zprint =[];
 Qmprint =[];
 Qgprint = [];
@@ -10,7 +10,7 @@ Qgprint = [];
 A.delF = 1; % Turns on/off mass transfer
 eos = eosf(A.delF);
 pcrit = A.Pcrit*.99; % allow pressure to drop slightly below exsolution so that Qg ~= 0 (overpressure develops)
-zspan = [0 A.depth];
+zspan = [-A.depth 0];
 options = odeset('Events',@ExsolutionDepth,'NormControl','on','RelTol',2.5e-14,'AbsTol',1e-17);
 y0 = [A.Pchamber];
 u0 = A.v_chamber_i;
@@ -32,7 +32,7 @@ delF = 1; % Turns on/off mass transfer
 eos = eosf(A.delF);
 nz = length(z1);
 zstart = z1(nz); A.exdepth = zstart;
-zspan = [zstart A.depth];
+zspan = [zstart 0];
 p0 = y1(nz); % new p0 = (should be pcrit)
 if abs((pcrit-p0)/pcrit) > 0.01 
     disp([pcrit p0])
@@ -63,7 +63,7 @@ rhogvec = [rhogvec; rhog2e];
 chidvec = [chidvec; chi_d2e];
 
 % Do fragmentation depth to surface integration, if needed
-if max(z2e) == A.depth
+if abs(max(z2e)) <  1e-3
     % We reached the surface with no fragmentation!
     
     A.fragdepth = 0;
@@ -81,7 +81,7 @@ else
     nz = length(z2e);
     zstart = z2e(nz);
     A.fragdepth = zstart;
-    zspan = [zstart A.depth];
+    zspan = [zstart 0];
     y0 = [p2e(nz) ug2e(nz) um2e(nz)];
     
     A.umf = um2e(nz); % to be used for new phi calculation

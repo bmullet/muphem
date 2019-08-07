@@ -1,6 +1,6 @@
 function [slip] = plotslipsurfaces(zvec,S,A,plot)
 
-[~,i] = min(abs(zvec - (A.fragdepth*0.999)));
+[~,i] = min(abs(zvec - (A.fragdepth*1.001)));
 
 eV = squeeze(S(i,:,:,:));
 

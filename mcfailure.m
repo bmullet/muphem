@@ -1,5 +1,7 @@
 function [Smax,Sfail,failure,S,failstress] = mcfailure(A,Srr,Szz,Stt,Srz,zvec)
-    ppore = (A.depth-zvec).*1000*A.g; %pore pressure gradient
+    depth = abs(zvec);
+    
+    ppore = (depth).*1000*A.g; %pore pressure gradient
 %     Smin = min([Srr Szz Stt],[],2);
 %     Smax = max([Srr Szz Stt],[],2); 
     
@@ -9,7 +11,7 @@ function [Smax,Sfail,failure,S,failstress] = mcfailure(A,Srr,Szz,Stt,Srz,zvec)
     S(:,3,3) = Szz;
     S(:,1,3) = Srz;
     S(:,3,1) = Srz;
-    [~,ii] = min(abs(zvec - (A.fragdepth*0.999)));
+    [~,ii] = min(abs(zvec - (A.fragdepth*1.001)));
     disp('Srz at plot point')
     disp(Srz(ii));
     

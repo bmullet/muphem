@@ -6,7 +6,8 @@ function [] = plot_failure(z,pvec,phivec,A,Srr,Szz,Stt,Srz,Smax,Sfail)
 %     Sfail = qu + Smin*tan(deg2rad(45)+A.mc.phi/2)^2;
 %     
     % Get fragmentation depth
-    z = (A.depth-z)/1e3;
+    z = abs(z)/1e3;
+    
     Zfr = z(find(phivec>A.phi0,1,'first'));
     Srrplot = Srr/1e6;
     Szzplot = Szz/1e6;
