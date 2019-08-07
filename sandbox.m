@@ -62,9 +62,12 @@ plot(kw1,z,kw2,z)
 legend('k1','k2')
 set(gca,'XScale','log','Ydir','reverse')
 
+{A,zvec,pvec,ugvec,umvec,phivec,rhogvec,chidvec,Qmvec,Qgvec,failure,Sprincipal,slip};
+
 %% Distribute solution
-A = out{1}; zvec = out{2}; pvec = out{3}; ugvec = out{4}; umvec = out{5};
-phivec = out{6}; rhogvec = out{7}; chidvec = out{8}; Qmvec = out{9}; Qgvec = out{10}; failure = out{11};
+A = out{i}{1}; zvec = out{i}{2}; pvec = out{i}{3}; ugvec = out{i}{4}; umvec = out{i}{5};
+phivec = out{i}{6}; rhogvec = out{i}{7}; chidvec = out{i}{8}; Qmvec = out{i}{9}; Qgvec = out{i}{10}; failure = out{i}{11}; Sprincipal = out{i}{12};
+slip = out{i}{13};
 disp('Output distributed')
 
 %% Test 3 - Test for uniqueness

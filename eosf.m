@@ -30,7 +30,7 @@ phi = 1 - (1-A.hg)./(1-chid).*(um0)./um;
 function [ phi ] = calcphif (A,um,~) %calculate phi after fragmentation
 phi = 1 - (1-A.phi0)*A.umf./um;
 
-% 
+
 % function [rhoha, c, phi] = eos1(A,P,phi)
 %     % Henry's Law
 %     pcrit = (A.hg/A.hs)^(1/A.hb);

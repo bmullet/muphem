@@ -7,12 +7,6 @@ rhom = A.rhom0;
 Qg = rhog*ug*phi;
 Qm = rhom*um*(1-phi);
 Qt = A.v_chamber_i*rhom;
- 
-% if (abs(1- (Qm + Qg)/Qt) > .01) %throws error if continuity is off by 1% or more
-%     disp('[Qm, Qg, Qt]')
-%     disp([Qm, Qg, Qt])
-%     error('Continuity violated!')
-% end
 
 dydz = zeros(3,1);
 g = A.g;
@@ -77,6 +71,8 @@ dydz(3) = -(1-phi)*rhom*g - Fmg - delF*Fmw;
                 %Fmg = Fmg1*(1-t) + Fmg2*(t);
             elseif phi>=A.phi0
                 Fmg = Fmg2;
+            else
+                Fmg=0;
             end
     end
 

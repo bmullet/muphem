@@ -1,4 +1,4 @@
-function [] = plotslipsurfaces(zvec,S,A)
+function [slip] = plotslipsurfaces(zvec,S,A,plot)
 
 [~,i] = min(abs(zvec - (A.fragdepth*0.999)));
 
@@ -49,28 +49,37 @@ om = linspace(0,2*pi,30);
 x = cos(om);
 y = sin(om);
 
-figure()
-
-ax1 = subplot(1,2,1);
-% Plot circle, slip directions, fault surfaces
-plot3(x,y,zeros(size(x))); hold on;
-quiver3([1 1],[0 0],[0 0],[n1(1) n2(1)],[n1(2) n2(2)],[n1(3) n2(3)])
-surf(X1,Y1,Z1)
-surf(X2,Y2,Z2)
 
 fprintf('-----------SLIP DIRECTIONS---------\n')
 fprintf('      %%r        %%z         %%theta\n')
 fprintf('-----------------------------------\n')
 fprintf('      %0.2f      %.02f       %.2f\n',n1(1)^2, n1(3)^2, n1(2)^2)
 fprintf('      %0.2f      %.02f       %.2f\n',n2(1)^2, n2(3)^2, n2(2)^2)
-ax2 = subplot(1,2,2);
-% Plot a circle, slip directions, fault surfaces
-plot3(x,y,zeros(size(x))); hold on;
-quiver3([1 1],[0 0],[0 0],[n1(1) n2(1)],[n1(2) n2(2)],[n1(3) n2(3)])
 
-% Set views
-view(ax2,[0 0]);
-view(ax1,[0 90]);
-subplot(1,2,2); zlim([-1 1]);
-subplot(1,2,1); zlim([-1 1]);
+if(plot)
+    figure()
+    
+    ax1 = subplot(1,2,1);
+    % Plot circle, slip directions, fault surfaces
+    plot3(x,y,zeros(size(x))); hold on;
+    quiver3([1 1],[0 0],[0 0],[n1(1) n2(1)],[n1(2) n2(2)],[n1(3) n2(3)])
+    surf(X1,Y1,Z1)
+    surf(X2,Y2,Z2)
+    
+    
+    ax2 = subplot(1,2,2);
+    % Plot a circle, slip directions, fault surfaces
+    plot3(x,y,zeros(size(x))); hold on;
+    quiver3([1 1],[0 0],[0 0],[n1(1) n2(1)],[n1(2) n2(2)],[n1(3) n2(3)])
+    
+    % Set views
+    view(ax2,[0 0]);
+    view(ax1,[0 90]);
+    subplot(1,2,2); zlim([-1 1]);
+    subplot(1,2,1); zlim([-1 1]);
+end
+
+% Return slip vectors
+slip = {n1,n2};
+
 end

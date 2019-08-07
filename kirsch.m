@@ -10,7 +10,8 @@ function [Srr, Szz, Stt, Srz] = kirsch (zvec,p,A,ugvec,umvec,rhogvec,phivec,pvec
     Stt = 2*(S)-p;
     
     Srz = nan(size(Stt));
-    Srz(zvec<A.fragdepth) = 4*A.mu(phivec,pvec).*umvec(zvec<A.fragdepth)/A.r;
+    mu = A.mu(phivec,pvec);
+    Srz(zvec<A.fragdepth) = 4*mu(zvec<A.fragdepth).*umvec(zvec<A.fragdepth)/A.r;
     Srz(zvec>=A.fragdepth) = A.f0*rhogvec(zvec>=A.fragdepth).*ugvec(zvec>=A.fragdepth).^2./2;
     Srz = Srz;
     
