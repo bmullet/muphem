@@ -8,6 +8,8 @@ VISCOSITY_THETA_G_FLAG = 'None';
 VISCOSITY_MODEL_FLAG = 'Hess and Dingwell';
 %VISCOSITY_THETA_G_FLAG = 'None';
 
+    A.useForchheimer = true;
+
     % Set some constants and containers
     A.Patm_ = 1.013e5;     % pascals
     A.vchamber_ = [];
@@ -83,6 +85,11 @@ VISCOSITY_MODEL_FLAG = 'Hess and Dingwell';
     A.Pstar = 20e6; % pressure constant (2.5 - 20 MPa)
     A.rhow = 1e3; % density of water
     A.kc = 2e-19; % Magma permeability
+    
+    % Forchheimer's Law
+    A.ftb = 0.1; % Throat bubble ratio [0.05-0.5]
+    A.m = 5; % Tortuosity factor
+    A.Ff0 = 1e-3;
     
 %     %%%%% GRIMSVOTN PARAMS %%%%%
 %     A.H = 1700;                % Length for Grimsvotn

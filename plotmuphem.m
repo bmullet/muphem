@@ -51,8 +51,7 @@ set(gca,'XScale','log')
 xlabel('Velocity (m/s)')
 set(gca,'Ydir','reverse')
 ylabel('depth (km)')
-legend('Melt', 'Gas')
-legend('show')
+
 
 % Pressure v. z
 subplot(1,6,2)
@@ -107,6 +106,11 @@ end
 
 set(gcf,'Units','inches',...
  'Position',[0 0 20 10])
+
+subplot(1,6,1)
+legend('Melt', 'Gas')
+legend('show')
+drawnow
 
 % % Solubility Law
 % figure

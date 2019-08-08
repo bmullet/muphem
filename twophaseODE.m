@@ -16,7 +16,6 @@ if (A.delF)
     Fmg = interphase();
     G = 0;
     Fmw = meltwallfriction();
-    %Fgw = gaswallfriction();
     Fgw = 0; %CORRECT
     delF = 1;
 else
@@ -24,7 +23,6 @@ else
     Fmg = interphase();
     G = gasloss();
     Fmw = 0; %CORRECT
-    %Fmw = meltwallfriction();
     Fgw = gaswallfriction();
     delF = 0;
 end
@@ -52,6 +50,7 @@ dydz(3) = -(1-phi)*rhom*g - Fmg - delF*Fmw;
         end
         
         G = 2*rhog*phi*k*(p - ppore)/(A.mug*A.r^2);
+        
         G(G<0) = 0; % Set no incoming gas
         G(:) = 0;
     end
@@ -59,9 +58,19 @@ dydz(3) = -(1-phi)*rhom*g - Fmg - delF*Fmw;
     function Fmg = interphase()
      
             rb = (3*phi/(4*pi*A.nb))^(1/3); %bubble radius
-            Fmg1 = -(9/2*phi*(1-phi)*A.mu(phi,p)*(ug-um)/rb^2);
-            Fmg2 = -3/8*phi*(1-phi)*A.dragC/A.Rash*rhog*abs(ug-um)*(ug-um);
- 
+            
+            if (A.useForchheimer)
+                k1 = (A.ftb*rb)^2/8 * phi^A.m;
+                k2 = (A.ftb*rb)/A.Ff0 * phi^(1+3*A.m)/2;
+                
+                Fmg1 = -(A.mug/k1 + rhog/k2*abs(ug-um))*(ug-um)*phi*(1-phi);
+            else
+                Fmg1 = -(9/2*phi*(1-phi)*A.mu(phi,p)*(ug-um)/rb^2);
+            end
+            
+            
+            %Fmg2 = -3/8*phi*(1-phi)*A.dragC/A.Rash*rhog*abs(ug-um)*(ug-um);
+            Fmg2 = 0;
             pf = A.phiforce;
             if phi<pf
                 Fmg = Fmg1;

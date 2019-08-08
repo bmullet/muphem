@@ -50,7 +50,7 @@ sol = ode15s(@(z,y) twophaseODE(z,y,A), zspan, y0, options);
 
 options = odeset('Events',@FragmentationDepth,'Mass',@mass, 'MStateDependence', 'strong', 'NormControl','on','RelTol',2.5e-7,'AbsTol',1e-10);
 
-solext = odextend(sol,[],A.depth,sol.y(:,end),options);
+solext = odextend(sol,[],0,sol.y(:,end),options);
 p2e = solext.y(1,:)'; ug2e = solext.y(2,:)'; um2e = solext.y(3,:)'; 
 z2e = solext.x';
 [ rhog2e, chi_d2e, phi2e ] = eos.calcvars(A,um2e,p2e);
