@@ -7,6 +7,7 @@ function [A] = initA(A)
 VISCOSITY_THETA_G_FLAG = 'None';
 VISCOSITY_MODEL_FLAG = 'Hess and Dingwell';
 %VISCOSITY_THETA_G_FLAG = 'None';
+VISCOSITY_THETA_C_FLAG = 'Costa';
 
     A.useForchheimer = true;
 
@@ -22,6 +23,7 @@ VISCOSITY_MODEL_FLAG = 'Hess and Dingwell';
     A.nb = 1e15;        % Bubble concentration
     A.Pchamber = 140000000; % Chamber pressure (Pa)
     A.gamma = 1.29;
+    xc = 0.4; % Crystal content
     
     % Henry's law constants
     A.hs = 4.109999e-6;
@@ -88,8 +90,8 @@ VISCOSITY_MODEL_FLAG = 'Hess and Dingwell';
     
     % Forchheimer's Law
     A.ftb = 0.1; % Throat bubble ratio [0.05-0.5]
-    A.m = 5; % Tortuosity factor
-    A.Ff0 = 1e-3;
+    A.m = 3.5; % Tortuosity factor
+    A.Ff0 = 10;
     
 %     %%%%% GRIMSVOTN PARAMS %%%%%
 %     A.H = 1700;                % Length for Grimsvotn
@@ -119,17 +121,31 @@ VISCOSITY_MODEL_FLAG = 'Hess and Dingwell';
             % Default to no phi dependence
             theta_g = @(phi) 1;
     end
+    
+    switch VISCOSITY_THETA_C_FLAG
+        case 'Costa'
+            c1 = 0.9995;
+            c2 = 0.4;
+            c3 = 1;
+            B = 2.5;
+            theta_c = @(xc) (1 - c1*erf(sqrt(pi)/2 * xc * (1 + c2/(1-xc)^c3)))^-(B/c1);
+        otherwise
+            theta_c = @(xc) 1;     
+    end
+    
    
     switch VISCOSITY_MODEL_FLAG
         case 'Hess and Dingwell'
             mufunc = @(w) 10.^(-3.545 + 0.833*log(w) + (9601 - 2368*log(w))./(A.T - (195.7 + 32.25*log(w))));
-            A.mu = @(phi,p) mufunc(w(p)*100).*theta_g(phi);
+            A.mu = @(phi,p) mufunc(w(p)*100).*theta_g(phi).*theta_c(xc);
         case 'Whittington et al.'
             mufunc = @(w) 10.^(-4.43 + (7618.3 - 17.25*log10(w + 0.26))./(A.T - (406.1 - 292.6*log10(w + 0.26))));
-            A.mu =  @(phi,p) mufunc(w(p)).*theta_g(phi);
+            A.mu =  @(phi,p) mufunc(w(p)).*theta_g(phi).*theta_c(xc);
         otherwise
-            A.mu = @(phi,p) A.mu0.*theta_g(phi);
+            A.mu = @(phi,p) A.mu0.*theta_g(phi).*theta_c(xc);
     end
+    
+    
     
    
 end
