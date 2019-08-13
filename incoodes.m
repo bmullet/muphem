@@ -2,9 +2,6 @@ function [zvec,pvec,ugvec,umvec,phivec,rhogvec,chidvec,Qmvec,Qgvec,A] = incoodes
 %INCOODES: (In)tegrate (Co)nduit (ODEs)
 %   Integrates conduit ODEs from base of conduit (z=-A.depth) to top of
 %   conduit (z=0)
-zprint =[];
-Qmprint =[];
-Qgprint = [];
 
 %% First integrate until we reach p critical (where gas first exsolves)
 A.delF = 1; % Turns on/off mass transfer
@@ -113,7 +110,7 @@ end
         resid = A.rhom0*u0 - (A.rhom0*(1-phitest)*u + rhog*phitest*u); % delta u is zero
     end
 
-    function M = mass(z,y)
+    function M = mass(~,y)
         p = y(1); phi = y(2); du = y(3); 
         chid = eos.chidofp(A,p); 
         um = eos.calcum(A,phi,chid);
@@ -138,16 +135,22 @@ end
     end
 
     function M = mass2(~,y)
-        p = y(1); ug = y(2); um = y(3); 
+        p = y(1); phi = y(2); du = y(3); 
         chid = eos.chidofp(A,p); 
         um = eos.calcum(A,phi,chid);
         rhog = eos.rhogofp(A,p);
         rhom = A.rhom0;
         Qm = (1-phi)*um*rhom; Qg = phi*rhog*ug;
+        
+        alpha = - (Qm+Qg)/(p*(1/ug + (1-phi)/(phi*um)));
+        
+        gammat = 1 + alpha;
+        md = (rhom*um^2 - rhog*ug^2)/(um/(1-phi) + ug/phi);
+        
         M = zeros(3,3);
-        M(1,:) = [1, p/ug, (1-phi)/phi*p/um]; %dpdz equation
-        M(2,:) = [phi, Qg, 0]; % Gas momentum balance
-        M(3,:) = [1-phi,0, Qm]; % Melt momentum balance    
+        M(1,:) = [ug/p, (ug/phi + um/(1-phi)), 1]; %mass balance
+        M(2,:) = [gammat, 0, -md]; % Add momentum balance
+        M(3,:) = [1/(rhog*ug) - 1/(rhom*um),0, 1]; % Subtract momentum balance    
     end
 
     function [value,isterminal,direction] = ExsolutionDepth(~,y)
