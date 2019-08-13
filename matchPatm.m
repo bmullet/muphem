@@ -20,7 +20,7 @@ function [ resid ] = matchPatm(v,A)
         resid = abs(max(zvec))*10;
     else
         % made it to surface but pressure is too high
-        resid = (A.Patm_-pvec(end))/1e5;      
+        resid = (A.Patm_-pvec(end))/1e5*40;      
     end
     
     if imag(resid)>0

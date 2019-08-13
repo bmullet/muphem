@@ -371,3 +371,11 @@ colorbar
 xlabel('Chamber overpressure (MPa)')
 ylabel('Log_{10} \mu (Pa-s)')
 title('Gas exit velocity (m/s)')
+
+%% Test exit velocities
+v = .1:.1:15;
+resid = zeros(size(v));
+for i = 1:length(v)
+    vi = v(i)
+    resid(i) = matchPatm(vi, A);
+end
