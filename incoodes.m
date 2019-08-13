@@ -38,12 +38,10 @@ if abs((pcrit-p0)/pcrit) > 0.01
     disp([pcrit p0])
     error('Pcrit and p0 do not match!!')
 end
-%[ rhog0, ~, phi0 ] = eos.calcvars(A,u0,p0);
-% ug0 = u0;
-% um0 = (A.rhom0*u0 - phi0*rhog0*u0)/((1-phi0)*A.rhom0); % to conserve continuity melt velocity maybe needs to drop
-ug0 = fzero(@(u) exslvv(u,u0,p0),u0); % Find v0 for exsolve phase
 
-y0 = [y1(nz) ug0 ug0]; % format is [p ug um];
+phi0 = fzero(@(phi) exslvphi(phi,u0,p0), 0); % Find phi0
+
+y0 = [p0 phi0 0]; % format is [p phi delta0];
 
 options = odeset('Events',@RegimeChangeDepth,'Mass',@mass, 'MStateDependence', 'strong', 'NormControl','on','RelTol',2.5e-7,'AbsTol',1e-10);
 sol = ode15s(@(z,y) twophaseODE(z,y,A), zspan, y0, options);
@@ -51,9 +49,11 @@ sol = ode15s(@(z,y) twophaseODE(z,y,A), zspan, y0, options);
 options = odeset('Events',@FragmentationDepth,'Mass',@mass, 'MStateDependence', 'strong', 'NormControl','on','RelTol',2.5e-7,'AbsTol',1e-10);
 
 solext = odextend(sol,[],0,sol.y(:,end),options);
-p2e = solext.y(1,:)'; ug2e = solext.y(2,:)'; um2e = solext.y(3,:)'; 
+p2e = solext.y(1,:)'; phi2e = solext.y(2,:)'; du2e = solext.y(3,:)'; 
 z2e = solext.x';
-[ rhog2e, chi_d2e, phi2e ] = eos.calcvars(A,um2e,p2e);
+[ rhog2e, chi_d2e, um2e ] = eos.calcvars(A,phi2e,p2e);
+ug2e = du2e + um2e;
+
 Qm2e = (1-phi2e).*um2e.*A.rhom0;
 Qg2e = phi2e.*ug2e.*rhog2e;
 phivec = [phivec; phi2e];
@@ -63,7 +63,7 @@ rhogvec = [rhogvec; rhog2e];
 chidvec = [chidvec; chi_d2e];
 
 % Do fragmentation depth to surface integration, if needed
-if abs(max(z2e)) <  1e-3
+if abs(max(z2e)) <  1
     % We reached the surface with no fragmentation!
     
     A.fragdepth = 0;
@@ -82,15 +82,18 @@ else
     zstart = z2e(nz);
     A.fragdepth = zstart;
     zspan = [zstart 0];
-    y0 = [p2e(nz) ug2e(nz) um2e(nz)];
+    y0 = [p2e(nz) phi2e(nz) du2e(nz)];
     
     A.umf = um2e(nz); % to be used for new phi calculation
     options = odeset('Events',@BlowUp, 'Mass',@mass2, 'MStateDependence', 'strong', 'NormControl','on','RelTol',2.5e-14,'AbsTol',1e-10,'InitialStep',1e-6);
     warning off MATLAB:ode15s:IntegrationTolNotMet
     [z3,y3] = ode15s(@(z,y) twophaseODE(z,y,A), zspan, y0, options);
-  
-    p3 = y3(:,1); ug3 = y3(:,2); um3 = y3(:,3);
-    [ rhog3, chi_d3, phi3 ] = eos.calcvars(A,um3,p3);
+    
+    p3 = y3(:,1); phi3 = y3(:,2); du3 = y3(:,3);
+    
+    [ rhog3, chi_d3, um3 ] = eos.calcvars(A,phi3,p3);
+    ug3 = du3 + um3;
+    
     Qm3 = (1-phi3).*um3.*A.rhom0;
     Qg3 = phi3.*ug3.*rhog3;
     phivec = [phivec; phi3];
@@ -105,34 +108,39 @@ else
     
 end
 
-    function resid = exslvv(utest,u0,p)
-        [ rhog, ~, phi ] = eos.calcvars(A,utest,p);
-        resid = A.rhom0*u0 - (A.rhom0*(1-phi)*utest + rhog*phi*utest);
+    function resid = exslvphi(phitest,u0,p)
+        [ rhog, ~, u ] = eos.calcvars(A,phitest,p);
+        resid = A.rhom0*u0 - (A.rhom0*(1-phitest)*u + rhog*phitest*u); % delta u is zero
     end
 
     function M = mass(z,y)
-        p = y(1); ug = y(2); um = y(3); 
+        p = y(1); phi = y(2); du = y(3); 
         chid = eos.chidofp(A,p); 
-        phi = eos.calcphi(A,um,chid);
+        um = eos.calcum(A,phi,chid);
         rhog = eos.rhogofp(A,p);
         rhom = A.rhom0;
         Qm = (1-phi)*um*rhom; Qg = phi*rhog*ug;
         I = -(Qm)/(1-chid)*A.hs*A.hb*p^(A.hb-1);
         
+        alpha = - (Qm+Qg)/(p*(1/ug + (1-phi)/(phi*um)));
+        Gamma = (Qm/Qg)*(rhog*ug/(rhom*um) - 1)*(A.hb*chid/(1-chid));
+        
+        gammat = 1 + alpha*(1-Gamma) - I*du;
+        md = (rhom*um^2 - rhog*ug^2)/(um/(1-phi) + ug/phi);
+        
+        gamma3 = (1/(rhog*ug) - 1/(rhom*um) - 1/p*(Qm/(rhog*phi) - um));
+        
         M = zeros(3,3);
-        M(1,:) = [1+I*p/Qg*(rhog*ug/(rhom*um)-1), p/ug, (1-phi)/phi*p/um]; %dpdz equation
-        M(2,:) = [phi+I*ug, Qg, 0]; % Gas momentum balance
-        M(3,:) = [1-phi-I*um,0, Qm]; % Melt momentum balance    
-
-        zprint =[zprint; z];
-        Qmprint =[Qmprint; Qm];
-        Qgprint = [Qgprint; Qg];
+        M(1,:) = [(ug/p - (1/(phi*rhog) + 1/((1-phi)*rhom))*I), (ug/phi + um/(1-phi)), 1]; %mass balance
+        M(2,:) = [gammat, 0, -md]; % Add momentum balance
+        M(3,:) = [gamma3,0, 1]; % Subtract momentum balance    
+        
     end
 
     function M = mass2(~,y)
         p = y(1); ug = y(2); um = y(3); 
         chid = eos.chidofp(A,p); 
-        phi = eos.calcphi(A,um,chid);
+        um = eos.calcum(A,phi,chid);
         rhog = eos.rhogofp(A,p);
         rhom = A.rhom0;
         Qm = (1-phi)*um*rhom; Qg = phi*rhog*ug;
@@ -141,6 +149,7 @@ end
         M(2,:) = [phi, Qg, 0]; % Gas momentum balance
         M(3,:) = [1-phi,0, Qm]; % Melt momentum balance    
     end
+
     function [value,isterminal,direction] = ExsolutionDepth(~,y)
         % Exsolution depth function
         value = y(1)-pcrit;     % The value that we want to be zero (p = pcrit)
@@ -151,9 +160,7 @@ end
      
     function [value,isterminal,direction] = RegimeChangeDepth(~,y)
         % Regime change depth function
-        p = y(1); ug = y(2); um = y(3); 
-        chid = eos.chidofp(A,p); 
-        phi = eos.calcphi(A,um,chid);
+        phi = y(2);
         value = A.phiforce-phi;     % The value that we want to be zero (p = pcrit)
         isterminal = 1;         % Halt integration
         direction = 0;          % The zero can be approached from either direction
@@ -162,9 +169,7 @@ end
 
     function [value,isterminal,direction] = FragmentationDepth(~,y)
         % Exsolution depth function
-        p = y(1); ug = y(2); um = y(3); 
-        chid = eos.chidofp(A,p); 
-        phi = eos.calcphi(A,um,chid);
+        phi = y(2);
         value = A.phi0-phi;     % The value that we want to be zero (p = pcrit)
         isterminal = 1;         % Halt integration
         direction = 0;          % The zero can be approached from either direction
