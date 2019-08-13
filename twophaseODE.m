@@ -63,10 +63,9 @@ dydz(3) = -(1-phi)*rhom*g - Fmg - delF*Fmw;
                 k1 = (A.ftb*rb)^2/8 * phi^A.m;
                 k2 = (A.ftb*rb)/A.Ff0 * phi^(1+3*A.m)/2;
                 
-                k1 = max(1e-15,k1);
-                k2 = max(1e-15,k1);
-                
-                
+                k1 = max(1e-10,k1);
+                k2 = max(1e-10,k1);
+                     
                 Fmg1 = -(A.mug/k1 + rhog/k2*abs(ug-um))*(ug-um)*phi*(1-phi);
 
             else

@@ -4,10 +4,11 @@ function [A] = initA(A)
 %INITA Sets up struct A with constants and containers
 % MODEL FLAGS (used to quickly change model)
 %VISCOSITY_MODEL_FLAG = 'Hess and Dingwell';
-VISCOSITY_THETA_G_FLAG = 'None';
-VISCOSITY_MODEL_FLAG = 'Hess and Dingwell';
 %VISCOSITY_THETA_G_FLAG = 'None';
+VISCOSITY_MODEL_FLAG = 'Hess and Dingwell';
+VISCOSITY_THETA_G_FLAG = 'None';
 VISCOSITY_THETA_C_FLAG = 'Costa';
+%VISCOSITY_THETA_C_FLAG = 'None';
 
     A.useForchheimer = true;
 
@@ -52,7 +53,8 @@ VISCOSITY_THETA_C_FLAG = 'Costa';
     %A.mu = 1e9;         % liquid viscosity, Pa s (RHYOLITE)
     %A.mu = 1000;         % test vis a vis eric
     
-    A.Rw = 455.59;       % J/kg-K Gas constant for water
+    %A.Rw = 455.59;       % J/kg-K Gas constant for water
+    A.Rw = 461.4;
     %A.Plam0 = 10e6;     % reference pressure (for melt density), Pa
     %A.Blam = 1e-10;     % melt compressibility, Pa^-1
     
@@ -63,7 +65,7 @@ VISCOSITY_THETA_C_FLAG = 'Costa';
     % Kirsch Equations: Conduit Wall Rock 
     A.k.p = .5;         % Poisson's ratio
     A.k.K = A.k.p/(1-A.k.p); % K constant
-    A.k.rho = 3000;     % Rock Density
+    A.k.rho = 2500;     % Rock Density
     A.k.P0 = []   ;     % Pore pressure
     
     % Mohr Coulomb Failure

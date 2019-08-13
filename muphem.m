@@ -19,9 +19,9 @@ A.Pchamber = 140000000;
 % Perform shooting method via fzero
 %c0 = findc0(A); 
 % %A.c0 = c0;
-vbounds = [1];            % Set upper boundary at 10% speed of sound at critical pressure       
+vbounds = [6];            % Set upper boundary at 10% speed of sound at critical pressure       
 v_fzero = fzero(@(v) matchPatm(v,A),vbounds,optimset('Display','iter'));
-
+%v_fzero = vbounds;
 A.v_chamber_i = v_fzero;
 
 % Collect Solution

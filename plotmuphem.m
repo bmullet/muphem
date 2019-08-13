@@ -44,7 +44,7 @@ disp(min(p));
 figure()
 % um, ug vs. z
 hold on
-subplot(1,6,1)
+subplot(1,7,1)
 plot(um,zprint,ug,zprint)
 hold on
 set(gca,'XScale','log')
@@ -54,7 +54,7 @@ ylabel('depth (km)')
 
 
 % Pressure v. z
-subplot(1,6,2)
+subplot(1,7,2)
 hold on
 plot(pplot,zprint)
 xlabel('Pressure (MPa)')
@@ -62,7 +62,7 @@ set(gca,'Ydir','reverse')
 ylabel('depth (km)')
 
 % Phi v. z
-subplot(1,6,3)
+subplot(1,7,3)
 hold on
 plot(phi,zprint)
 xlabel('\phi')
@@ -70,7 +70,7 @@ set(gca,'Ydir','reverse')
 ylabel('depth (km)')
 
 % Q
-subplot(1,6,4)
+subplot(1,7,4)
 hold on
 plot(Qg./Qm,zprint)
 xlabel('Q_g/Q_m (kg/m^2-s)')
@@ -78,7 +78,7 @@ set(gca,'Ydir','reverse')
 ylabel('depth (km)')
 
 % chi v. z
-subplot(1,6,5)
+subplot(1,7,5)
 hold on
 plot(chid,zprint)
 xlabel('\chi_d')
@@ -86,16 +86,25 @@ set(gca,'Ydir','reverse')
 ylabel('depth (km) ')
 
 % rhog v. z
-subplot(1,6,6)
+subplot(1,7,6)
 hold on
 plot(rhog,zprint)
 xlabel('\rho_g (kg/m^3)')
 set(gca,'Ydir','reverse')
 ylabel('depth (km) ')
 
+% mu v. z
+subplot(177)
+hold on
+mu = A.mu(phi,p);
+plot(log10(mu(zprint>abs(A.fragdepth)/1e3)),zprint(zprint>abs(A.fragdepth/1e3)))
+xlabel('log_{10} \mu')
+set(gca,'Ydir','reverse')
+ylabel('depth (km)')
 
-for i=1:6
-  subplot(1,6,i)
+
+for i=1:7
+  subplot(1,7,i)
   xl=xlim;
   hold on
   plot([min(xl) max(xl)],[zex zex],'k--')
@@ -107,7 +116,7 @@ end
 set(gcf,'Units','inches',...
  'Position',[0 0 20 10])
 
-subplot(1,6,1)
+subplot(1,7,1)
 legend('Melt', 'Gas')
 legend('show')
 drawnow
