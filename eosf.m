@@ -2,19 +2,19 @@ function [eosfunc] = eosf(dF)
 eosfunc.rhogofp = @rhogofp;
 eosfunc.chidofp = @chidofp;
 if (dF)
-    eosfunc.calcphi = @calcphi;
+    eosfunc.calcum = @umofphi;
 else
-    eosfunc.calcphi = @calcphif;
+    eosfunc.calcum = @umofphif;
 end
 eosfunc.calcvars = @calcvars;
 
-function [ rhog, chi_d, phi ] = calcvars(A,um,p)
+function [ rhog, chi_d, um ] = calcvars(A,phi,p)
 rhog = rhogofp(A,p);
 chi_d = chidofp(A,p);
 if (A.delF)
-    phi = calcphi(A,um,chi_d);
+    um = umofphi(A,phi,chi_d);
 else
-    phi = calcphif(A,um);
+    um = umofphif(A,phi);
 end
 
 function [ rhog ] = rhogofp (A,p)
@@ -23,13 +23,14 @@ rhog = p/(A.Rw*A.T);
 function [ chi_d ] = chidofp (A,p)
 chi_d = A.hs*p.^A.hb;
 
-function [ phi ] = calcphi (A,um,chid)
+
+function [ um ] = umofphi (A,phi,chid)
 um0 = A.v_chamber_i;
-phi = 1 - (1-A.hg)./(1-chid).*(um0)./um;
+um = (1 - A.hg)./(1 - chid) .* (um0)./(1-phi);
 
-function [ phi ] = calcphif (A,um,~) %calculate phi after fragmentation
-phi = 1 - (1-A.phi0)*A.umf./um;
 
+function [ um ] = umofphif (A,phi,~)
+um = (1 - A.phi0)./( 1 - phi).*A.umf;
 
 % function [rhoha, c, phi] = eos1(A,P,phi)
 %     % Henry's Law
