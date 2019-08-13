@@ -7,8 +7,8 @@ function [A] = initA(A)
 %VISCOSITY_THETA_G_FLAG = 'None';
 VISCOSITY_MODEL_FLAG = 'Hess and Dingwell';
 VISCOSITY_THETA_G_FLAG = 'None';
-%VISCOSITY_THETA_C_FLAG = 'Costa';
-VISCOSITY_THETA_C_FLAG = 'None';
+VISCOSITY_THETA_C_FLAG = 'Costa';
+%VISCOSITY_THETA_C_FLAG = 'None';
 
     A.useForchheimer = true;
 
@@ -76,7 +76,7 @@ VISCOSITY_THETA_C_FLAG = 'None';
     
     % Fragmentation
     A.f0 = 0.01;  % Darcy-Weisbach friction factor
-    A.phi0 = .83; % critical gas volume fraction for fragmentation
+    A.phi0 = .85; % critical gas volume fraction for fragmentation
     A.phiforce = .80; % start of transition period (should be less than phi0)
     %A.mug = 1e-5; % gas viscosity
     A.mug = 1.5e-2; % gas viscosity
