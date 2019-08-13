@@ -40,10 +40,10 @@ phi0 = fzero(@(phi) exslvphi(phi,u0,p0), 0); % Find phi0
 
 y0 = [p0 phi0 0]; % format is [p phi delta0];
 
-options = odeset('Events',@RegimeChangeDepth,'Mass',@mass, 'MStateDependence', 'strong', 'NormControl','on','RelTol',2.5e-7,'AbsTol',1e-10);
+options = odeset('Events',@RegimeChangeDepth,'Mass',@mass, 'MStateDependence', 'strong', 'NormControl','on','RelTol',2.5e-9,'AbsTol',1e-9);
 sol = ode15s(@(z,y) twophaseODE(z,y,A), zspan, y0, options);
 
-options = odeset('Events',@FragmentationDepth,'Mass',@mass, 'MStateDependence', 'strong', 'NormControl','on','RelTol',2.5e-7,'AbsTol',1e-10);
+options = odeset('Events',@FragmentationDepth,'Mass',@mass, 'MStateDependence', 'strong', 'NormControl','on','RelTol',2.5e-9,'AbsTol',1e-9);
 
 solext = odextend(sol,[],0,sol.y(:,end),options);
 p2e = solext.y(1,:)'; phi2e = solext.y(2,:)'; du2e = solext.y(3,:)'; 
@@ -82,7 +82,7 @@ else
     y0 = [p2e(nz) phi2e(nz) du2e(nz)];
     
     A.umf = um2e(nz); % to be used for new phi calculation
-    options = odeset('Events',@BlowUp, 'Mass',@mass2, 'MStateDependence', 'strong', 'NormControl','on','RelTol',2.5e-14,'AbsTol',1e-10,'InitialStep',1e-6);
+    options = odeset('Events',@BlowUp, 'Mass',@mass2, 'MStateDependence', 'strong', 'NormControl','on','RelTol',2.5e-9,'AbsTol',1e-9,'InitialStep',1e-6);
     warning off MATLAB:ode15s:IntegrationTolNotMet
     [z3,y3] = ode15s(@(z,y) twophaseODE(z,y,A), zspan, y0, options);
     
