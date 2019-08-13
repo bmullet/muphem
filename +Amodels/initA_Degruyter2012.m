@@ -7,8 +7,8 @@ function [A] = initA(A)
 %VISCOSITY_THETA_G_FLAG = 'None';
 VISCOSITY_MODEL_FLAG = 'Hess and Dingwell';
 VISCOSITY_THETA_G_FLAG = 'None';
-VISCOSITY_THETA_C_FLAG = 'Costa';
-%VISCOSITY_THETA_C_FLAG = 'None';
+%VISCOSITY_THETA_C_FLAG = 'Costa';
+VISCOSITY_THETA_C_FLAG = 'None';
 
     A.useForchheimer = true;
 

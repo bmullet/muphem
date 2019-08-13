@@ -3,6 +3,7 @@ function [ dydz ] = twophaseODE( z,y,A )
 eos = eosf(A.delF);
 p = y(1); phi = y(2); du = y(3);
 [rhog, ~, um] = eos.calcvars(A,phi,p);
+ug = du + um;
 rhom = A.rhom0;
 Qg = rhog*ug*phi;
 Qm = rhom*um*(1-phi);

@@ -114,6 +114,7 @@ end
         p = y(1); phi = y(2); du = y(3); 
         chid = eos.chidofp(A,p); 
         um = eos.calcum(A,phi,chid);
+        ug = du + um;
         rhog = eos.rhogofp(A,p);
         rhom = A.rhom0;
         Qm = (1-phi)*um*rhom; Qg = phi*rhog*ug;
@@ -138,6 +139,7 @@ end
         p = y(1); phi = y(2); du = y(3); 
         chid = eos.chidofp(A,p); 
         um = eos.calcum(A,phi,chid);
+        ug = du + um;
         rhog = eos.rhogofp(A,p);
         rhom = A.rhom0;
         Qm = (1-phi)*um*rhom; Qg = phi*rhog*ug;
