@@ -76,17 +76,24 @@ dydz(3) = -(1/(rhog*ug) - 1/(rhom*um))*g + (1/Qm + 1/Qg)*Fmg  + 1/Qg*G - 1/Qg*Fg
             
             
             Fmg2 = -3/8*phi*(1-phi)*A.dragC/A.Rash*rhog*abs(ug-um)*(ug-um);
-            pf = A.phiforce;
-            if phi<pf
+%             pf = A.phiforce;
+%             if phi<pf
+%                 Fmg = Fmg1;
+%             elseif (phi>=pf) && (phi<A.phi0)
+%                 t = (phi-pf)/(A.phi0-pf);
+%                 Fmg = -1*(abs(Fmg1))^(1-t)*(abs(Fmg2))^(t)*sign(ug-um);
+%                 %Fmg = Fmg1*(1-t) + Fmg2*(t);
+%             elseif phi>=A.phi0
+%                 Fmg = Fmg2;
+%             else
+%                 Fmg=0;
+%             end
+            
+            
+            if (A.delF)
                 Fmg = Fmg1;
-            elseif (phi>=pf) && (phi<A.phi0)
-                t = (phi-pf)/(A.phi0-pf);
-                Fmg = -1*(abs(Fmg1))^(1-t)*(abs(Fmg2))^(t)*sign(ug-um);
-                %Fmg = Fmg1*(1-t) + Fmg2*(t);
-            elseif phi>=A.phi0
-                Fmg = Fmg2;
             else
-                Fmg=0;
+                Fmg = Fmg2;
             end
     end
 
