@@ -1,8 +1,8 @@
 function [ dydz ] = twophaseODE( z,y,A )
 %TWOPHASEODE ode system of equations for two phase system
 eos = eosf(A.delF);
-p = y(1); ug = y(2); um = y(3);
-[rhog, ~, phi] = eos.calcvars(A,um,p);
+p = y(1); phi = y(2); du = y(3);
+[rhog, ~, um] = eos.calcvars(A,phi,p);
 rhom = A.rhom0;
 Qg = rhog*ug*phi;
 Qm = rhom*um*(1-phi);
@@ -27,11 +27,12 @@ else
     delF = 0;
 end
 
-%%% CORRECT EQNS
+beta = (2 + Qm/Qg + (1-phi)/phi)/(1/ug + (1-phi)/phi * (1/um));
+
 %Set RHS of equations
-dydz(1) = -p*G/Qg;
-dydz(2) = -phi*rhog*g + Fmg + G*ug - (1-delF)*Fgw;
-dydz(3) = -(1-phi)*rhom*g - Fmg - delF*Fmw;
+dydz(1) = -G/(phi*rhog);
+dydz(2) = -(phi * rhog + (1-phi) * rhom)*g + beta*G - (1-delF)*Fgw - delF*Fmw;
+dydz(3) = -(1/(rhog*ug) - 1/(rhom*um))*g + (1/Qm + 1/Qg)*Fmg  + 1/Qg*G - 1/Qg*Fgw + 1/Qm*Fmw;
 
     function G = gasloss()
         % put gas loss function here
