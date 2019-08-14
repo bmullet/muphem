@@ -152,15 +152,18 @@ set(gca,'YScale','log')
 figure
 subplot(1,3,1)
 plot(Qm+Qg,z)
+set(gca,'Ydir','reverse')
 hold on
 xlabel('Qt')
 ylabel('z (m)')
 subplot(1,3,2)
 plot(Qm,z)
+set(gca,'Ydir','reverse')
 xlabel('Qm')
 ylabel('z (m)')
 subplot(1,3,3)
 plot(Qg,z)
+set(gca,'Ydir','reverse')
 xlabel('Qg')
 ylabel('z (m)')
 

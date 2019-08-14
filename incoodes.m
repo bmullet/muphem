@@ -40,48 +40,73 @@ phi0 = fzero(@(phi) exslvphi(phi,u0,p0), 0); % Find phi0
 
 y0 = [p0 phi0 0]; % format is [p phi delta0];
 
-options = odeset('Events',@RegimeChangeDepth,'Mass',@mass, 'MStateDependence', 'strong', 'NormControl','on','RelTol',2.5e-9,'AbsTol',1e-9);
+options = odeset('Events',@FragmentationDepth,'Mass',@mass, 'MStateDependence', 'strong', 'NormControl','on','RelTol',2.5e-9,'AbsTol',1e-9);
 sol = ode15s(@(z,y) twophaseODE(z,y,A), zspan, y0, options);
 
-options = odeset('Events',@FragmentationDepth,'Mass',@mass, 'MStateDependence', 'strong', 'NormControl','on','RelTol',2.5e-9,'AbsTol',1e-9);
+zfrag = sol.x';
+pfrag = sol.y(1,:)'; phifrag = sol.y(2,:)'; dufrag = sol.y(3,:)'; 
+[ rhogfrag, chidfrag, umfrag] = eos.calcvars(A,phifrag,pfrag);
+ugfrag = umfrag + dufrag;
 
-solext = odextend(sol,[],0,sol.y(:,end),options);
-p2e = solext.y(1,:)'; phi2e = solext.y(2,:)'; du2e = solext.y(3,:)'; 
-z2e = solext.x';
-[ rhog2e, chi_d2e, um2e ] = eos.calcvars(A,phi2e,p2e);
-ug2e = du2e + um2e;
+Qmfrag = (1-phifrag).*umfrag.*A.rhom0;
+Qgfrag = phifrag.*ugfrag.*rhogfrag;
+phivec = [phivec; phifrag];
+Qmvec = [Qmvec; Qmfrag];
+Qgvec = [Qgvec; Qgfrag];
+rhogvec = [rhogvec; rhogfrag];
+chidvec = [chidvec; chidfrag];
 
-Qm2e = (1-phi2e).*um2e.*A.rhom0;
-Qg2e = phi2e.*ug2e.*rhog2e;
-phivec = [phivec; phi2e];
-Qmvec = [Qmvec; Qm2e];
-Qgvec = [Qgvec; Qg2e];
-rhogvec = [rhogvec; rhog2e];
-chidvec = [chidvec; chi_d2e];
+nz = length(zfrag);
+zstart = zfrag(nz);
+A.fragdepth = zstart;
+zspan = [zstart 0];
+
+A.umf = umfrag(nz); % to be used for new phi calculation
+
+
+
 
 % Do fragmentation depth to surface integration, if needed
-if abs(max(z2e)) <  1
+if abs(max(zfrag)) <  1
     % We reached the surface with no fragmentation!
     
     A.fragdepth = 0;
-    zvec  = [z1; z2e];
-    pvec = [p1; p2e];
-    ugvec = [ug1;  ug2e];
-    umvec = [um1; um2e];
+    zvec  = [z1; zfrag];
+    pvec = [p1; pfrag];
+    ugvec = [ug1;  ugfrag];
+    umvec = [um1; umfrag];
     
     
 else
-    %delF = 0; % Turns on/off mass transfer
+    % Did not reach surface, so keep going!
     A.delF = 0;
     delF = 0;
     eos = eosf(A.delF);
+    
+    options = odeset('Events',@RegimeChangeDepth,'Mass',@mass2, 'MStateDependence', 'strong', 'NormControl','on','RelTol',2.5e-9,'AbsTol',1e-9);
+
+    solext = ode15s(@(z,y) twophaseODE(z,y,A), zspan, sol.y(:,end), options);
+    
+    p2e = solext.y(1,:)'; phi2e = solext.y(2,:)'; du2e = solext.y(3,:)'; 
+    z2e = solext.x';
+    [ rhog2e, chi_d2e, um2e ] = eos.calcvars(A,phi2e,p2e);
+    ug2e = du2e + um2e;
+
+    Qm2e = (1-phi2e).*um2e.*A.rhom0;
+    Qg2e = phi2e.*ug2e.*rhog2e;
+    phivec = [phivec; phi2e];
+    Qmvec = [Qmvec; Qm2e];
+    Qgvec = [Qgvec; Qg2e];
+    rhogvec = [rhogvec; rhog2e];
+    chidvec = [chidvec; chi_d2e];
+    
     nz = length(z2e);
     zstart = z2e(nz);
-    A.fragdepth = zstart;
+    
     zspan = [zstart 0];
+
     y0 = [p2e(nz) phi2e(nz) du2e(nz)];
     
-    A.umf = um2e(nz); % to be used for new phi calculation
     options = odeset('Events',@BlowUp, 'Mass',@mass2, 'MStateDependence', 'strong', 'NormControl','on','RelTol',2.5e-9,'AbsTol',1e-9,'InitialStep',1e-6);
     warning off MATLAB:ode15s:IntegrationTolNotMet
     [z3,y3] = ode15s(@(z,y) twophaseODE(z,y,A), zspan, y0, options);
@@ -98,10 +123,10 @@ else
     Qgvec = [Qgvec; Qg3];
     rhogvec = [rhogvec; rhog3];
     chidvec = [chidvec; chi_d3];
-    zvec  = [z1; z2e; z3];
-    pvec = [p1; p2e; p3];
-    ugvec = [ug1; ug2e; ug3];
-    umvec = [um1; um2e; um3];
+    zvec  = [z1; zfrag; z2e; z3];
+    pvec = [p1; pfrag; p2e; p3];
+    ugvec = [ug1; ugfrag; ug2e; ug3];
+    umvec = [um1; umfrag; um2e; um3];
     
 end
 
