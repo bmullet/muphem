@@ -23,7 +23,7 @@ CRYSTAL_GROWTH = true;
     %A.Bchm = 1e-7;       % Chamber compressibility (sill)
     A.Vchm = 3e10;        % Chamber volume
     A.nb = 1e9;        % Bubble concentration
-    A.Pchamber = 120e6; % Chamber pressure (Pa)
+    A.Pchamber = 140e6; % Chamber pressure (Pa)
     A.gamma = 1.29;
 
     
@@ -105,11 +105,14 @@ CRYSTAL_GROWTH = true;
 %     A.Bchm = 1e-9;             % Somewhere in between
      
     A.mu0 = A.mu;
-    
+    A.rb0 = (A.phi0/(4/3*pi*A.nb))^(1/3);
+     
     % Henry's law
     w = @(p) min(A.hg, A.hs*p.^A.hb);
     
     xc0 = 0.45; % Crystal content
+    
+    
     xcmax = 0.6;
     
     if CRYSTAL_GROWTH
@@ -162,6 +165,7 @@ CRYSTAL_GROWTH = true;
             A.mu = @(phi,p) A.mu0.*theta_g(phi).*theta_c(xc(p));
     end
     
+    A.mu0l = A.mu(0,A.Pchamber);
     
     
    

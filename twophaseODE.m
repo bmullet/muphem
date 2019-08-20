@@ -4,10 +4,6 @@ eos = eosf(A.delF);
 p = y(1); phi = y(2); du = y(3);
 [rhog, ~, um] = eos.calcvars(A,phi,p);
 ug = du + um;
-rhom = A.rhom0;
-Qg = rhog*ug*phi;
-Qm = rhom*um*(1-phi);
-Qt = A.v_chamber_i*rhom;
 
 dydz = zeros(3,1);
 g = A.g;
@@ -17,23 +13,24 @@ if (A.delF)
     Fmg = interphase();
     G = 0;
     Fmw = meltwallfriction();
-    Fgw = 0; %CORRECT
-    delF = 1;
+    Fgw1 = 0; %CORRECT
+    Fgw2 = 0;
+    
 else
     %above fragmentation depth
     Fmg = interphase();
     G = gasloss();
     Fmw = 0; %CORRECT
-    Fgw = gaswallfriction();
-    delF = 0;
+    Fgw1 = gaswallfriction1();
+    Fgw2 = gaswallfriction2();
+  
 end
 
-beta = (2 + Qm/Qg + (1-phi)/phi)/(1/ug + (1-phi)/phi * (1/um));
-
 %Set RHS of equations
-dydz(1) = -G/(phi*rhog);
-dydz(2) = -(phi * rhog + (1-phi) * rhom)*g + beta*G - (1-delF)*Fgw - delF*Fmw;
-dydz(3) = -(1/(ug) - 1/(um))*g + (1/Qm + 1/Qg)*Fmg  + 1/Qg*G - 1/Qg*Fgw + 1/Qm*Fmw;
+%dydz(1) = -G/(phi*rhog);
+dydz(1) = 0;
+dydz(2) = -1/A.C.Fr^2*(phi*rhog*A.C.delta + (1-phi)) - Fmw - Fgw1;
+dydz(3) = -1/A.C.Fr^2*(1/ug-1/um) + Fmw/(1-phi) - Fgw2/phi - Fmg;
 
     function G = gasloss()
         % put gas loss function here
@@ -62,20 +59,18 @@ dydz(3) = -(1/(ug) - 1/(um))*g + (1/Qm + 1/Qg)*Fmg  + 1/Qg*G - 1/Qg*Fgw + 1/Qm*F
             rb = (3*phi/(4*pi*A.nb))^(1/3); %bubble radius
             
             if (A.useForchheimer)
-                k1 = (A.ftb*rb)^2/8 * phi^A.m;
-                k2 = (A.ftb*rb)/A.Ff0 * phi^(1+3*A.m)/2;
+                k1 = (phi/A.phi0)^(2/3);
+                k2 = (phi/A.phi0)^((1+3*A.m)/2+1/3);
+               
+                Fmg1 = -1/A.C.St*(1+A.C.Fo*k1/k2*du*rhog)*phi*(1-phi)/k1*du;
                 
-                k1 = max(1e-15,k1);
-                k2 = max(1e-15,k2);
-                     
-                Fmg1 = -(A.mug/k1 + rhog/k2*abs(ug-um))*(ug-um)*phi*(1-phi);
 
             else
-                Fmg1 = -(9/2*phi*(1-phi)*A.mu(phi,p)*(ug-um)/rb^2);
+                %Fmg1 = -(9/2*phi*(1-phi)*A.mu(phi,p)*(ug-um)/rb^2);
             end
             
             
-            Fmg2 = -3/8*phi*(1-phi)*A.dragC/A.Rash*rhog*abs(ug-um)*(ug-um);
+            Fmg2 = -3/8*phi*(1-phi)*A.dragC*A.C.rc/A.Rash*rhog*abs(ug-um)*(ug-um)*A.C.delta;
             pf = A.phiforce;
             
             if (A.delF)
@@ -104,13 +99,17 @@ dydz(3) = -(1/(ug) - 1/(um))*g + (1/Qm + 1/Qg)*Fmg  + 1/Qg*G - 1/Qg*Fgw + 1/Qm*F
 
     function Fmw = meltwallfriction()
       
-        Fmw = 8*A.mu(phi,p)*um/A.r^2;
+        Fmw = 8*A.mu(phi,p*A.C.p0)/A.C.mu0*um/A.C.Re;
     end
 
-    function Fgw = gaswallfriction()
+    function Fgw = gaswallfriction1()
         % put gas wall friction here
-        tau = A.f0.*0.5*rhog.*ug.^2;
-        Fgw = 2*tau./A.r;
+        Fgw = A.C.delta*A.f0*rhog*ug.^2/8;
+    end
+
+    function Fgw = gaswallfriction2()
+        % put gas wall friction here
+        Fgw = A.f0*ug/8;
     end
 end
 

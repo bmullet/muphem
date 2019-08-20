@@ -25,6 +25,7 @@ CRYSTAL_GROWTH = false;
     A.nb = 1e15;        % Bubble concentration
     A.Pchamber = 140000000; % Chamber pressure (Pa)
     A.gamma = 1.29;
+    
 
     
     % Henry's law constants
@@ -95,6 +96,7 @@ CRYSTAL_GROWTH = false;
     A.ftb = 0.1; % Throat bubble ratio [0.05-0.5]
     A.m = 3.5; % Tortuosity factor
     A.Ff0 = 10;
+    A.rb0 = (A.phif/(4/3*pi*A.nb))^(1/3);
     
 %     %%%%% GRIMSVOTN PARAMS %%%%%
 %     A.H = 1700;                % Length for Grimsvotn

@@ -25,29 +25,55 @@ Qmvec = A.rhom0*u0*ones(size(z1));
 Qgvec = zeros(size(z1));
 
 %% Now integrate to fragmentation depth using two phase model
+% Non-dimensionalize
+
+C.p0 = A.Pchamber;
+C.rc = A.r;
+C.c0 = A.hg;
+C.rhom = A.rhom0;
+C.mu0 = A.mu0l;
+C.U0 = sqrt(C.p0/C.rhom);
+C.rhog0 = C.p0/(A.Rw*A.T);
+C.Re = C.rc*C.rhom*C.U0/C.mu0;
+C.Fr = C.U0/sqrt(C.rc*9.8);
+C.k10 = A.phi0^A.m*(A.ftb*A.rb0)^2/8;
+C.k20 = (A.ftb*A.rb0)*A.phi0^((1+3*A.m)/2)/A.Ff0;
+C.St = A.rhom0*C.k10*C.U0/(C.mu0*C.rc);
+C.Fo = C.k10*C.U0*C.rhom/(C.k20*A.mug);
+C.delta = C.rhog0/C.rhom;
+A.C = C;
+
+
+u0 = u0/C.U0;
+
 delF = 1; % Turns on/off mass transfer
 eos = eosf(A.delF);
+
 nz = length(z1);
-zstart = z1(nz); A.exdepth = zstart;
+
+zstart = z1(nz)/C.rc; A.exdepth = zstart;
 zspan = [zstart 0];
-p0 = y1(nz); % new p0 = (should be pcrit)
-if abs((pcrit-p0)/pcrit) > 0.01 
-    disp([pcrit p0])
-    error('Pcrit and p0 do not match!!')
-end
+
+p0 = y1(nz)/C.p0; % new p0 = (should be pcrit)
 
 phi0 = fzero(@(phi) exslvphi(phi,u0,p0), 0); % Find phi0
 
 y0 = [p0 phi0 0]; % format is [p phi delta0];
 
-%1e-9
-options = odeset('Events',@FragmentationDepth,'Mass',@mass, 'MStateDependence', 'strong', 'NormControl','on','RelTol',2.5e-13,'AbsTol',1e-13);
+options = odeset('Events',@FragmentationDepth,'Mass',@mass, 'MStateDependence', 'strong', 'NormControl','on','RelTol',2.5e-5,'AbsTol',1e-5);
 sol = ode15s(@(z,y) twophaseODE(z,y,A), zspan, y0, options);
 
-zfrag = sol.x';
+zfrag = sol.x'*C.rc;
+
 pfrag = sol.y(1,:)'; phifrag = sol.y(2,:)'; dufrag = sol.y(3,:)'; 
 [ rhogfrag, chidfrag, umfrag] = eos.calcvars(A,phifrag,pfrag);
+
 ugfrag = umfrag + dufrag;
+
+pfrag = pfrag*C.p0;
+rhogfrag = rhogfrag*C.rhog0;
+umfrag = umfrag*C.U0;
+ugfrag = ugfrag*C.U0;
 
 Qmfrag = (1-phifrag).*umfrag.*A.rhom0;
 Qgfrag = phifrag.*ugfrag.*rhogfrag;
@@ -60,9 +86,9 @@ chidvec = [chidvec; chidfrag];
 nz = length(zfrag);
 zstart = zfrag(nz);
 A.fragdepth = zstart;
-zspan = [zstart 0];
+zspan = [zstart 0]/C.rc;
 
-A.umf = umfrag(nz); % to be used for new phi calculation
+A.umf = umfrag(nz)/C.U0; % to be used for new phi calculation
 
 
 
@@ -84,13 +110,18 @@ else
     delF = 0;
     eos = eosf(A.delF);
     
-    options = odeset('Events',@RegimeChangeDepth,'Mass',@mass2, 'MStateDependence', 'strong', 'NormControl','on','RelTol',2.5e-15,'AbsTol',1e-15);
+    options = odeset('Events',@RegimeChangeDepth,'Mass',@mass2, 'MStateDependence', 'strong', 'NormControl','on','RelTol',2.5e-5,'AbsTol',1e-5);
 
     solext = ode15s(@(z,y) twophaseODE(z,y,A), zspan, sol.y(:,end), options);
     
     p2e = solext.y(1,:)'; phi2e = solext.y(2,:)'; du2e = solext.y(3,:)'; 
-    z2e = solext.x';
+    z2e = solext.x'*C.rc;
     [ rhog2e, chi_d2e, um2e ] = eos.calcvars(A,phi2e,p2e);
+    
+    p2e = p2e*C.p0;
+    du2e = du2e*C.U0;
+    rhog2e = rhog2e*C.rhog0;
+    um2e = um2e*C.U0;
     ug2e = du2e + um2e;
 
     Qm2e = (1-phi2e).*um2e.*A.rhom0;
@@ -102,7 +133,7 @@ else
     chidvec = [chidvec; chi_d2e];
     
     nz = length(z2e);
-    zstart = z2e(nz);
+    zstart = z2e(nz)/C.rc;
     
     if abs(zstart) <  1
         
@@ -115,15 +146,21 @@ else
     
         zspan = [zstart 0];
         
-        y0 = [p2e(nz) phi2e(nz) du2e(nz)];
+        y0 = [p2e(nz)/C.p0 phi2e(nz) du2e(nz)/C.U0];
         
         options = odeset('Events',@BlowUp, 'Mass',@mass2, 'MStateDependence', 'strong', 'NormControl','on','RelTol',2.5e-9,'AbsTol',1e-9,'InitialStep',1e-6);
-        warning off MATLAB:ode15s:IntegrationTolNotMet
+        %warning off MATLAB:ode15s:IntegrationTolNotMet
         [z3,y3] = ode15s(@(z,y) twophaseODE(z,y,A), zspan, y0, options);
         
+        z3 = z3*C.rc;
         p3 = y3(:,1); phi3 = y3(:,2); du3 = y3(:,3);
         
         [ rhog3, chi_d3, um3 ] = eos.calcvars(A,phi3,p3);
+        p3 = p3*C.p0;
+        du3 = du3*C.U0;
+        rhog3 = rhog3*C.rhog0;
+        um3 = um3*C.U0;
+        
         ug3 = du3 + um3;
         
         Qm3 = (1-phi3).*um3.*A.rhom0;
@@ -142,7 +179,7 @@ end
 
     function resid = exslvphi(phitest,u0,p)
         [ rhog, ~, u ] = eos.calcvars(A,phitest,p);
-        resid = A.rhom0*u0 - (A.rhom0*(1-phitest)*u + rhog*phitest*u); % delta u is zero
+        resid = A.rhom0*u0 - (A.rhom0*(1-phitest)*u + rhog*C.rhog0*phitest*u); % delta u is zero
     end
 
     function M = mass(~,y)
@@ -152,19 +189,20 @@ end
         ug = du + um;
         rhog = eos.rhogofp(A,p);
         rhom = A.rhom0;
-        Qm = (1-phi)*um*rhom; Qg = phi*rhog*ug;
-        I = -(Qm)/(1-chid)*A.hs*A.hb*p^(A.hb-1);
         
-        alpha = - (Qm+Qg)/(p*(1/ug + (1-phi)/(phi*um)));
-        Gamma = (Qm/Qg)*(rhog*ug/(rhom*um) - 1)*(A.hb*chid/(1-chid));
+
+        alpha = ((1-phi)*um + phi*ug*rhog*C.delta)/(1/ug + (1-phi)/phi*1/um);
+        gam2 = 1/p*(ug + um*((1-phi)*rhom/(phi*(C.rhog0)) + 1)*(A.hb*chid/(1-chid)));
+        Gamma = (1-phi)/phi*(1-um/(ug*C.delta));
         
-        gammat = 1 + alpha*(1-Gamma) - I*du;
-        md = (rhom*um^2 - rhog*ug^2)/(um/(1-phi) + ug/phi);
+        gammat = 1 + alpha*(1-Gamma) - (A.hb*chid/(1-chid))*du;
         
-        gamma3 = (1/(rhog*ug) - 1/(rhom*um) - 1/p*(Qm/(rhog*phi) - um));
+        md = -(alpha*p/ug + ug*rhog*phi*C.delta);
+        
+        gamma3 = (1/(rhog*ug)*1/C.delta - 1/(um) - 1/p*(um*(1-phi)/(rhog*phi)*1/C.delta - um));
         
         M = zeros(3,3);
-        M(1,:) = [(ug/p - (1/(phi*rhog) + 1/((1-phi)*rhom))*I), (ug/phi + um/(1-phi)), 1]; %mass balance
+        M(1,:) = [gam2, (ug/phi + um/(1-phi)), 1]; %mass balance
         M(2,:) = [gammat, 0, -md]; % Add momentum balance
         M(3,:) = [gamma3,0, 1]; % Subtract momentum balance    
         
@@ -176,18 +214,21 @@ end
         um = eos.calcum(A,phi,chid);
         ug = du + um;
         rhog = eos.rhogofp(A,p);
-        rhom = A.rhom0;
-        Qm = (1-phi)*um*rhom; Qg = phi*rhog*ug;
-        
-        alpha = - (Qm+Qg)/(p*(1/ug + (1-phi)/(phi*um)));
-        
+
+        alpha = ((1-phi)*um + phi*ug*rhog*C.delta)/(1/ug + (1-phi)/phi*1/um);
+     
         gammat = 1 + alpha;
-        md = (rhom*um^2 - rhog*ug^2)/(um/(1-phi) + ug/phi);
+        
+        md = -(alpha*p/ug + ug*rhog*phi*C.delta);
+        
+        gamma3 = (1/(rhog*ug)*1/C.delta - 1/(um) );
         
         M = zeros(3,3);
         M(1,:) = [ug/p, (ug/phi + um/(1-phi)), 1]; %mass balance
         M(2,:) = [gammat, 0, -md]; % Add momentum balance
-        M(3,:) = [1/(rhog*ug) - 1/(rhom*um),0, 1]; % Subtract momentum balance    
+        M(3,:) = [gamma3,0, 1]; % Subtract momentum balance    
+        
+        
     end
 
     function [value,isterminal,direction] = ExsolutionDepth(~,y)

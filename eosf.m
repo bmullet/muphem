@@ -17,15 +17,15 @@ else
     um = umofphif(A,phi);
 end
 
-function [ rhog ] = rhogofp (A,p)
-rhog = p/(A.Rw*A.T);
+function [ rhog ] = rhogofp (~,p)
+rhog = p;
 
 function [ chi_d ] = chidofp (A,p)
-chi_d = A.hs*p.^A.hb;
+chi_d = A.hs*(p*A.Pchamber).^A.hb;
 
 
 function [ um ] = umofphi (A,phi,chid)
-um0 = A.v_chamber_i;
+um0 = A.v_chamber_i/A.C.U0;
 um = (1 - A.hg)./(1 - chid) .* (um0)./(1-phi);
 
 
