@@ -40,7 +40,8 @@ phi0 = fzero(@(phi) exslvphi(phi,u0,p0), 0); % Find phi0
 
 y0 = [p0 phi0 0]; % format is [p phi delta0];
 
-options = odeset('Events',@FragmentationDepth,'Mass',@mass, 'MStateDependence', 'strong', 'NormControl','on','RelTol',2.5e-9,'AbsTol',1e-9);
+%1e-9
+options = odeset('Events',@FragmentationDepth,'Mass',@mass, 'MStateDependence', 'strong', 'NormControl','on','RelTol',2.5e-13,'AbsTol',1e-13);
 sol = ode15s(@(z,y) twophaseODE(z,y,A), zspan, y0, options);
 
 zfrag = sol.x';
@@ -83,7 +84,7 @@ else
     delF = 0;
     eos = eosf(A.delF);
     
-    options = odeset('Events',@RegimeChangeDepth,'Mass',@mass2, 'MStateDependence', 'strong', 'NormControl','on','RelTol',2.5e-9,'AbsTol',1e-9);
+    options = odeset('Events',@RegimeChangeDepth,'Mass',@mass2, 'MStateDependence', 'strong', 'NormControl','on','RelTol',2.5e-15,'AbsTol',1e-15);
 
     solext = ode15s(@(z,y) twophaseODE(z,y,A), zspan, sol.y(:,end), options);
     
@@ -103,31 +104,40 @@ else
     nz = length(z2e);
     zstart = z2e(nz);
     
-    zspan = [zstart 0];
-
-    y0 = [p2e(nz) phi2e(nz) du2e(nz)];
+    if abs(zstart) <  1
+        
+        zvec  = [z1; zfrag; z2e];
+        pvec = [p1; pfrag; p2e];
+        ugvec = [ug1; ugfrag; ug2e];
+        umvec = [um1; umfrag; um2e];    
+        
+    else
     
-    options = odeset('Events',@BlowUp, 'Mass',@mass2, 'MStateDependence', 'strong', 'NormControl','on','RelTol',2.5e-9,'AbsTol',1e-9,'InitialStep',1e-6);
-    warning off MATLAB:ode15s:IntegrationTolNotMet
-    [z3,y3] = ode15s(@(z,y) twophaseODE(z,y,A), zspan, y0, options);
-    
-    p3 = y3(:,1); phi3 = y3(:,2); du3 = y3(:,3);
-    
-    [ rhog3, chi_d3, um3 ] = eos.calcvars(A,phi3,p3);
-    ug3 = du3 + um3;
-    
-    Qm3 = (1-phi3).*um3.*A.rhom0;
-    Qg3 = phi3.*ug3.*rhog3;
-    phivec = [phivec; phi3];
-    Qmvec = [Qmvec; Qm3];
-    Qgvec = [Qgvec; Qg3];
-    rhogvec = [rhogvec; rhog3];
-    chidvec = [chidvec; chi_d3];
-    zvec  = [z1; zfrag; z2e; z3];
-    pvec = [p1; pfrag; p2e; p3];
-    ugvec = [ug1; ugfrag; ug2e; ug3];
-    umvec = [um1; umfrag; um2e; um3];
-    
+        zspan = [zstart 0];
+        
+        y0 = [p2e(nz) phi2e(nz) du2e(nz)];
+        
+        options = odeset('Events',@BlowUp, 'Mass',@mass2, 'MStateDependence', 'strong', 'NormControl','on','RelTol',2.5e-9,'AbsTol',1e-9,'InitialStep',1e-6);
+        warning off MATLAB:ode15s:IntegrationTolNotMet
+        [z3,y3] = ode15s(@(z,y) twophaseODE(z,y,A), zspan, y0, options);
+        
+        p3 = y3(:,1); phi3 = y3(:,2); du3 = y3(:,3);
+        
+        [ rhog3, chi_d3, um3 ] = eos.calcvars(A,phi3,p3);
+        ug3 = du3 + um3;
+        
+        Qm3 = (1-phi3).*um3.*A.rhom0;
+        Qg3 = phi3.*ug3.*rhog3;
+        phivec = [phivec; phi3];
+        Qmvec = [Qmvec; Qm3];
+        Qgvec = [Qgvec; Qg3];
+        rhogvec = [rhogvec; rhog3];
+        chidvec = [chidvec; chi_d3];
+        zvec  = [z1; zfrag; z2e; z3];
+        pvec = [p1; pfrag; p2e; p3];
+        ugvec = [ug1; ugfrag; ug2e; ug3];
+        umvec = [um1; umfrag; um2e; um3];
+    end
 end
 
     function resid = exslvphi(phitest,u0,p)

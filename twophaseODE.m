@@ -33,7 +33,7 @@ beta = (2 + Qm/Qg + (1-phi)/phi)/(1/ug + (1-phi)/phi * (1/um));
 %Set RHS of equations
 dydz(1) = -G/(phi*rhog);
 dydz(2) = -(phi * rhog + (1-phi) * rhom)*g + beta*G - (1-delF)*Fgw - delF*Fmw;
-dydz(3) = -(1/(rhog*ug) - 1/(rhom*um))*g + (1/Qm + 1/Qg)*Fmg  + 1/Qg*G - 1/Qg*Fgw + 1/Qm*Fmw;
+dydz(3) = -(1/(ug) - 1/(um))*g + (1/Qm + 1/Qg)*Fmg  + 1/Qg*G - 1/Qg*Fgw + 1/Qm*Fmw;
 
     function G = gasloss()
         % put gas loss function here
@@ -65,8 +65,8 @@ dydz(3) = -(1/(rhog*ug) - 1/(rhom*um))*g + (1/Qm + 1/Qg)*Fmg  + 1/Qg*G - 1/Qg*Fg
                 k1 = (A.ftb*rb)^2/8 * phi^A.m;
                 k2 = (A.ftb*rb)/A.Ff0 * phi^(1+3*A.m)/2;
                 
-                k1 = max(1e-8,k1);
-                k2 = max(1e-8,k2);
+                k1 = max(1e-15,k1);
+                k2 = max(1e-15,k2);
                      
                 Fmg1 = -(A.mug/k1 + rhog/k2*abs(ug-um))*(ug-um)*phi*(1-phi);
 
@@ -84,13 +84,13 @@ dydz(3) = -(1/(rhog*ug) - 1/(rhom*um))*g + (1/Qm + 1/Qg)*Fmg  + 1/Qg*G - 1/Qg*Fg
                 Fmg = Fmg2;
             end
             
-            
+%             
 %             if phi<A.phi0
 %                 Fmg = Fmg1;
 %             elseif (phi>=A.phi0) && (phi<pf)
 %                 t = (phi-A.phi0)/(pf-A.phi0);
 %                 Fmg = -1*(abs(Fmg1))^(1-t)*(abs(Fmg2))^(t)*sign(ug-um);
-%                 Fmg = Fmg1*(1-t) + Fmg2*(t);
+%            
 %             elseif phi>=pf
 %                 Fmg = Fmg2;
 %             else
@@ -103,6 +103,7 @@ dydz(3) = -(1/(rhog*ug) - 1/(rhom*um))*g + (1/Qm + 1/Qg)*Fmg  + 1/Qg*G - 1/Qg*Fg
     end
 
     function Fmw = meltwallfriction()
+      
         Fmw = 8*A.mu(phi,p)*um/A.r^2;
     end
 
