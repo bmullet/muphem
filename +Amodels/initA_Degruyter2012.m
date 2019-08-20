@@ -96,7 +96,7 @@ CRYSTAL_GROWTH = false;
     A.ftb = 0.1; % Throat bubble ratio [0.05-0.5]
     A.m = 3.5; % Tortuosity factor
     A.Ff0 = 10;
-    A.rb0 = (A.phif/(4/3*pi*A.nb))^(1/3);
+    A.rb0 = (A.phi0/(4/3*pi*A.nb))^(1/3);
     
 %     %%%%% GRIMSVOTN PARAMS %%%%%
 %     A.H = 1700;                % Length for Grimsvotn
@@ -159,6 +159,7 @@ CRYSTAL_GROWTH = false;
             A.mu = @(phi,p) A.mu0.*theta_g(phi).*theta_c(xc(p));
     end
     
+      A.mu0l = A.mu(0,A.Pchamber);
     
     
    
