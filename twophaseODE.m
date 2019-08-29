@@ -80,25 +80,25 @@ dydz(3) = -1/A.C.Fr^2*(1/ug-1/um) + Fmw/(1-phi) - Fgw2/phi + lambda*Fmg;
           
             pf = A.phiforce;
             
-%             if (A.delF)
-%                 Fmg = Fmg1;
-%                
-%             else
-%                 Fmg = Fmg2;
-%             end
-            
-            
-            if phi<A.phi0
+            if (A.delF)
                 Fmg = Fmg1;
-            elseif (phi>=A.phi0) && (phi<pf)
-                t = (phi-A.phi0)/(pf-A.phi0);
-                Fmg = -1*(abs(Fmg1))^(1-t)*(abs(Fmg2))^(t)*sign(ug-um);
-            elseif phi>=pf
-                Fmg = Fmg2;
+               
             else
-                Fmg=0;
-            end   
-                   
+                Fmg = Fmg2;
+            end
+            
+            
+%             if phi<A.phi0
+%                 Fmg = Fmg1;
+%             elseif (phi>=A.phi0) && (phi<pf)
+%                 t = (phi-A.phi0)/(pf-A.phi0);
+%                 Fmg = -1*(abs(Fmg1))^(1-t)*(abs(Fmg2))^(t)*sign(ug-um);
+%             elseif phi>=pf
+%                 Fmg = Fmg2;
+%             else
+%                 Fmg=0;
+%             end   
+%                    
             
 
     end
@@ -110,12 +110,12 @@ dydz(3) = -1/A.C.Fr^2*(1/ug-1/um) + Fmw/(1-phi) - Fgw2/phi + lambda*Fmg;
 
     function Fgw = gaswallfriction1()
         % put gas wall friction here
-        Fgw = A.C.delta*A.f0*rhog*ug.^2/8;
+        Fgw = A.C.delta*A.f0*rhog*ug.^2;
     end
 
     function Fgw = gaswallfriction2()
         % put gas wall friction here
-        Fgw = A.f0*ug/8;
+        Fgw = A.f0*ug/phi;
     end
 end
 

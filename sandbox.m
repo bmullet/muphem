@@ -379,3 +379,7 @@ for i = 1:length(v)
     vi = v(i)
     resid(i) = matchPatm(vi, A);
 end
+
+%% Distribute solution
+    A = out{1}; zvec = out{2}; pvec = out{3}; ugvec = out{4}; umvec = out{5};
+phivec = out{6}; rhogvec = out{7}; chidvec = out{8}; Qmvec = out{9}; Qgvec = out{10}; failure = out{11};
