@@ -26,11 +26,12 @@ else
   
 end
 
+lambda = (1/(um*(1-phi)) + 1/(ug*phi*rhog*A.C.delta));
 %Set RHS of equations
 %dydz(1) = -G/(phi*rhog);
 dydz(1) = 0;
 dydz(2) = -1/A.C.Fr^2*(phi*rhog*A.C.delta + (1-phi)) - Fmw - Fgw1;
-dydz(3) = -1/A.C.Fr^2*(1/ug-1/um) + Fmw/(1-phi) - Fgw2/phi - Fmg;
+dydz(3) = -1/A.C.Fr^2*(1/ug-1/um) + Fmw/(1-phi) - Fgw2/phi + lambda*Fmg;
 
     function G = gasloss()
         % put gas loss function here
@@ -62,7 +63,12 @@ dydz(3) = -1/A.C.Fr^2*(1/ug-1/um) + Fmw/(1-phi) - Fgw2/phi - Fmg;
                 k1 = (phi/A.phi0)^(2/3);
                 k2 = (phi/A.phi0)^((1+3*A.m)/2+1/3);
                
-                Fmg1 = -1/A.C.St*(1+A.C.Fo*k1/k2*du*rhog)*phi*(1-phi)/k1*du;
+                gamma = (1/(um*(1-phi)) + 1/(ug*phi*rhog*A.C.delta));
+                Fmg1 = -gamma/A.C.St*(1+A.C.Fo*k1/k2*abs(du)*rhog)*phi*(1-phi)/k1*du;
+                Fmg1 = sign(Fmg1)*min(abs(Fmg1),1e5);
+                
+                Fmg1 = -du*1e6;
+           
                 
 
             else
@@ -71,28 +77,28 @@ dydz(3) = -1/A.C.Fr^2*(1/ug-1/um) + Fmw/(1-phi) - Fgw2/phi - Fmg;
             
             
             Fmg2 = -3/8*phi*(1-phi)*A.dragC*A.C.rc/A.Rash*rhog*abs(ug-um)*(ug-um)*A.C.delta;
+          
             pf = A.phiforce;
             
-            if (A.delF)
-                Fmg = Fmg1;
-            else
-                Fmg = Fmg2;
-            end
-            
-%             
-%             if phi<A.phi0
+%             if (A.delF)
 %                 Fmg = Fmg1;
-%             elseif (phi>=A.phi0) && (phi<pf)
-%                 t = (phi-A.phi0)/(pf-A.phi0);
-%                 Fmg = -1*(abs(Fmg1))^(1-t)*(abs(Fmg2))^(t)*sign(ug-um);
-%            
-%             elseif phi>=pf
-%                 Fmg = Fmg2;
+%                
 %             else
-%                 Fmg=0;
-%             end   
-
-
+%                 Fmg = Fmg2;
+%             end
+            
+            
+            if phi<A.phi0
+                Fmg = Fmg1;
+            elseif (phi>=A.phi0) && (phi<pf)
+                t = (phi-A.phi0)/(pf-A.phi0);
+                Fmg = -1*(abs(Fmg1))^(1-t)*(abs(Fmg2))^(t)*sign(ug-um);
+            elseif phi>=pf
+                Fmg = Fmg2;
+            else
+                Fmg=0;
+            end   
+                   
             
 
     end

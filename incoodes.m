@@ -43,7 +43,6 @@ C.Fo = C.k10*C.U0*C.rhom/(C.k20*A.mug);
 C.delta = C.rhog0/C.rhom;
 A.C = C;
 
-
 u0 = u0/C.U0;
 
 delF = 1; % Turns on/off mass transfer
@@ -58,9 +57,17 @@ p0 = y1(nz)/C.p0; % new p0 = (should be pcrit)
 
 phi0 = fzero(@(phi) exslvphi(phi,u0,p0), 0); % Find phi0
 
+[ rhogtest, ~, utest ] = eos.calcvars(A,phi0,p0);
+
+if (abs((utest*(phi0*rhogtest*C.rhog0 + (1-phi0)*C.rhom)) - u0*C.rhom)>1e-3)
+    error('Mass is not conserved!')
+end
+
+
 y0 = [p0 phi0 0]; % format is [p phi delta0];
 
-options = odeset('Events',@FragmentationDepth,'Mass',@mass, 'MStateDependence', 'strong', 'NormControl','on','RelTol',2.5e-5,'AbsTol',1e-5);
+
+options = odeset('Events',@FragmentationDepth,'Mass',@mass, 'MStateDependence','strong', 'Stats', 'off', 'NormControl','off','RelTol',1e-5,'AbsTol',1e-6);
 sol = ode15s(@(z,y) twophaseODE(z,y,A), zspan, y0, options);
 
 zfrag = sol.x'*C.rc;
@@ -110,7 +117,7 @@ else
     delF = 0;
     eos = eosf(A.delF);
     
-    options = odeset('Events',@RegimeChangeDepth,'Mass',@mass2, 'MStateDependence', 'strong', 'NormControl','on','RelTol',2.5e-5,'AbsTol',1e-5);
+    options = odeset('Events',@RegimeChangeDepth,'Mass',@mass2, 'MStateDependence', 'strong',  'NormControl','off','RelTol',2.5e-5,'AbsTol',1e-6,'InitialStep',1e-6);
 
     solext = ode15s(@(z,y) twophaseODE(z,y,A), zspan, sol.y(:,end), options);
     
@@ -148,7 +155,7 @@ else
         
         y0 = [p2e(nz)/C.p0 phi2e(nz) du2e(nz)/C.U0];
         
-        options = odeset('Events',@BlowUp, 'Mass',@mass2, 'MStateDependence', 'strong', 'NormControl','on','RelTol',2.5e-9,'AbsTol',1e-9,'InitialStep',1e-6);
+        options = odeset('Events',@BlowUp, 'Mass',@mass2, 'MStateDependence', 'strong', 'NormControl','off','RelTol',2.5e-5,'AbsTol',1e-6,'InitialStep',1e-6);
         %warning off MATLAB:ode15s:IntegrationTolNotMet
         [z3,y3] = ode15s(@(z,y) twophaseODE(z,y,A), zspan, y0, options);
         
@@ -191,15 +198,15 @@ end
         rhom = A.rhom0;
         
 
-        alpha = ((1-phi)*um + phi*ug*rhog*C.delta)/(1/ug + (1-phi)/phi*1/um);
-        gam2 = 1/p*(ug + um*((1-phi)*rhom/(phi*(C.rhog0)) + 1)*(A.hb*chid/(1-chid)));
-        Gamma = (1-phi)/phi*(1-um/(ug*C.delta));
+        alpha = -((1-phi)*um + phi*ug*rhog*C.delta)/(1/ug + (1-phi)/phi*1/um);
+        gam2 = 1/p*(ug + um*((1-phi)*rhom/(rhog*phi*(C.rhog0)) + 1)*(A.hb*chid/(1-chid)));
+        Gamma = (1-phi)/phi*(1-um/(ug*rhog*C.delta))*(A.hb*chid/(1-chid));
         
-        gammat = 1 + alpha*(1-Gamma) - (A.hb*chid/(1-chid))*du;
+        gammat = 1 + alpha*(1-Gamma) + (1-phi)*um/p*(A.hb*chid/(1-chid))*du;
         
         md = -(alpha*p/ug + ug*rhog*phi*C.delta);
         
-        gamma3 = (1/(rhog*ug)*1/C.delta - 1/(um) - 1/p*(um*(1-phi)/(rhog*phi)*1/C.delta - um));
+        gamma3 = (1/(rhog*ug)*1/C.delta - 1/(um) - 1/p*(um*(1-phi)/(rhog*phi)*1/C.delta + um)*(A.hb*chid/(1-chid)));
         
         M = zeros(3,3);
         M(1,:) = [gam2, (ug/phi + um/(1-phi)), 1]; %mass balance
@@ -215,7 +222,7 @@ end
         ug = du + um;
         rhog = eos.rhogofp(A,p);
 
-        alpha = ((1-phi)*um + phi*ug*rhog*C.delta)/(1/ug + (1-phi)/phi*1/um);
+        alpha = -((1-phi)*um + phi*ug*rhog*C.delta)/(1/ug + (1-phi)/phi*1/um);
      
         gammat = 1 + alpha;
         
