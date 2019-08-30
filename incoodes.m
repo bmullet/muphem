@@ -217,8 +217,8 @@ end
 
     function M = mass2(~,y)
         p = y(1); phi = y(2); du = y(3); 
-        chid = eos.chidofp(A,p); 
-        um = eos.calcum(A,phi,chid);
+       
+        um = eos.calcum(A,phi);
         ug = du + um;
         rhog = eos.rhogofp(A,p);
 
