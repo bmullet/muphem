@@ -198,7 +198,7 @@ end
         rhom = A.rhom0;
         
 
-        alpha = -((1-phi)*um + phi*ug*rhog*C.delta)/(1/ug + (1-phi)/phi*1/um);
+        alpha = -1/p*((1-phi)*um + phi*ug*rhog*C.delta)/(1/ug + (1-phi)/phi*1/um);
         gam2 = 1/p*(ug + um*((1-phi)*rhom/(rhog*phi*(C.rhog0)) + 1)*(A.hb*chid/(1-chid)));
         Gamma = (1-phi)/phi*(1-um/(ug*rhog*C.delta))*(A.hb*chid/(1-chid));
         
@@ -222,7 +222,7 @@ end
         ug = du + um;
         rhog = eos.rhogofp(A,p);
 
-        alpha = -((1-phi)*um + phi*ug*rhog*C.delta)/(1/ug + (1-phi)/phi*1/um);
+        alpha = -1/p*((1-phi)*um + phi*ug*rhog*C.delta)/(1/ug + (1-phi)/phi*1/um);
      
         gammat = 1 + alpha;
         
