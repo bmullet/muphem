@@ -117,7 +117,7 @@ else
     delF = 0;
     eos = eosf(A.delF);
     
-    options = odeset('Events',@RegimeChangeDepth,'Mass',@mass2, 'MStateDependence', 'strong',  'NormControl','off','RelTol',2.5e-5,'AbsTol',1e-6,'InitialStep',1e-6);
+    options = odeset('Events',@RegimeChangeDepth,'Mass',@mass2, 'MStateDependence', 'strong',  'NormControl','off','RelTol',2.5e-8,'AbsTol',1e-9,'InitialStep',1e-6);
 
     solext = ode15s(@(z,y) twophaseODE(z,y,A), zspan, sol.y(:,end), options);
     
@@ -155,7 +155,7 @@ else
         
         y0 = [p2e(nz)/C.p0 phi2e(nz) du2e(nz)/C.U0];
         
-        options = odeset('Events',@BlowUp, 'Mass',@mass2, 'MStateDependence', 'strong', 'NormControl','off','RelTol',2.5e-5,'AbsTol',1e-6,'InitialStep',1e-6);
+        options = odeset('Events',@BlowUp, 'Mass',@mass2, 'MStateDependence', 'strong', 'NormControl','off','RelTol',2.5e-8,'AbsTol',1e-9,'InitialStep',1e-6);
         %warning off MATLAB:ode15s:IntegrationTolNotMet
         [z3,y3] = ode15s(@(z,y) twophaseODE(z,y,A), zspan, y0, options);
         

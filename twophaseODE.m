@@ -76,7 +76,7 @@ dydz(3) = -1/A.C.Fr^2*(1/ug-1/um) + Fmw/(1-phi) - Fgw2/phi + lambda*Fmg;
             end
             
             
-            Fmg2 = -3/8*phi*(1-phi)*A.dragC*A.C.rc/A.Rash*rhog*abs(ug-um)*(ug-um)*A.C.delta;
+            Fmg2 = -3/8*phi*(1-phi)*A.dragC*A.C.rc/A.Rash*rhog*abs(du)*(du)*A.C.delta;
           
             pf = A.phiforce;
             
