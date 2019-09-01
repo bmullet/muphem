@@ -1,5 +1,8 @@
 function [ dydz ] = twophaseODE( z,y,A )
-%TWOPHASEODE ode system of equations for two phase system
+%TWOPHASEODE ode system of equations for two phasesystem
+% TODO: 
+%   - MULTIPLY THIRD EQUATION BY QmQg
+%   - FIUGRE OUT WHAT THE HECK WITH FMG
 eos = eosf(A.delF);
 p = y(1); phi = y(2); du = y(3);
 [rhog, ~, um] = eos.calcvars(A,phi,p);
@@ -60,13 +63,11 @@ dydz(3) = -1/A.C.Fr^2*(1/ug-1/um) + Fmw/(1-phi) - Fgw2/phi + lambda*Fmg;
             rb = (3*phi/(4*pi*A.nb))^(1/3); %bubble radius
             
             if (A.useForchheimer)
-                k1 = (phi/A.phi0)^(2/3);
+                k1 = (phi/A.phi0)^(A.m+2/3);
                 k2 = (phi/A.phi0)^((1+3*A.m)/2+1/3);
-               
-                gamma = (1/(um*(1-phi)) + 1/(ug*phi*rhog*A.C.delta));
-                Fmg1 = -gamma/A.C.St*(1+A.C.Fo*k1/k2*abs(du)*rhog)*phi*(1-phi)/k1*du;
-                Fmg1 = sign(Fmg1)*min(abs(Fmg1),1e5);
-                Fmg1 = -du*1e6;
+          
+                Fmg1 = -1/A.C.St*(1+A.C.Fo*k1/k2*abs(du)*rhog)*phi*(1-phi)/k1*du;
+                %Fmg1 = sign(Fmg1)*min(abs(Fmg1),1e5);
                 
 
             else
