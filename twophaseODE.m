@@ -66,9 +66,7 @@ dydz(3) = -1/A.C.Fr^2*(1/ug-1/um) + Fmw/(1-phi) - Fgw2/phi + lambda*Fmg;
                 gamma = (1/(um*(1-phi)) + 1/(ug*phi*rhog*A.C.delta));
                 Fmg1 = -gamma/A.C.St*(1+A.C.Fo*k1/k2*abs(du)*rhog)*phi*(1-phi)/k1*du;
                 Fmg1 = sign(Fmg1)*min(abs(Fmg1),1e5);
-                
                 Fmg1 = -du*1e6;
-           
                 
 
             else
