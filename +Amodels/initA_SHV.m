@@ -105,7 +105,7 @@ CRYSTAL_GROWTH = true;
 %     A.Bchm = 1e-9;             % Somewhere in between
      
     A.mu0 = A.mu;
-    A.rb0 = (A.phi0/(4/3*pi*A.nb))^(1/3);
+    A.rb0 = (A.phi0/((1-A.phi0)*4/3*pi*A.nb))^(1/3);
      
     % Henry's law
     w = @(p) min(A.hg, A.hs*p.^A.hb);

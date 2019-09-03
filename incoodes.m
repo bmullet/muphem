@@ -6,7 +6,7 @@ function [zvec,pvec,ugvec,umvec,phivec,rhogvec,chidvec,Qmvec,Qgvec,A] = incoodes
 %% First integrate until we reach p critical (where gas first exsolves)
 A.delF = 1; % Turns on/off mass transfer
 eos = eosf(A.delF);
-pcrit = A.Pcrit*.99; % allow pressure to drop slightly below exsolution so that Qg ~= 0 (overpressure develops)
+pcrit = A.Pcrit*0.99; % allow pressure to drop slightly below exsolution so that Qg ~= 0 (overpressure develops)
 zspan = [-A.depth 0];
 options = odeset('Events',@ExsolutionDepth,'NormControl','on','RelTol',2.5e-14,'AbsTol',1e-17);
 y0 = [A.Pchamber];
@@ -27,18 +27,20 @@ Qgvec = zeros(size(z1));
 %% Now integrate to fragmentation depth using two phase model
 % Non-dimensionalize
 
+
 C.p0 = A.Pchamber;
 C.rc = A.r;
 C.c0 = A.hg;
 C.rhom = A.rhom0;
 C.mu0 = A.mu0l;
 C.U0 = sqrt(C.p0/C.rhom);
+
 C.rhog0 = C.p0/(A.Rw*A.T);
 C.Re = C.rc*C.rhom*C.U0/C.mu0;
 C.Fr = C.U0/sqrt(C.rc*9.8);
 C.k10 = A.phi0^A.m*(A.ftb*A.rb0)^2/8;
 C.k20 = (A.ftb*A.rb0)*A.phi0^((1+3*A.m)/2)/A.Ff0;
-C.St = A.rhom0*C.k10*C.U0/(C.mu0*C.rc);
+C.St = A.rhom0*C.k10*C.U0/(A.mug*C.rc);
 C.Fo = C.k10*C.U0*C.rhom/(C.k20*A.mug);
 C.delta = C.rhog0/C.rhom;
 A.C = C;
@@ -67,7 +69,7 @@ end
 y0 = [p0 phi0 0]; % format is [p phi delta0];
 
 
-options = odeset('Events',@FragmentationDepth,'Mass',@mass, 'MStateDependence','strong', 'Stats', 'off', 'NormControl','off','RelTol',1e-5,'AbsTol',1e-6);
+options = odeset('Events',@FragmentationDepth,'Mass',@mass, 'MStateDependence','strong', 'Stats', 'off', 'NormControl','off','RelTol',1e-3,'AbsTol',1e-4);
 sol = ode15s(@(z,y) twophaseODE(z,y,A), zspan, y0, options);
 
 zfrag = sol.x'*C.rc;
@@ -206,12 +208,14 @@ end
         
         md = -(alpha*p/ug + ug*rhog*phi*C.delta);
         
+        qm = (1-phi)*um;
+        
         gamma3 = (1/(rhog*ug)*1/C.delta - 1/(um) - 1/p*(um*(1-phi)/(rhog*phi)*1/C.delta + um)*(A.hb*chid/(1-chid)));
         
         M = zeros(3,3);
         M(1,:) = [gam2, (ug/phi + um/(1-phi)), 1]; %mass balance
         M(2,:) = [gammat, 0, -md]; % Add momentum balance
-        M(3,:) = [gamma3,0, 1]; % Subtract momentum balance    
+        M(3,:) = qm*[gamma3,0, 1]; % Subtract momentum balance    
         
     end
 
@@ -230,10 +234,12 @@ end
         
         gamma3 = (1/(rhog*ug)*1/C.delta - 1/(um) );
         
+        qm = (1-phi)*um;
+        
         M = zeros(3,3);
         M(1,:) = [ug/p, (ug/phi + um/(1-phi)), 1]; %mass balance
         M(2,:) = [gammat, 0, -md]; % Add momentum balance
-        M(3,:) = [gamma3,0, 1]; % Subtract momentum balance    
+        M(3,:) = qm*[gamma3,0, 1]; % Subtract momentum balance    
         
         
     end
