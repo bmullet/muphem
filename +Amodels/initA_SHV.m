@@ -23,7 +23,7 @@ CRYSTAL_GROWTH = true;
     %A.Bchm = 1e-7;       % Chamber compressibility (sill)
     A.Vchm = 3e10;        % Chamber volume
     A.nb = 1e9;        % Bubble concentration
-    A.Pchamber = 140e6; % Chamber pressure (Pa)
+    A.Pchamber = 124e6; % Chamber pressure (Pa)
     A.gamma = 1.29;
 
     

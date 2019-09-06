@@ -6,6 +6,7 @@ function [A] = initA(A)
 %VISCOSITY_MODEL_FLAG = 'Hess and Dingwell';
 %VISCOSITY_THETA_G_FLAG = 'None';
 VISCOSITY_MODEL_FLAG = 'Hess and Dingwell';
+%VISCOSITY_MODEL_FLAG = 'None';
 VISCOSITY_THETA_G_FLAG = 'None';
 VISCOSITY_THETA_C_FLAG = 'Costa';
 %VISCOSITY_THETA_C_FLAG = 'None';
@@ -29,7 +30,7 @@ CRYSTAL_GROWTH = false;
 
     
     % Henry's law constants
-    A.hs = 4.1413e-6;
+    A.hs = 4.1e-6;
     A.hb = 0.5;
     A.hg = 0.046; %total volatile content
     A.Pcrit = (A.hg/A.hs)^(1/A.hb);   % Pcrit is pressure when volatiles first exsolve
@@ -50,8 +51,8 @@ CRYSTAL_GROWTH = false;
     %A.T = 900;          % K (temperature of magma) (RHYOLITE)
     
     %A.mu = 100;         % liquid viscosity, Pa s (BASALT)    
-    %A.mu = 1e6;         % liquid viscosity, Pa s (ANDESITE)
-    A.mu = 1e5;         % liquid viscosity, Pa s (DACITE)
+    A.mu = 1e6;         % liquid viscosity, Pa s (ANDESITE)
+    %A.mu = 1e5;         % liquid viscosity, Pa s (DACITE)
     %A.mu = 1e9;         % liquid viscosity, Pa s (RHYOLITE)
     %A.mu = 1000;         % test vis a vis eric
     
@@ -133,7 +134,7 @@ CRYSTAL_GROWTH = false;
             theta_g = @(phi) 1 + phi;
         otherwise
             % Default to no phi dependence
-            theta_g = @(phi) 1;
+            theta_g = @(phi) ones(size(phi));
     end
     
     switch VISCOSITY_THETA_C_FLAG
@@ -144,7 +145,7 @@ CRYSTAL_GROWTH = false;
             B = 2.5;
             theta_c = @(xc) (1 - c1*erf(sqrt(pi)/2 * xc .* (1 + c2./(1-xc).^c3))).^-(B/c1);
         otherwise
-            theta_c = @(xc) 1;     
+            theta_c = @(xc) ones(size(xc));     
     end
     
    
@@ -154,7 +155,7 @@ CRYSTAL_GROWTH = false;
             A.mu = @(phi,p) mufunc(w(p)*100).*theta_g(phi).*theta_c(xc(p));
         case 'Whittington et al.'
             mufunc = @(w) 10.^(-4.43 + (7618.3 - 17.25*log10(w + 0.26))./(A.T - (406.1 - 292.6*log10(w + 0.26))));
-            A.mu =  @(phi,p) mufunc(w(p)).*theta_g(phi).*theta_c(xc(p));
+            A.mu =  @(phi,p) mufunc(w(p)*100).*theta_g(phi).*theta_c(xc(p));
         otherwise
             A.mu = @(phi,p) A.mu0.*theta_g(phi).*theta_c(xc(p));
     end

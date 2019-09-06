@@ -6,7 +6,7 @@ function [zvec,pvec,ugvec,umvec,phivec,rhogvec,chidvec,Qmvec,Qgvec,A] = incoodes
 %% First integrate until we reach p critical (where gas first exsolves)
 A.delF = 1; % Turns on/off mass transfer
 eos = eosf(A.delF);
-pcrit = A.Pcrit*0.99; % allow pressure to drop slightly below exsolution so that Qg ~= 0 (overpressure develops)
+pcrit = A.Pcrit*0.999; % allow pressure to drop slightly below exsolution so that Qg ~= 0 (overpressure develops)
 zspan = [-A.depth 0];
 options = odeset('Events',@ExsolutionDepth,'NormControl','on','RelTol',2.5e-14,'AbsTol',1e-17);
 y0 = [A.Pchamber];
@@ -69,7 +69,7 @@ end
 y0 = [p0 phi0 0]; % format is [p phi delta0];
 
 
-options = odeset('Events',@FragmentationDepth,'Mass',@mass, 'MStateDependence','strong', 'Stats', 'off', 'NormControl','off','RelTol',1e-3,'AbsTol',1e-4);
+options = odeset('Events',@FragmentationDepth,'Mass',@mass, 'MStateDependence','strong', 'Stats', 'off', 'NormControl','off','RelTol',1e-4,'AbsTol',1e-5);
 sol = ode15s(@(z,y) twophaseODE(z,y,A), zspan, y0, options);
 
 zfrag = sol.x'*C.rc;
@@ -119,7 +119,7 @@ else
     delF = 0;
     eos = eosf(A.delF);
     
-    options = odeset('Events',@RegimeChangeDepth,'Mass',@mass2, 'MStateDependence', 'strong',  'NormControl','off','RelTol',2.5e-8,'AbsTol',1e-9,'InitialStep',1e-6);
+    options = odeset('Events',@RegimeChangeDepth,'Mass',@mass2, 'MStateDependence', 'strong',  'NormControl','off','RelTol',2.5e-5,'AbsTol',1e-5,'InitialStep',1e-6);
 
     solext = ode15s(@(z,y) twophaseODE(z,y,A), zspan, sol.y(:,end), options);
     
@@ -157,7 +157,7 @@ else
         
         y0 = [p2e(nz)/C.p0 phi2e(nz) du2e(nz)/C.U0];
         
-        options = odeset('Events',@BlowUp, 'Mass',@mass2, 'MStateDependence', 'strong', 'NormControl','off','RelTol',2.5e-8,'AbsTol',1e-9,'InitialStep',1e-6);
+        options = odeset('Events',@BlowUp, 'Mass',@mass2, 'MStateDependence', 'strong', 'NormControl','off','RelTol',2.5e-5,'AbsTol',1e-5,'InitialStep',1e-6);
         %warning off MATLAB:ode15s:IntegrationTolNotMet
         [z3,y3] = ode15s(@(z,y) twophaseODE(z,y,A), zspan, y0, options);
         
@@ -205,12 +205,15 @@ end
         Gamma = (1-phi)/phi*(1-um/(ug*rhog*C.delta))*(A.hb*chid/(1-chid));
         
         gammat = 1 + alpha*(1-Gamma) + (1-phi)*um/p*(A.hb*chid/(1-chid))*du;
+        %gammat = 1 + alpha;
+
         
         md = -(alpha*p/ug + ug*rhog*phi*C.delta);
         
         qm = (1-phi)*um;
         
         gamma3 = (1/(rhog*ug)*1/C.delta - 1/(um) - 1/p*(um*(1-phi)/(rhog*phi)*1/C.delta + um)*(A.hb*chid/(1-chid)));
+        %gamma3 = (1/(rhog*ug)*1/C.delta - 1/(um));
         
         M = zeros(3,3);
         M(1,:) = [gam2, (ug/phi + um/(1-phi)), 1]; %mass balance

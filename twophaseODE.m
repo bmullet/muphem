@@ -82,7 +82,7 @@ dydz(3) = um*(1-phi)*(-1/A.C.Fr^2*(1/ug-1/um) + Fmw/(1-phi) - Fgw2/phi + lambda*
                 Fmg = Fmg2;
             end
             
-            
+%             
 %             if phi<A.phi0
 %                 Fmg = Fmg1;
 %             elseif (phi>=A.phi0) && (phi<pf)
