@@ -18,7 +18,7 @@ if (A.delF)
     Fmw = meltwallfriction();
     Fgw1 = 0; %CORRECT
     Fgw2 = 0;
-    
+    zeta = 1;
 else
     %above fragmentation depth
     Fmg = interphase();
@@ -26,15 +26,15 @@ else
     Fmw = 0; %CORRECT
     Fgw1 = gaswallfriction1();
     Fgw2 = gaswallfriction2();
-  
+    zeta = 1;
 end
 
 lambda = (1/(um*(1-phi)) + 1/(ug*phi*rhog*A.C.delta));
 %Set RHS of equations
 %dydz(1) = -G/(phi*rhog);
 dydz(1) = 0;
-dydz(2) = -1/A.C.Fr^2*(phi*rhog*A.C.delta + (1-phi)) - Fmw - Fgw1;
-dydz(3) = um*(1-phi)*(-1/A.C.Fr^2*(1/ug-1/um) + Fmw/(1-phi) - Fgw2/phi + lambda*Fmg);
+dydz(2) = -zeta*1/A.C.Fr^2*(phi*rhog*A.C.delta + (1-phi)) - Fmw - Fgw1;
+dydz(3) = um*(1-phi)*(-zeta*1/A.C.Fr^2*(1/ug-1/um) + Fmw/(1-phi) - Fgw2/phi + lambda*Fmg);
 
     function G = gasloss()
         % put gas loss function here
@@ -76,23 +76,23 @@ dydz(3) = um*(1-phi)*(-1/A.C.Fr^2*(1/ug-1/um) + Fmw/(1-phi) - Fgw2/phi + lambda*
           
             pf = A.phiforce;
             
-            if (A.delF)
-                Fmg = Fmg1;             
-            else
-                Fmg = Fmg2;
-            end
-            
-%             
-%             if phi<A.phi0
-%                 Fmg = Fmg1;
-%             elseif (phi>=A.phi0) && (phi<pf)
-%                 t = (phi-A.phi0)/(pf-A.phi0);
-%                 Fmg = -1*(abs(Fmg1))^(1-t)*(abs(Fmg2))^(t)*sign(ug-um);
-%             elseif phi>=pf
-%                 Fmg = Fmg2;
+%             if (A.delF)
+%                 Fmg = Fmg1;             
 %             else
-%                 Fmg=0;
-%             end                     
+%                 Fmg = Fmg2;
+%             end
+%             
+            
+            if phi<A.phi0
+                Fmg = Fmg1;
+            elseif (phi>=A.phi0) && (phi<pf)
+                t = (phi-A.phi0)/(pf-A.phi0);
+                Fmg = -1*(abs(Fmg1))^(1-t)*(abs(Fmg2))^(t)*sign(ug-um);
+            elseif phi>=pf
+                Fmg = Fmg2;
+            else
+                Fmg=0;
+            end                     
             
 
     end

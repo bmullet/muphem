@@ -115,11 +115,11 @@ if abs(max(zfrag)) <  1
     
 else
     % Did not reach surface, so keep going!
-    A.delF = 0;
-    delF = 0;
+    A.delF = 1;
+    delF = 1;
     eos = eosf(A.delF);
     
-    options = odeset('Events',@RegimeChangeDepth,'Mass',@mass2, 'MStateDependence', 'strong',  'NormControl','off','RelTol',2.5e-5,'AbsTol',1e-5,'InitialStep',1e-6);
+    options = odeset('Events',@RegimeChangeDepth,'Mass',@mass, 'MStateDependence', 'strong',  'NormControl','off','RelTol',2.5e-5,'AbsTol',1e-5,'InitialStep',1e-6);
 
     solext = ode15s(@(z,y) twophaseODE(z,y,A), zspan, sol.y(:,end), options);
     
@@ -152,7 +152,10 @@ else
         umvec = [um1; umfrag; um2e];    
         
     else
-    
+        A.delF = 0;
+        delF = 0;
+        eos = eosf(A.delF);
+        
         zspan = [zstart 0];
         
         y0 = [p2e(nz)/C.p0 phi2e(nz) du2e(nz)/C.U0];
@@ -206,7 +209,6 @@ end
         
         gammat = 1 + alpha*(1-Gamma) + (1-phi)*um/p*(A.hb*chid/(1-chid))*du;
         %gammat = 1 + alpha;
-
         
         md = -(alpha*p/ug + ug*rhog*phi*C.delta);
         
