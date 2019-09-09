@@ -30,7 +30,7 @@ um = (1 - A.hg)./(1 - chid) .* (um0)./(1-phi);
 
 
 function [ um ] = umofphif (A,phi,~)
-um = (1 - A.phi0)./( 1 - phi).*A.umf;
+um = (1 - A.phiforce)./( 1 - phi).*A.umf;
 
 % function [rhoha, c, phi] = eos1(A,P,phi)
 %     % Henry's Law
