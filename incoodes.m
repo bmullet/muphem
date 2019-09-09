@@ -35,7 +35,7 @@ C.rhom = A.rhom0;
 C.mu0 = A.mu0l;
 C.U0 = sqrt(C.p0/C.rhom);
 
-C.rhog0 = C.p0/(A.Rw*(A.T-273));
+C.rhog0 = C.p0/(A.Rw*(A.T));
 C.Re = C.rc*C.rhom*C.U0/C.mu0;
 C.Fr = C.U0/sqrt(C.rc*9.8);
 C.k10 = A.phi0^A.m*(A.ftb*A.rb0)^2/8;
