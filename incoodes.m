@@ -35,7 +35,7 @@ C.rhom = A.rhom0;
 C.mu0 = A.mu0l;
 C.U0 = sqrt(C.p0/C.rhom);
 
-C.rhog0 = C.p0/(A.Rw*A.T);
+C.rhog0 = C.p0/(A.Rw*(A.T-273));
 C.Re = C.rc*C.rhom*C.U0/C.mu0;
 C.Fr = C.U0/sqrt(C.rc*9.8);
 C.k10 = A.phi0^A.m*(A.ftb*A.rb0)^2/8;
@@ -69,7 +69,7 @@ end
 y0 = [p0 phi0 0]; % format is [p phi delta0];
 
 
-options = odeset('Events',@FragmentationDepth,'Mass',@mass, 'MStateDependence','strong', 'Stats', 'off', 'NormControl','off','RelTol',1e-4,'AbsTol',1e-5);
+options = odeset('Events',@FragmentationDepth,'Mass',@mass, 'MStateDependence','strong', 'Stats', 'off', 'NormControl','off','RelTol',1e-5,'AbsTol',1e-6);
 sol = ode15s(@(z,y) twophaseODE(z,y,A), zspan, y0, options);
 
 zfrag = sol.x'*C.rc;
@@ -97,7 +97,7 @@ zstart = zfrag(nz);
 A.fragdepth = zstart;
 zspan = [zstart 0]/C.rc;
 
-A.umf = umfrag(nz)/C.U0; % to be used for new phi calculation
+
 
 
 
@@ -119,7 +119,7 @@ else
     delF = 1;
     eos = eosf(A.delF);
     
-    options = odeset('Events',@RegimeChangeDepth,'Mass',@mass, 'MStateDependence', 'strong',  'NormControl','off','RelTol',2.5e-5,'AbsTol',1e-5,'InitialStep',1e-6);
+    options = odeset('Events',@RegimeChangeDepth,'Mass',@mass, 'MStateDependence', 'strong',  'NormControl','off','RelTol',2.5e-5,'AbsTol',1e-6,'InitialStep',1e-6);
 
     solext = ode15s(@(z,y) twophaseODE(z,y,A), zspan, sol.y(:,end), options);
     
@@ -152,6 +152,8 @@ else
         umvec = [um1; umfrag; um2e];    
         
     else
+        A.umf = um2e(nz)/C.U0; % to be used for new phi calculation
+        
         A.delF = 0;
         delF = 0;
         eos = eosf(A.delF);
@@ -160,7 +162,7 @@ else
         
         y0 = [p2e(nz)/C.p0 phi2e(nz) du2e(nz)/C.U0];
         
-        options = odeset('Events',@BlowUp, 'Mass',@mass2, 'MStateDependence', 'strong', 'NormControl','off','RelTol',2.5e-5,'AbsTol',1e-5,'InitialStep',1e-6);
+        options = odeset('Events',@BlowUp, 'Mass',@mass2, 'MStateDependence', 'strong', 'NormControl','off','RelTol',2.5e-5,'AbsTol',1e-6,'InitialStep',1e-6);
         %warning off MATLAB:ode15s:IntegrationTolNotMet
         [z3,y3] = ode15s(@(z,y) twophaseODE(z,y,A), zspan, y0, options);
         

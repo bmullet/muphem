@@ -30,6 +30,7 @@ CRYSTAL_GROWTH = false;
 
     
     % Henry's law constants
+    %A.hs = 4.1e-6;
     A.hs = 4.1e-6;
     A.hb = 0.5;
     A.hg = 0.046; %total volatile content
@@ -49,6 +50,7 @@ CRYSTAL_GROWTH = false;
     A.T = 1159;          % K (temperature of magma) (ANDESITE)
     %A.T = 1000;          % K (temperature of magma) (DACITE)
     %A.T = 900;          % K (temperature of magma) (RHYOLITE)
+    %A.T = 886;
     
     %A.mu = 100;         % liquid viscosity, Pa s (BASALT)    
     A.mu = 1e6;         % liquid viscosity, Pa s (ANDESITE)
@@ -58,6 +60,7 @@ CRYSTAL_GROWTH = false;
     
     %A.Rw = 455.59;       % J/kg-K Gas constant for water
     A.Rw = 461.4;
+    %A.Rw = 322;
     %A.Plam0 = 10e6;     % reference pressure (for melt density), Pa
     %A.Blam = 1e-10;     % melt compressibility, Pa^-1
     

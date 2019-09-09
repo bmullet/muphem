@@ -303,3 +303,10 @@ xlabel('Pressure (Pa)')
 set(gca,'Ydir','reverse')
 ylabel('depth (m)')
 
+figure
+loglog(p,phi);
+set(gca,'XScale','log')
+xlabel('Pressure (Pa)')
+ylabel('\phi')
+
+
