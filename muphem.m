@@ -9,8 +9,18 @@ function [ varargout ] = muphem( varargin )
 
 end
 
-function [ vargout ] = multiflow2(op,A)
-plot = true;
+function [ vargout ] = multiflow2(op,A,varargin)
+plot = false;
+
+if length(varargin) > 0
+    params = varargin{1};
+    A.depth = params.depth;
+    A.mu = @(phi,p) A.mu(phi,p)*params.visc_factor;
+    A.radius = params.radius;
+    A.T = params.T;
+    A.Pchamber = A.depth*9.8*2700;
+    disp(A)
+end
 
 % Perform shooting method via fzero
 %c0 = findc0(A); 
@@ -41,7 +51,7 @@ else
     disp('no failure')
 end
 
-plot_failure(zvec,pvec,phivec,A,Srr,Szz,Stt,Srz, Smax,Sfail)
+%plot_failure(zvec,pvec,phivec,A,Srr,Szz,Stt,Srz, Smax,Sfail)
 disp('Pressure at conduit exit:')
 disp(min(pvec));
 vargout = {A,zvec,pvec,ugvec,umvec,phivec,rhogvec,chidvec,Qmvec,Qgvec,failure,Sprincipal,slip,sigmavals};
