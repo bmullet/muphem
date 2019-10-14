@@ -78,8 +78,8 @@ xlim([1e5, 5e8]);
 
 %% Get one example to save as CSV
 load(['../multiphase_test/v0.03T1100.0r50.0d6000.0.mat']);
-        A = out{1}; zvec = out{2}; pvec = out{3}; ugvec = out{4}; umvec = out{5};
-        phivec = out{6}; rhogvec = out{7}; chidvec = out{8}; Qmvec = out{9}; Qgvec = out{10}; failure = out{11};
+A = out{1}; zvec = out{2}; pvec = out{3}; ugvec = out{4}; umvec = out{5};
+phivec = out{6}; rhogvec = out{7}; chidvec = out{8}; Qmvec = out{9}; Qgvec = out{10}; failure = out{11};
         
         lithvec = -(.25/(1-.25))*zvec*2700*9.8;
         

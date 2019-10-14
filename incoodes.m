@@ -12,18 +12,37 @@ options = odeset('Events',@ExsolutionDepth,'NormControl','on','RelTol',2.5e-14,'
 y0 = [A.Pchamber];
 u0 = A.v_chamber_i;
 
-if A.Pchamber < pcrit
-    error('pcrit < A.pchamber!')
+if A.Pchamber > pcrit
+
+    [z1,y1,ze,ze,ze] = ode45(@(z,y) singlephaseODE(z,y,u0,A),zspan,y0,options);
+    p1 = y1(:,1); um1=u0*ones(size(z1)); ug1 = um1;
+    phivec = zeros(size(z1));
+    rhogvec = zeros(size(z1));
+    chidvec = zeros(size(z1));
+    Qmvec = A.rhom0*u0*ones(size(z1));
+    Qgvec = zeros(size(z1));
+    nz = length(z1);
+    zstart = z1(nz)/A.r; A.exdepth = zstart;
+    zspan = [zstart 0];
+    p0 = y1(nz)/A.Pchamber; % new p0 = (should be pcrit)
+
+else
+
+    phivec = [];
+    rhogvec = [];
+    chidvec = [];
+    Qmvec = [];
+    Qgvec = [];
+    um1=[];
+    ug1=[];
+    p1=[];
+
+    zstart = -A.depth/A.r; A.exdepth = zstart;
+    zspan = [zstart 0];
+    p0 = 1; 
+    z1 = [];
+    
 end
-
-[z1,y1,ze,ze,ze] = ode45(@(z,y) singlephaseODE(z,y,u0,A),zspan,y0,options);
-p1 = y1(:,1); um1=u0*ones(size(z1)); ug1 = um1;
-phivec = zeros(size(z1));
-rhogvec = zeros(size(z1));
-chidvec = zeros(size(z1));
-Qmvec = A.rhom0*u0*ones(size(z1));
-Qgvec = zeros(size(z1));
-
 %% Now integrate to fragmentation depth using two phase model
 % Non-dimensionalize
 
@@ -35,7 +54,7 @@ C.rhom = A.rhom0;
 C.mu0 = A.mu0l;
 C.U0 = sqrt(C.p0/C.rhom);
 
-C.rhog0 = C.p0/(A.Rw*(A.T));
+C.rhog0 = C.p0/(A.Rw*(A.T-273));
 C.Re = C.rc*C.rhom*C.U0/C.mu0;
 C.Fr = C.U0/sqrt(C.rc*9.8);
 C.k10 = A.phi0^A.m*(A.ftb*A.rb0)^2/8;
@@ -49,13 +68,6 @@ u0 = u0/C.U0;
 
 delF = 1; % Turns on/off mass transfer
 eos = eosf(A.delF);
-
-nz = length(z1);
-
-zstart = z1(nz)/C.rc; A.exdepth = zstart;
-zspan = [zstart 0];
-
-p0 = y1(nz)/C.p0; % new p0 = (should be pcrit)
 
 phi0 = fzero(@(phi) exslvphi(phi,u0,p0), 0); % Find phi0
 

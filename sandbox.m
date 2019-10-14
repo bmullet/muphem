@@ -381,5 +381,15 @@ for i = 1:length(v)
 end
 
 %% Distribute solution
-    A = out{1}; zvec = out{2}; pvec = out{3}; ugvec = out{4}; umvec = out{5};
+A = out{1}; zvec = out{2}; pvec = out{3}; ugvec = out{4}; umvec = out{5};
 phivec = out{6}; rhogvec = out{7}; chidvec = out{8}; Qmvec = out{9}; Qgvec = out{10}; failure = out{11};
+
+%% Do MSH_Degruyter test
+semilogx(pvz(:,1),pvz(:,2),'or')
+set(gca,'YDir','Reverse')
+ylabel('Depth (z)')
+xlabel('Pressure (Pa)')
+hold on;
+semilogx(pvec,-zvec,'-b')
+legend('From Degruyter (2012)', 'My implementation')
+
