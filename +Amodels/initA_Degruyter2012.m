@@ -33,7 +33,7 @@ CRYSTAL_GROWTH = false;
     %A.hs = 4.1e-6;
     A.hs = 4.1e-6;
     A.hb = 0.5;
-    A.hg = 0.046; %total volatile content
+    A.hg = 0.046*.6; %total volatile content
     A.Pcrit = (A.hg/A.hs)^(1/A.hb);   % Pcrit is pressure when volatiles first exsolve
     
     %A.lam = 1-A.hg; % melt mass fraction (1-total volatile mass fraction)
@@ -82,8 +82,8 @@ CRYSTAL_GROWTH = false;
     
     % Fragmentation
     A.f0 = 0.0075;  % Darcy-Weisbach friction factor
-    A.phi0 = .80; % critical gas volume fraction for fragmentation
-    A.phiforce = .85; % start of transition period (should be less than phi0)
+    A.phi0 = .78; % critical gas volume fraction for fragmentation
+    A.phiforce = .80; % start of transition period (should be less than phi0)
     %A.mug = 1e-5; % gas viscosity
     A.mug = 1.5e-2; % gas viscosity
     A.Rash = 0.001; % ash radius
@@ -116,7 +116,10 @@ CRYSTAL_GROWTH = false;
     w = @(p) min(A.hg, A.hs*p.^A.hb);
     
     xc0 = 0.4; % Crystal content
-    xcmax = 0.6;
+    xcmax = 0.4;
+%     xc0 = 0.0;
+%     xcmax = 0.0;
+    
     
     if CRYSTAL_GROWTH
         xc = @(p) min(xcmax, xc0 + 0.55*(0.58815*(p/1e6).^(-0.5226)));
