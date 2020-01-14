@@ -2,6 +2,7 @@ function [zvec,pvec,ugvec,umvec,phivec,rhogvec,chidvec,Qmvec,Qgvec,A] = incoodes
 %INCOODES: (In)tegrate (Co)nduit (ODEs)
 %   Integrates conduit ODEs from base of conduit (z=-A.depth) to top of
 %   conduit (z=0)
+%
 
 %% First integrate until we reach p critical (where gas first exsolves)
 A.delF = 1; % Turns on/off mass transfer
@@ -108,10 +109,6 @@ nz = length(zfrag);
 zstart = zfrag(nz);
 A.fragdepth = zstart;
 zspan = [zstart 0]/C.rc;
-
-
-
-
 
 
 % Do fragmentation depth to surface integration, if needed
