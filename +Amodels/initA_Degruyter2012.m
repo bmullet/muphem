@@ -117,6 +117,10 @@ CRYSTAL_GROWTH = false;
     
     xc0 = 0.4; % Crystal content
     xcmax = 0.4;
+    A.xcmax = xcmax;
+    A.xcexp = -0.5226;
+    
+    
 %     xc0 = 0.0;
 %     xcmax = 0.0;
     
@@ -126,6 +130,7 @@ CRYSTAL_GROWTH = false;
     else
         xc = @(p) xc0;
     end
+    A.xc = xc;
     
     switch VISCOSITY_THETA_G_FLAG
         case 'Bagdassarove-Dingwell'

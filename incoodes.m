@@ -212,20 +212,23 @@ end
         ug = du + um;
         rhog = eos.rhogofp(A,p);
         rhom = A.rhom0;
+        beta = eos.calcbeta(A,p);
         
 
         alpha = -1/p*((1-phi)*um + phi*ug*rhog*C.delta)/(1/ug + (1-phi)/phi*1/um);
-        gam2 = 1/p*(ug + um*((1-phi)*rhom/(rhog*phi*(C.rhog0)) + 1)*(A.hb*chid/(1-chid)));
-        Gamma = (1-phi)/phi*(1-um/(ug*rhog*C.delta))*(A.hb*chid/(1-chid));
         
-        gammat = 1 + alpha*(1-Gamma) + (1-phi)*um/p*(A.hb*chid/(1-chid))*du;
+        gam2 = (1/p*ug - um*((1-phi)*rhom/(rhog*phi*(C.rhog0)) + 1)*(beta));
+        
+        Gamma = (1-phi)/phi*(1-um/(ug*rhog*C.delta))*(beta);
+        
+        gammat = 1 + alpha*(1-p*Gamma) + (1-phi)*um*beta*du;
         %gammat = 1 + alpha;
         
         md = -(alpha*p/ug + ug*rhog*phi*C.delta);
         
         qm = (1-phi)*um;
         
-        gamma3 = (1/(rhog*ug)*1/C.delta - 1/(um) - 1/p*(um*(1-phi)/(rhog*phi)*1/C.delta + um)*(A.hb*chid/(1-chid)));
+        gamma3 = (1/(rhog*ug)*1/C.delta - 1/(um) - (um*(1-phi)/(rhog*phi)*1/C.delta + um)*beta);
         %gamma3 = (1/(rhog*ug)*1/C.delta - 1/(um));
         
         M = zeros(3,3);
