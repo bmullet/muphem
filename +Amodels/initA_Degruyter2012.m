@@ -24,16 +24,16 @@ CRYSTAL_GROWTH = false;
     %A.Bchm = 1e-7;       % Chamber compressibility (sill)
     A.Vchm = 3e10;        % Chamber volume
     A.nb = 1e15;        % Bubble concentration
-    A.Pchamber = 140000000; % Chamber pressure (Pa)
+    A.Pchamber = 134814680; % Chamber pressure (Pa)
     A.gamma = 1.29;
     
 
     
     % Henry's law constants
     %A.hs = 4.1e-6;
-    A.hs = 4.1e-6;
+    A.hs = 4.11e-6;
     A.hb = 0.5;
-    A.hg = 0.046*.6; %total volatile content
+    A.hg = 0.046; %total volatile content
     A.Pcrit = (A.hg/A.hs)^(1/A.hb);   % Pcrit is pressure when volatiles first exsolve
     
     %A.lam = 1-A.hg; % melt mass fraction (1-total volatile mass fraction)
@@ -85,7 +85,7 @@ CRYSTAL_GROWTH = false;
     A.phi0 = .78; % critical gas volume fraction for fragmentation
     A.phiforce = .80; % start of transition period (should be less than phi0)
     %A.mug = 1e-5; % gas viscosity
-    A.mug = 1.5e-2; % gas viscosity
+    A.mug = 1e-5; % gas viscosity
     A.Rash = 0.001; % ash radius
     A.dragC = 0.8; % drag coefficient
     
@@ -115,8 +115,8 @@ CRYSTAL_GROWTH = false;
     % Henry's law
     w = @(p) min(A.hg, A.hs*p.^A.hb);
     
-    xc0 = 0.4; % Crystal content
-    xcmax = 0.4;
+    xc0 = 0.0; % Crystal content
+    xcmax = 0.0;
     A.xcmax = xcmax;
     A.xcexp = -0.5226;
     
@@ -128,7 +128,7 @@ CRYSTAL_GROWTH = false;
     if CRYSTAL_GROWTH
         xc = @(p) min(xcmax, xc0 + 0.55*(0.58815*(p/1e6).^(-0.5226)));
     else
-        xc = @(p) xc0;
+        xc = @(p) xc0*ones(size(p));
     end
     A.xc = xc;
     
@@ -155,6 +155,7 @@ CRYSTAL_GROWTH = false;
             c3 = 1;
             B = 2.5;
             theta_c = @(xc) (1 - c1*erf(sqrt(pi)/2 * xc .* (1 + c2./(1-xc).^c3))).^-(B/c1);
+            disp('Costa!')
         otherwise
             theta_c = @(xc) ones(size(xc));     
     end

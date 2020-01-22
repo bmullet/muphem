@@ -13,7 +13,7 @@ function [ rhog, chi_d, um ] = calcvars(A,phi,p)
 rhog = rhogofp(A,p);
 chi_d = chidofp(A,p);
 if (A.delF)
-    um = umofphi(A,phi,chi_d);
+    um = umofphi(A,phi,chi_d,p);
 else
     um = umofphif(A,phi);
 end
@@ -35,10 +35,19 @@ if (chi_c ~= 0) && (chi_c ~= A.xcmax)
 end
 beta = 1 / (chi_d - chi_c * chi_d + 1) * ((1-chi_c)*dxddp - chi_d * (dxcdp));
 
-function [ um ] = umofphi (A,phi,chid)
-um0 = A.v_chamber_i/A.C.U0;
-um = (1 - A.hg)./(1 - chid) .* (um0)./(1-phi);
+function [ um ] = umofphi (A,phi,chid,p)
 
+xc1 = A.xc(A.Pchamber);
+xc2 = A.xc(p * A.Pchamber);
+
+um0 = A.v_chamber_i/A.C.U0;
+gamma1 = gamma(A.hg, xc1);
+gamma2 = gamma(chid, xc2);
+
+um = (1 - gamma1)./(1 - gamma2) .* (um0)./(1-phi);
+
+function [ gamma ] = gamma( chid, chic )
+gamma = chid .* (1 - chic) ./ ((chid .* (1 - chic) + 1));
 
 function [ um ] = umofphif (A,phi,~)
 um = (1 - A.phiforce)./( 1 - phi).*A.umf;

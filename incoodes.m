@@ -4,6 +4,8 @@ function [zvec,pvec,ugvec,umvec,phivec,rhogvec,chidvec,Qmvec,Qgvec,A] = incoodes
 %   conduit (z=0)
 %
 
+debug = true;
+
 %% First integrate until we reach p critical (where gas first exsolves)
 A.delF = 1; % Turns on/off mass transfer
 eos = eosf(A.delF);
@@ -23,9 +25,10 @@ if A.Pchamber > pcrit
     Qmvec = A.rhom0*u0*ones(size(z1));
     Qgvec = zeros(size(z1));
     nz = length(z1);
-    zstart = z1(nz)/A.r; A.exdepth = zstart;
+    zstart = z1(nz)/A.r; A.exdepth = zstart*A.r;
     zspan = [zstart 0];
     p0 = y1(nz)/A.Pchamber; % new p0 = (should be pcrit)
+ 
 
 else
 
@@ -82,7 +85,7 @@ end
 y0 = [p0 phi0 0]; % format is [p phi delta0];
 
 
-options = odeset('Events',@FragmentationDepth,'Mass',@mass, 'MStateDependence','strong', 'Stats', 'off', 'NormControl','off','RelTol',1e-5,'AbsTol',1e-6);
+options = odeset('Events',@FragmentationDepth,'Mass',@mass, 'MStateDependence','strong', 'Stats', 'off', 'NormControl','off','RelTol',1e-8,'AbsTol',1e-9);
 sol = ode15s(@(z,y) twophaseODE(z,y,A), zspan, y0, options);
 
 zfrag = sol.x'*C.rc;
@@ -198,6 +201,13 @@ else
         ugvec = [ug1; ugfrag; ug2e; ug3];
         umvec = [um1; umfrag; um2e; um3];
     end
+    
+end
+
+if (debug)
+       fprintf('Ex depth = %.2f\n', A.exdepth);    
+       fprintf('frag depth = %.2f\n', A.fragdepth); 
+       
 end
 
     function resid = exslvphi(phitest,u0,p)
@@ -208,7 +218,7 @@ end
     function M = mass(~,y)
         p = y(1); phi = y(2); du = y(3); 
         chid = eos.chidofp(A,p); 
-        um = eos.calcum(A,phi,chid);
+        um = eos.calcum(A,phi,chid,p);
         ug = du + um;
         rhog = eos.rhogofp(A,p);
         rhom = A.rhom0;
@@ -217,19 +227,17 @@ end
 
         alpha = -1/p*((1-phi)*um + phi*ug*rhog*C.delta)/(1/ug + (1-phi)/phi*1/um);
         
-        gam2 = (1/p*ug - um*((1-phi)*rhom/(rhog*phi*(C.rhog0)) + 1)*(beta));
+        gam2 = (1/p*ug + um*((1-phi)*rhom/(rhog*phi*(C.rhog0)) + 1)*(beta));
         
         Gamma = (1-phi)/phi*(1-um/(ug*rhog*C.delta))*(beta);
         
         gammat = 1 + alpha*(1-p*Gamma) + (1-phi)*um*beta*du;
-        %gammat = 1 + alpha;
         
         md = -(alpha*p/ug + ug*rhog*phi*C.delta);
         
         qm = (1-phi)*um;
         
         gamma3 = (1/(rhog*ug)*1/C.delta - 1/(um) - (um*(1-phi)/(rhog*phi)*1/C.delta + um)*beta);
-        %gamma3 = (1/(rhog*ug)*1/C.delta - 1/(um));
         
         M = zeros(3,3);
         M(1,:) = [gam2, (ug/phi + um/(1-phi)), 1]; %mass balance
