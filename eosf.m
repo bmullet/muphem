@@ -50,7 +50,7 @@ function [ gamma ] = gamma( chid, chic )
 gamma = chid .* (1 - chic) ./ ((chid .* (1 - chic) + 1));
 
 function [ um ] = umofphif (A,phi,~)
-um = (1 - A.phiforce)./( 1 - phi).*A.umf;
+um = (1 - A.phi0)./( 1 - phi).*A.umf;
 
 % function [rhoha, c, phi] = eos1(A,P,phi)
 %     % Henry's Law

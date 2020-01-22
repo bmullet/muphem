@@ -127,11 +127,12 @@ if abs(max(zfrag)) <  1
     
 else
     % Did not reach surface, so keep going!
-    A.delF = 1;
-    delF = 1;
+    A.umf = umfrag(end)/C.U0; % to be used for new phi calculation
+    A.delF = 0;
+    delF = 0;
     eos = eosf(A.delF);
     
-    options = odeset('Events',@RegimeChangeDepth,'Mass',@mass, 'MStateDependence', 'strong',  'NormControl','off','RelTol',2.5e-5,'AbsTol',1e-6,'InitialStep',1e-6);
+    options = odeset('Events',@RegimeChangeDepth,'Mass',@mass2, 'MStateDependence', 'strong',  'NormControl','off','RelTol',2.5e-5,'AbsTol',1e-6,'InitialStep',1e-6);
 
     solext = ode15s(@(z,y) twophaseODE(z,y,A), zspan, sol.y(:,end), options);
     
@@ -164,7 +165,7 @@ else
         umvec = [um1; umfrag; um2e];    
         
     else
-        A.umf = um2e(nz)/C.U0; % to be used for new phi calculation
+
         
         A.delF = 0;
         delF = 0;

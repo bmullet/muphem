@@ -16,14 +16,14 @@ if (A.delF)
     Fmg = interphase();
     G = 0;
     Fmw = meltwallfriction();
-    Fgw1 = 0; %CORRECT
+    Fgw1 = 0; 
     Fgw2 = 0;
     zeta = 1;
 else
     %above fragmentation depth
     Fmg = interphase();
     G = gasloss();
-    Fmw = 0; %CORRECT
+    Fmw = 0;
     Fgw1 = gaswallfriction1();
     Fgw2 = gaswallfriction2();
     zeta = 1;
