@@ -15,19 +15,19 @@ plot = true;
 if length(varargin) > 0
     params = varargin{1};
     A.depth = params.depth;
-    A.mu = @(phi,p) A.mu(phi,p)*params.visc_factor;
+    A.xc0 = params.xc;
     A.radius = params.radius;
     A.T = params.T;
     A.Pchamber = A.depth*9.8*2700;
-    disp(A)
+    A = Amodels.initA_Degruyter2012(A); % rebuild functions
 end
 
 % Perform shooting method via fzero
 %c0 = findc0(A); 
 % %A.c0 = c0;
-vbounds = [10];            % Set upper boundary at 10% speed of sound at critical pressure       
+vbounds = [5];            % Set upper boundary at 10% speed of sound at critical pressure       
 v_fzero = fzero(@(v) matchPatm(v,A),vbounds,optimset('Display','iter'));
-
+%v_fzero = 4.6;
 A.v_chamber_i = v_fzero;
 
 % Collect Solution

@@ -9,7 +9,7 @@ debug = true;
 %% First integrate until we reach p critical (where gas first exsolves)
 A.delF = 1; % Turns on/off mass transfer
 eos = eosf(A.delF);
-pcrit = A.Pcrit*0.999; % allow pressure to drop slightly below exsolution so that Qg ~= 0 (overpressure develops)
+pcrit = A.Pcrit*0.99; % allow pressure to drop slightly below exsolution so that Qg ~= 0 (overpressure develops)
 zspan = [-A.depth 0];
 options = odeset('Events',@ExsolutionDepth,'NormControl','on','RelTol',2.5e-14,'AbsTol',1e-17);
 y0 = [A.Pchamber];
@@ -85,7 +85,7 @@ end
 y0 = [p0 phi0 0]; % format is [p phi delta0];
 
 
-options = odeset('Events',@FragmentationDepth,'Mass',@mass, 'MStateDependence','strong', 'Stats', 'off', 'NormControl','off','RelTol',1e-8,'AbsTol',1e-9);
+options = odeset('Events',@FragmentationDepth,'Mass',@mass, 'MStateDependence','strong', 'Stats', 'off', 'NormControl','off','RelTol',1e-5,'AbsTol',1e-6);
 sol = ode15s(@(z,y) twophaseODE(z,y,A), zspan, y0, options);
 
 zfrag = sol.x'*C.rc;

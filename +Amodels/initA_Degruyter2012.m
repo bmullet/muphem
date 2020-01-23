@@ -1,6 +1,7 @@
 function [A] = initA(A)
 %% USED FOR FAILURE MODELS
 
+
 %INITA Sets up struct A with constants and containers
 % MODEL FLAGS (used to quickly change model)
 %VISCOSITY_MODEL_FLAG = 'Hess and Dingwell';
@@ -11,6 +12,9 @@ VISCOSITY_THETA_G_FLAG = 'None';
 VISCOSITY_THETA_C_FLAG = 'Costa';
 %VISCOSITY_THETA_C_FLAG = 'None';
 CRYSTAL_GROWTH = false;
+
+if (~exist('A'))
+    % set up new struct
 
     A.useForchheimer = true;
 
@@ -112,25 +116,25 @@ CRYSTAL_GROWTH = false;
      
     A.mu0 = A.mu;
     
-    % Henry's law
-    w = @(p) min(A.hg, A.hs*p.^A.hb);
+
     
-    xc0 = 0.0; % Crystal content
-    xcmax = 0.0;
+    xc0 = 0.30; % Crystal content
+    xcmax = 0.30;
     A.xcmax = xcmax;
+    A.xc0 = xc0;
     A.xcexp = -0.5226;
     
+end
+    % now re-build functions
     
-%     xc0 = 0.0;
-%     xcmax = 0.0;
-    
-    
+    % Henry's law
+    w = @(p) min(A.hg, A.hs*p.^A.hb);
+
     if CRYSTAL_GROWTH
-        xc = @(p) min(xcmax, xc0 + 0.55*(0.58815*(p/1e6).^(-0.5226)));
+        A.xc = @(p) min(A.xcmax, A.xc0 + 0.55*(0.58815*(p/1e6).^(-0.5226)));
     else
-        xc = @(p) xc0*ones(size(p));
+        A.xc = @(p) A.xc0*ones(size(p));
     end
-    A.xc = xc;
     
     switch VISCOSITY_THETA_G_FLAG
         case 'Bagdassarove-Dingwell'
@@ -164,17 +168,16 @@ CRYSTAL_GROWTH = false;
     switch VISCOSITY_MODEL_FLAG
         case 'Hess and Dingwell'
             mufunc = @(w) 10.^(-3.545 + 0.833*log(w) + (9601 - 2368*log(w))./(A.T - (195.7 + 32.25*log(w))));
-            A.mu = @(phi,p) mufunc(w(p)*100).*theta_g(phi).*theta_c(xc(p));
+            A.mu = @(phi,p) mufunc(w(p)*100).*theta_g(phi).*theta_c(A.xc(p));
         case 'Whittington et al.'
             mufunc = @(w) 10.^(-4.43 + (7618.3 - 17.25*log10(w + 0.26))./(A.T - (406.1 - 292.6*log10(w + 0.26))));
-            A.mu =  @(phi,p) mufunc(w(p)*100).*theta_g(phi).*theta_c(xc(p));
+            A.mu =  @(phi,p) mufunc(w(p)*100).*theta_g(phi).*theta_c(A.xc(p));
         otherwise
-            A.mu = @(phi,p) A.mu0.*theta_g(phi).*theta_c(xc(p));
+            A.mu = @(phi,p) A.mu0.*theta_g(phi).*theta_c(A.xc(p));
     end
     
-      A.mu0l = A.mu(0,A.Pchamber);
+    A.mu0l = A.mu(0,A.Pchamber);
     
     
    
 end
-

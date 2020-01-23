@@ -22,7 +22,7 @@ for i=1:length(jsons)
         % Save output
         output_name = [input_json(1:end-5) '.mat'];
         save(output_name, 'out');
-    catch
+        catchcd
     end
 
 end
