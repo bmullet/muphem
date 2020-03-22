@@ -80,8 +80,7 @@ dydz(3) = um*(1-phi)*(-zeta*1/A.C.Fr^2*(1/ug-1/um) + Fmw/(1-phi) - Fgw2/phi + la
 %                 Fmg = Fmg1;             
 %             else
 %                 Fmg = Fmg2;
-%             end
-%             
+%             end             
             
             if phi<A.phi0
                 Fmg = Fmg1;
@@ -93,8 +92,7 @@ dydz(3) = um*(1-phi)*(-zeta*1/A.C.Fr^2*(1/ug-1/um) + Fmw/(1-phi) - Fgw2/phi + la
             else
                 Fmg=0;
             end                     
-            
-
+                
     end
 
     function Fmw = meltwallfriction()

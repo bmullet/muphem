@@ -19,6 +19,8 @@ if (~exist('A'))
     A.useForchheimer = true;
 
     % Set some constants and containers
+    A.lambda = 0.5;
+    A.chamber_fac = 0.7;
     A.Patm_ = 1.013e5;     % pascals
     A.vchamber_ = [];
     A.Ptop_ = [];
@@ -28,10 +30,10 @@ if (~exist('A'))
     %A.Bchm = 1e-7;       % Chamber compressibility (sill)
     A.Vchm = 3e10;        % Chamber volume
     A.nb = 1e15;        % Bubble concentration
-    A.Pchamber = 134814680; % Chamber pressure (Pa)
+
+    
     A.gamma = 1.29;
     
-
     
     % Henry's law constants
     %A.hs = 4.1e-6;
@@ -46,9 +48,13 @@ if (~exist('A'))
     %A.rhom0 = 2500;   % kg/m^3 (reference density of melt) (ANDESITE)
     %A.rhom0 = 2700;   % kg/m^3 (reference density of melt) (BASALT)
     %A.rhohc = 741;      % kg/m^3 (density of dissolved volatiles)
-    A.rhom0 = 2500; % test vis a vis koyaguchi
+    %A.rhom0 = 2500; % test vis a vis koyaguchi
+    A.rhom0 = 2600; % test vis a vis koyaguchi
     
     A.g = 9.81;         % N/kg (force/mass for gravity)
+    %A.Pchamber = 134814680; % Chamber pressure (Pa)
+    A.Pchamber = A.depth*A.g*A.rhom0*A.chamber_fac; % Chamber pressure (Pa)
+    
     
     %A.T = 1200;         % K (temperature of magma) (BASALT)
     A.T = 1159;          % K (temperature of magma) (ANDESITE)
@@ -87,7 +93,7 @@ if (~exist('A'))
     % Fragmentation
     A.f0 = 0.0075;  % Darcy-Weisbach friction factor
     A.phi0 = .80; % critical gas volume fraction for fragmentation
-    A.phiforce = .85; % start of transition period (should be less than phi0)
+    A.phiforce = .801; % start of transition period (should be less than phi0)
     %A.mug = 1e-5; % gas viscosity
     A.mug = 1e-5; % gas viscosity
     A.Rash = 0.001; % ash radius
