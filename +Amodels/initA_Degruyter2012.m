@@ -48,12 +48,13 @@ if (~exist('A'))
     %A.rhom0 = 2500;   % kg/m^3 (reference density of melt) (ANDESITE)
     %A.rhom0 = 2700;   % kg/m^3 (reference density of melt) (BASALT)
     %A.rhohc = 741;      % kg/m^3 (density of dissolved volatiles)
-    %A.rhom0 = 2500; % test vis a vis koyaguchi
-    A.rhom0 = 2600; % test vis a vis koyaguchi
+    A.rhom0 = 2500; % test vis a vis koyaguchi
+    %A.rhom0 = 2600; % test vis a vis koyaguchi
     
     A.g = 9.81;         % N/kg (force/mass for gravity)
-    %A.Pchamber = 134814680; % Chamber pressure (Pa)
-    A.Pchamber = A.depth*A.g*A.rhom0*A.chamber_fac; % Chamber pressure (Pa)
+    A.Pchamber = 134814680; % Chamber pressure (Pa)
+    %A.Pchamber = 140e6;
+    %A.Pchamber = A.depth*A.g*A.rhom0*A.chamber_fac; % Chamber pressure (Pa)
     
     
     %A.T = 1200;         % K (temperature of magma) (BASALT)
@@ -93,7 +94,7 @@ if (~exist('A'))
     % Fragmentation
     A.f0 = 0.0075;  % Darcy-Weisbach friction factor
     A.phi0 = .80; % critical gas volume fraction for fragmentation
-    A.phiforce = .801; % start of transition period (should be less than phi0)
+    A.phiforce = .85; % start of transition period (should be less than phi0)
     %A.mug = 1e-5; % gas viscosity
     A.mug = 1e-5; % gas viscosity
     A.Rash = 0.001; % ash radius
@@ -124,8 +125,8 @@ if (~exist('A'))
     
 
     
-    xc0 = 0.30; % Crystal content
-    xcmax = 0.30;
+    xc0 = 0.40; % Crystal content
+    xcmax = 0.40;
     A.xcmax = xcmax;
     A.xc0 = xc0;
     A.xcexp = -0.5226;
