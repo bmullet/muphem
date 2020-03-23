@@ -45,6 +45,8 @@ end
 % Plot slip directions
 slip = plotslipsurfaces(zvec,Sprincipal,A,plot);
 
+plotfailureprofiles(A,Srr,Szz,Stt,Srz,zvec,pvec);
+
 if (failure)
     disp('we have a failure!')
 else
