@@ -226,14 +226,23 @@ set(ht,'FontSize',20)
 
 set(0,'defaultFigurePosition', [defpos(1) defpos(2) width*100, height*100]);
 
-clrs = parula(3);
-s = 0:0.01:1;
-fades = [0.25, 1]; % fade factor
-taus = [0.0, 0.75];
 
-fail_rz = @(p,tau,c,q)   .5*(p+1+((p-1)^2 + 4*(tau*p)^2)^0.5) - c - q*0.5*(p+1-((p-1)^2 + 4*(tau*p)^2)^0.5);
-fail_rt = @(p,s,tau,c,q) - 2*s + p + c + q*0.5*(p + 1 - ((p-1)^2 + 4*(tau*p)^2)^.5);
-fail_tz = @(p,s,tau,c,q) 0.5*(p + 1 + ((p-1)^2 + 4*(tau*p)^2)^.5) - c - q*(2*s-p);
+tau_flag = 'sigz'; % Can be 'p' or 'sigz' for how to normalize
+
+clrs = parula(3);
+s = 0.05:0.01:1;
+fades = [0.25, 1]; % fade factor
+taus = [0.0, 0.4];
+
+if tau_flag == 'p'
+ fail_rz = @(p,tau,c,q)   .5*(p+1+((p-1)^2 + 4*(tau*p)^2)^0.5) - c - q*0.5*(p+1-((p-1)^2 + 4*(tau*p)^2)^0.5);
+ fail_rt = @(p,s,tau,c,q) - 2*s + p + c + q*0.5*(p + 1 - ((p-1)^2 + 4*(tau*p)^2)^.5);
+ fail_tz = @(p,s,tau,c,q) 0.5*(p + 1 + ((p-1)^2 + 4*(tau*p)^2)^.5) - c - q*(2*s-p);
+else
+ fail_rz = @(p,tau,c,q)   .5*(p+1+((p-1)^2 + 4*(tau)^2)^0.5) - c - q*0.5*(p+1-((p-1)^2 + 4*(tau)^2)^0.5);
+ fail_rt = @(p,s,tau,c,q) - 2*s + p + c + q*0.5*(p + 1 - ((p-1)^2 + 4*(tau)^2)^.5);
+ fail_tz = @(p,s,tau,c,q) 0.5*(p + 1 + ((p-1)^2 + 4*(tau)^2)^.5) - c - q*(2*s-p);
+end
 
 c = 0;
 phi = 38/180*pi;
@@ -302,21 +311,29 @@ end
 
 %figure
 
-bound_rt = @(p,s,tau) p*(3*s-p-1) - (s*(2*s-1) - 1/2*(tau)^2);
-bound_rz = @(p,s,tau) (4*s-3*p-1)^2 - ((p-1)^2 + 4*tau^2);
+if tau_flag == 'sigz'
+%bound_rt = @(p,s,tau) p*(3*s-p-1) - (s*(2*s-1) - 1/2*(tau)^2);
+bound_rt = @(p,s,tau) 2*s - p - (1/2*(1+p) - sqrt((1/2*(p-1))^2 + (tau)^2));
+%bound_rz = @(p,s,tau) (4*s-3*p-1)^2 - ((p-1)^2 + 4*(tau)^2);
+bound_rz = @(p,s,tau) 2*s - p - (1/2*(1+p) + sqrt((1/2*(p-1))^2 + (tau)^2));
+else
+   
+bound_rt = @(p,s,tau) 2*s - p - (1/2*(1+p) - sqrt((1/2*(p-1))^2 + (tau*p)^2));
+bound_rz = @(p,s,tau) 2*s - p - (1/2*(1+p) + sqrt((1/2*(p-1))^2 + (tau*p)^2));
+end
 
 
 prt = nan(size(s));
-prz = nan(size(s));
+pzt = nan(size(s));
 
 for i = 1:length(s)
-   prt(i) = fzero(@(x) bound_rt(x,s(i),tau*x),s(i)+tau);
-   prz(i) = fzero(@(x) bound_rz(x,s(i),tau*x),2*s(i) - 1-tau);
+   prt(i) = fzero(@(x) bound_rt(x,s(i),tau),s(i)+tau);
+   pzt(i) = fzero(@(x) bound_rz(x,s(i),tau),2*s(i) - 1-tau);
 end
 
 p1 = plot(s,prt,'Color', clrs(1,:), 'LineStyle', '-'); hold on
 p1.Color(4) = fade;
-p1 = plot(s,prz,'Color', clrs(2,:), 'LineStyle', '-');
+p1 = plot(s,pzt,'Color', clrs(2,:), 'LineStyle', '-');
 p1.Color(4) = fade;
 ylim([0,1])
 xlim([0,1])
