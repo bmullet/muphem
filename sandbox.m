@@ -721,6 +721,12 @@ semilogy(c,abs(ts)); hold on;
 xlabel('c/\sigma_{zz}')
 ylabel('\tau^*')
 
+%% calculate the SRF
+lambda = 0.5;
+phi = 30*pi/180;
+
+SRF = tan(phi)/(tan(2*(atan(sqrt(1/lambda))-pi/4)))
+
 %% Aiy-Corona
 
-SantaClara = [7, 9, 11, 14, 20, 24, 32, 37, 43, 45, 48, 66, 79, 91, 114, 138, 155, 175, 189, 196, 263, 302, 321] ;
+SantaClara = [7, 9, 11, 14, 20, 24, 32, 37, 43, 45, 48, 66, 79, 91, 114, 138, 155, 175, 189, 196, 263, 302, 321, 375, 459, 542] ;

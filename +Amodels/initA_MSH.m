@@ -54,7 +54,7 @@ if (~exist('A'))
     A.g = 9.81;         % N/kg (force/mass for gravity)
     %A.Pchamber = 134814680; % Chamber pressure (Pa)
     %A.Pchamber = 140e6;
-    A.Pchamber = A.depth*A.g*A.rhom0*A.chamber_fac; % Chamber pressure (Pa)
+    
     
     
     %A.T = 1200;         % K (temperature of magma) (BASALT)
@@ -133,6 +133,7 @@ if (~exist('A'))
     
 end
     % now re-build functions
+    A.Pchamber = 1.01e5+A.depth*A.g*A.rhom0*A.chamber_fac; % Chamber pressure (Pa)
     
     % Henry's law
     w = @(p) min(A.hg, A.hs*p.^A.hb);

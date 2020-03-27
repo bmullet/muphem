@@ -3,7 +3,7 @@ function [Srr, Szz, Stt, Srz] = kirsch (zvec,p,A,ugvec,umvec,rhogvec,phivec,pvec
     %P0 = 1.01e5+10000*z;       % Pore Pressure gradient = 5 kPa/m
     
     Srr = p;    
-    Szz = 1.01e5+A.k.rho*(z)*A.g;
+    Szz = 1.01e5 + A.k.rho*(z)*A.g;
     
     S = A.k.K*Szz;     % Poisson's ratio stress condition
     %S = Szz;            % Isotropic stress condition
