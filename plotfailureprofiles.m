@@ -68,4 +68,25 @@ ylabel('z');
 xlim(xl)
 legend()
 
+
+figure
+
+phi = 25/180*pi;
+C = 2*cohesion*((mu^2 + 1)^(1/2) + mu);
+
+q = tan(pi/4 + 1/2*phi)^2;
+
+rzrf = @(p, sigz, lambda, beta) sqrt((1/beta*p./sigz - lambda)./(1/q - C./(q*sigz) - lambda));
+
+beta = 1;
+rfailzr = rzrf(Srr, Szz, A.lambda, beta);
+plot(rfailzr*A.r, zvec, 'DisplayName', 'Analytical','LineWidth',3);
+
+
+% xlim([100, 115]);
+% ylim([-2900, -1100]);
+% xlim([80, 180])
+% ylim([-3000, 0])
+legend show
+
 end

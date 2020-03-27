@@ -414,7 +414,6 @@ plot([0.23, 0.23],ylim, '--r')
 
 %% Plot some failure things
 
-
 phi = 38/180*pi;
 cohesion = 5e6; mu = tan(phi); C = 2*cohesion*((mu^2 + 1)^(1/2) + mu);
 
@@ -533,11 +532,12 @@ end
 %% Failure distance
 
 % A.rhom0 = 2600;
-A.r = 100;
+A.r = 30;
+lambda = 0.5;
 
-data = importdata('plam5.txt');
-zvec = data(:,1);
-pvec = data(:,2);
+% data = importdata('plam5.txt');
+% zvec = data(:,1);
+% pvec = data(:,2);
 
 phi = 25/180*pi;
 cohesion = 5e5; mu = tan(phi); C = 2*cohesion*((mu^2 + 1)^(1/2) + mu);
@@ -554,7 +554,7 @@ lith = -A.rhom0*zvec*9.8;
 
 
 beta = 1;
-    rfailzr = rzrf(pvec, lith, 0.5, beta);
+    rfailzr = rzrf(pvec, lith, lambda, beta);
     plot(rfailzr*A.r, zvec, 'DisplayName', 'Analytical','LineWidth',3);
     hold on
 
@@ -573,7 +573,6 @@ z = data.data(:,2);
 r = r(idx);
 
 
-1 + 'hello'
 
 plot(r,z,'DisplayName', 'COMSOL - no shear','LineWidth',3)
 
