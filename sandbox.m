@@ -727,6 +727,28 @@ phi = 30*pi/180;
 
 SRF = tan(phi)/(tan(2*(atan(sqrt(1/lambda))-pi/4)))
 
+%% Save model output
+
+% name model
+
+NAME = 'MSH_lam5_ch7_r30_phi80'; % MSH chamberfac = 0.7
+
+
+% distrubute solution
+A = out{1}; zvec = out{2}; pvec = out{3}; ugvec = out{4}; umvec = out{5};
+phivec = out{6}; rhogvec = out{7}; chidvec = out{8}; Qmvec = out{9}; Qgvec = out{10}; failure = out{11};
+Srz = nan(size(phivec));
+mu = A.mu(phivec,pvec);
+Srz(zvec<A.fragdepth) = 4*mu(zvec<A.fragdepth).*umvec(zvec<A.fragdepth)/A.r;
+Srz(zvec>=A.fragdepth) = A.f0*rhogvec(zvec>=A.fragdepth).*ugvec(zvec>=A.fragdepth).^2./2;
+
+% write solution
+csvwrite("p_" + NAME + ".csv", [zvec, pvec]);
+csvwrite("tau_" + NAME + ".csv", [zvec, Srz]);
+
+
+
+
 %% Aiy-Corona
 
 SantaClara = [7, 9, 11, 14, 20, 24, 32, 37, 43, 45, 48, 66, 79, 91, 114, 138, 155, 175, 189, 196, 263, 302, 321, 375, 459, 542] ;
