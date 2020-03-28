@@ -730,7 +730,7 @@ SRF = tan(phi)/(tan(2*(atan(sqrt(1/lambda))-pi/4)))
 
 % name model
 
-NAME = 'MSH_lam5_ch7_r30_phi80'; % MSH chamberfac = 0.7
+NAME = 'MSH_lam5_ch7_r30_phi70'; % MSH chamberfac = 0.7
 
 
 % distrubute solution

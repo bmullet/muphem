@@ -81,7 +81,9 @@ rzrf = @(p, sigz, lambda, beta) sqrt((1/beta*p./sigz - lambda)./(1/q - C./(q*sig
 beta = 1;
 rfailzr = rzrf(Srr, Szz, A.lambda, beta);
 plot(rfailzr*A.r, zvec, 'DisplayName', 'Analytical','LineWidth',3);
+hold on;
 
+plot([A.r, A.r], ylim, '--r')
 
 % xlim([100, 115]);
 % ylim([-2900, -1100]);
