@@ -16,12 +16,14 @@ lambdas = 0.5:.01:1;
 rvec = nan(size(lambdas));
 
 for i = 1:length(lambdas)
-   A.lambda = lambdas(i);
    
-   A.chamber_fac = (1+A.lambda)/2;
-   A = Amodels.initA_MSH(A);
+   B = A;
+   B.lambda = lambdas(i);
    
-   rvec(i) = fzero(@(r) failure(r,A), [20, 150], options);
+   B.chamber_fac = (1+B.lambda)/2;
+   B = Amodels.initA_MSH(B);
+   
+   rvec(i) = fzero(@(r) failure(r,B), [20, 150], options);
     
 end
 
