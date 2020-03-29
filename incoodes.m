@@ -4,7 +4,9 @@ function [zvec,pvec,ugvec,umvec,phivec,rhogvec,chidvec,Qmvec,Qgvec,A] = incoodes
 %   conduit (z=0)
 %
 
-debug = true;
+warning off MATLAB:ode15s:IntegrationTolNotMet
+
+debug = false;
 
 %% First integrate until we reach p critical (where gas first exsolves)
 A.delF = 1; % Turns on/off mass transfer
@@ -176,7 +178,7 @@ else
         y0 = [p2e(nz)/C.p0 phi2e(nz) du2e(nz)/C.U0];
         
         options = odeset('Events',@BlowUp, 'Mass',@mass2, 'MStateDependence', 'strong', 'NormControl','off','RelTol',2.5e-5,'AbsTol',1e-6,'InitialStep',1e-6);
-        %warning off MATLAB:ode15s:IntegrationTolNotMet
+        warning off MATLAB:ode15s:IntegrationTolNotMet
         [z3,y3] = ode15s(@(z,y) twophaseODE(z,y,A), zspan, y0, options);
         
         z3 = z3*C.rc;

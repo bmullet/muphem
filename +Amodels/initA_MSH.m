@@ -86,10 +86,11 @@ if (~exist('A'))
     A.k.P0 = []   ;     % Pore pressure
     
     % Mohr Coulomb Failure
-    A.mc.C = 9e6;
+    %A.mc.C = 9e6;
     %A.mc.C = 8e6;
-    A.mc.phi = deg2rad(15);
-    %A.mc.phi = deg2rad(35);
+    A.mc.C = 5e6;
+    %A.mc.phi = deg2rad(15);
+    A.mc.phi = deg2rad(38);
     
     % Fragmentation
     A.f0 = 0.0075;  % Darcy-Weisbach friction factor

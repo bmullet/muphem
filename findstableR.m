@@ -22,8 +22,7 @@ for i = 1:N
         A.hg = hg;
         A.mu = mu;
         stabler(i,j) = findr(A,rmax,rmin,tol);
-        
-        
+                
     end
 end
 

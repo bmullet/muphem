@@ -49,14 +49,14 @@ om = linspace(0,2*pi,30);
 x = cos(om);
 y = sin(om);
 
-
+if(plot)
 fprintf('-----------SLIP DIRECTIONS---------\n')
 fprintf('      %%r        %%z         %%theta\n')
 fprintf('-----------------------------------\n')
 fprintf('      %0.2f      %.02f       %.2f\n',n1(1)^2, n1(3)^2, n1(2)^2)
 fprintf('      %0.2f      %.02f       %.2f\n',n2(1)^2, n2(3)^2, n2(2)^2)
 
-if(plot)
+
     figure()
     
     ax1 = subplot(1,2,1);

@@ -12,8 +12,8 @@ function [Smax,Sfail,failure,S,failstress] = mcfailure(A,Srr,Szz,Stt,Srz,zvec)
     S(:,1,3) = Srz;
     S(:,3,1) = Srz;
     [~,ii] = min(abs(zvec - (A.fragdepth*1.001)));
-    disp('Srz at plot point')
-    disp(Srz(ii));
+%     disp('Srz at plot point')
+%     disp(Srz(ii));
     
     principalstress = nan(length(zvec),3);
     % rotate into principal stress directions
