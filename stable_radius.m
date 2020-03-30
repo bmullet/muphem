@@ -12,32 +12,54 @@ A = Amodels.initA_MSH(A);
 
 options = optimset('TolX',0.0005,'Display','iter');
 
-lambdas = 0.5:.01:1;
+lambdas = 0.6:.01:0.8;
 rvec = nan(size(lambdas));
 
-for i = 1:length(lambdas)
+M = 4; % max num of workers
+
+fail = zeros(size(rvec));
+
+
+
+parfor (i = 1:length(lambdas),M)
    
    B = A;
+   
    B.lambda = lambdas(i);
    
    B.chamber_fac = (1+B.lambda)/2;
    B = Amodels.initA_MSH(B);
-   
-   rvec(i) = fzero(@(r) failure(r,B), [20, 150], options);
-    
+   try
+       rvec(i) = fzero(@(r) failure(r,B), [100, 160], options);
+   catch ME
+       disp('FAILED')
+       fail(i) = 1;
+   end
 end
+
+%csvwrite('no_shear.csv',[lambdas; rvec])
 
 
 function [stressdiff] = failure(r,A)
+
+shear = true;
 
 A.r = r;
 
 out = muphem('multiflow2',0,A);
 
-stressdiff = out{12};
-failure = out{11};
+if shear 
+stressdiff = out{11};
+f = out{13};
 
-if (stressdiff < 0) && failure
+else
+    
+stressdiff = out{12}; % no shear is 13, shear is 12
+f = out{14};
+
+end
+
+if (stressdiff < 0) && f
     % failure but not at fragmentation
     stressdiff = 1;
     

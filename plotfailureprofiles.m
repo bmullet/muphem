@@ -1,4 +1,4 @@
-function [with_shear, no_shear, failure] = plotfailureprofiles(A,Srr,Szz,Stt,Srz,zvec,pvec,plotfigs)
+function [with_shear, no_shear, failure_shear, failure_no_shear] = plotfailureprofiles(A,Srr,Szz,Stt,Srz,zvec,pvec,plotfigs)
 
 close all;
 
@@ -101,7 +101,7 @@ ind = ind - 1; % max shear stress is one step below
 with_shear = frz_low(ind)/(Srr(ind)/Szz(ind)) - 1;
 no_shear = rfailzr(ind) - 1;
 
-failure = any(frz_low./(Srr./Szz) > 1);
-
+failure_shear = any(frz_low./(Srr./Szz) > 1);
+failure_no_shear = any(rfailzr(ind) > 1);
 
 end
