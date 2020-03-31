@@ -27,7 +27,7 @@ end
 % %A.c0 = c0;
 vbounds = [5];            % Set upper boundary at 10% speed of sound at critical pressure       
 v_fzero = fzero(@(v) matchPatm(v,A),vbounds);
-%v_fzero = 4.6;
+%v_fzero = 3.1998;
 A.v_chamber_i = v_fzero;
 
 % Collect Solution

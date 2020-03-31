@@ -3,8 +3,9 @@ function [zvec,pvec,ugvec,umvec,phivec,rhogvec,chidvec,Qmvec,Qgvec,A] = incoodes
 %   Integrates conduit ODEs from base of conduit (z=-A.depth) to top of
 %   conduit (z=0)
 %
-rtol = 8e-7; %1e-6 works!
-atol = 8e-8;
+rtol = 1e-7; %1e-9 works!
+atol = 1e-8;
+
 
 
 warning off MATLAB:ode15s:IntegrationTolNotMet
@@ -89,9 +90,15 @@ end
 
 y0 = [p0 phi0 0]; % format is [p phi delta0];
 
-
-options = odeset('Events',@FragmentationDepth,'Mass',@mass, 'MStateDependence','strong', 'Stats', 'off', 'NormControl','off','RelTol',rtol,'AbsTol',atol);
+warning('');
+options = odeset('Events',@FragmentationDepth,'Mass',@mass, 'MStateDependence','strong', 'Stats', 'off', 'NormControl','off','RelTol',rtol,'AbsTol',[atol*5, atol*10, atol*1000]);
 sol = ode15s(@(z,y) twophaseODE(z,y,A), zspan, y0, options);
+[warnMsg, warnId] = lastwarn;
+%     if ~isempty(warnMsg)
+%         disp(A.v_chamber_i);
+%         disp(A.lambda);
+%         disp(A.r);
+%     end
 
 zfrag = sol.x'*C.rc;
 
@@ -137,10 +144,15 @@ else
     delF = 0;
     eos = eosf(A.delF);
     
-    options = odeset('Events',@RegimeChangeDepth,'Mass',@mass2, 'MStateDependence', 'strong',  'NormControl','off','RelTol',rtol,'AbsTol',atol,'InitialStep',1e-6);
-
+    options = odeset('Events',@RegimeChangeDepth,'Mass',@mass2, 'MStateDependence', 'strong',  'NormControl','off','RelTol',rtol,'AbsTol',[atol*5, atol*10, atol*1000],'InitialStep',1e-6);
+warning('');
     solext = ode15s(@(z,y) twophaseODE(z,y,A), zspan, sol.y(:,end), options);
-    
+    [warnMsg, warnId] = lastwarn;
+%     if ~isempty(warnMsg)
+%         disp(A.v_chamber_i);
+%         disp(A.lambda);
+%         disp(A.r);
+%     end
     p2e = solext.y(1,:)'; phi2e = solext.y(2,:)'; du2e = solext.y(3,:)'; 
     z2e = solext.x'*C.rc;
     [ rhog2e, chi_d2e, um2e ] = eos.calcvars(A,phi2e,p2e);

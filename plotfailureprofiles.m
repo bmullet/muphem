@@ -1,6 +1,5 @@
 function [with_shear, no_shear, failure_shear, failure_no_shear] = plotfailureprofiles(A,Srr,Szz,Stt,Srz,zvec,pvec,plotfigs)
 
-close all;
 
 tau = Srz./Szz;
 phi = A.mc.phi;
@@ -78,12 +77,16 @@ C = 2*cohesion*((mu^2 + 1)^(1/2) + mu);
 q = tan(pi/4 + 1/2*phi)^2;
 
 rzrf = @(p, sigz, lambda, beta) sqrt((p./sigz - lambda)./(1/q - C./(q*sigz) - lambda));
+rzrf2 = @(p,sigz, lambda, beta) (q*sigz.*(((lambda - p./sigz).*(C - sigz + lambda.*q.*sigz))./(q*sigz)).^(1/2))./(C - sigz + lambda.*q.*sigz);
+rrtf = @(p, sig_z, x) (sig_z.*(q + 1).*(-((p./sig_z - x).*(C - sig_z.*x + q.*sig_z.*x))./(sig_z.*(q + 1))).^(1/2))./(C - sig_z.*x + q.*sig_z.*x);
 
 rfailzr = rzrf(Srr, Szz, A.lambda);
+rfailzr2 = rrtf(Srr,Szz,A.lambda);
 
 if plotfigs
 plot(rfailzr*A.r, zvec, 'DisplayName', 'Analytical','LineWidth',3);
 hold on;
+plot(rfailzr2*A.r, zvec, 'DisplayName', 'Analytical2','LineWidth',3);
 
 plot([A.r, A.r], ylim, '--r')
 
@@ -98,10 +101,14 @@ end
 [~,ind] = min(abs(zvec - A.fragdepth)); % find index of fragmentation depth
 ind = ind - 1; % max shear stress is one step below
 
-with_shear = frz_low(ind)/(Srr(ind)/Szz(ind)) - 1;
-no_shear = rfailzr(ind) - 1;
+shear_condition = max(frz_low,frt);
+no_shear_condition = max(rfailzr, rfailzr2);
 
-failure_shear = any(frz_low./(Srr./Szz) > 1);
-failure_no_shear = any(rfailzr(ind) > 1);
+with_shear = shear_condition(ind)/(Srr(ind)/Szz(ind)) - 1;
+
+no_shear = no_shear_condition(ind) - 1;
+
+failure_shear = any(shear_condition./(Srr./Szz) > 1);
+failure_no_shear = any(no_shear_condition(ind) > 1);
 
 end

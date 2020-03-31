@@ -1,3 +1,9 @@
+% %%
+% 
+% A.lambda = 0.6;
+% A = Amodels.initA_MSH(A);
+% r = fzero(@(r) failure(r,A), [50, 180], options);
+
 %%
 
 A = Amodels.initA_MSH;
@@ -12,25 +18,29 @@ A = Amodels.initA_MSH(A);
 
 options = optimset('TolX',0.0005,'Display','iter');
 
-lambdas = 0.6:.01:0.8;
+lambdas = 0.7:.01:1;
+%lambdas = [0.61];
 rvec = nan(size(lambdas));
 
-M = 4; % max num of workers
+M = 6; % max num of workers
 
 fail = zeros(size(rvec));
+
+A.chamber_fac = 0.80;
 
 
 
 parfor (i = 1:length(lambdas),M)
-   
+ %for i = 1:length(lambdas)
+     
    B = A;
    
    B.lambda = lambdas(i);
    
-   B.chamber_fac = (1+B.lambda)/2;
+   %B.chamber_fac = (1+B.lambda)/2;
    B = Amodels.initA_MSH(B);
    try
-       rvec(i) = fzero(@(r) failure(r,B), [100, 160], options);
+       rvec(i) = fzero(@(r) failure(r,B), [50, 150], options);
    catch ME
        disp('FAILED')
        fail(i) = 1;
@@ -42,7 +52,7 @@ end
 
 function [stressdiff] = failure(r,A)
 
-shear = true;
+shear = false;
 
 A.r = r;
 
@@ -54,7 +64,7 @@ f = out{13};
 
 else
     
-stressdiff = out{12}; % no shear is 13, shear is 12
+stressdiff = out{12}; % no shear is 12, shear is 11
 f = out{14};
 
 end
