@@ -58,7 +58,7 @@ if (~exist('A'))
     
     
     %A.T = 1200;         % K (temperature of magma) (BASALT)
-    A.T = 1159;          % K (temperature of magma) (ANDESITE)
+    A.T = 1100;          % K (temperature of magma) (ANDESITE)
     %A.T = 1000;          % K (temperature of magma) (DACITE)
     %A.T = 900;          % K (temperature of magma) (RHYOLITE)
     %A.T = 886;

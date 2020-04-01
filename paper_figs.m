@@ -409,6 +409,19 @@ ht = text(0.03,42,str,'Interpreter','tex');
 set(ht,'Rotation',0)
 set(ht,'FontSize',20)
 
+%% MSH plot
+load('paperfigs/MSH.mat');
+
+A = out{1}; zvec = out{2}; pvec = out{3}; ugvec = out{4}; umvec = out{5};
+phivec = out{6}; rhogvec = out{7}; chidvec = out{8};
+
+[Srr, Szz, Stt, Srz] = kirsch (zvec,pvec,A,ugvec,umvec,rhogvec,phivec,pvec);
+
+plotfailureprofiles(A,pvec,Szz,nan(size(Szz)),Srz,zvec,pvec,true);
+
+
+
+
 
 function plot_MC(rR,C_over_sigz,symbl,lw)
 clrs = parula(3);

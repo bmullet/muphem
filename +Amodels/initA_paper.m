@@ -25,7 +25,7 @@ if (~exist('A'))
     A.vchamber_ = [];
     A.Ptop_ = [];
     A.r = 40;             % Conduit radius
-    A.depth = 5000;          % Length
+    A.depth = 5300;          % Length
     A.Bchm = 1e-10;      % Chamber compressibility (sphere)
     %A.Bchm = 1e-7;       % Chamber compressibility (sill)
     A.Vchm = 3e10;        % Chamber volume
@@ -39,7 +39,7 @@ if (~exist('A'))
     %A.hs = 4.1e-6;
     A.hs = 4.11e-6;
     A.hb = 0.5;
-    A.hg = 0.04; %total volatile content
+    A.hg = 0.045; %total volatile content
     A.Pcrit = (A.hg/A.hs)^(1/A.hb);   % Pcrit is pressure when volatiles first exsolve
     
     %A.lam = 1-A.hg; % melt mass fraction (1-total volatile mass fraction)
@@ -90,12 +90,12 @@ if (~exist('A'))
     %A.mc.C = 8e6;
     A.mc.C = 5e6;
     %A.mc.phi = deg2rad(15);
-    A.mc.phi = deg2rad(38);
+    A.mc.phi = deg2rad(35);
     
     % Fragmentation
     A.f0 = 0.0075;  % Darcy-Weisbach friction factor
     A.phi0 = .80; % critical gas volume fraction for fragmentation
-    A.phiforce = .85; % start of transition period (should be less than phi0)
+    A.phiforce = .85; % start of transition period (should be less than fgw0)
     %A.mug = 1e-5; % gas viscosity
     A.mug = 1e-5; % gas viscosity
     A.Rash = 0.001; % ash radius

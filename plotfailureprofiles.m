@@ -4,6 +4,7 @@ function [with_shear, no_shear, failure_shear, failure_no_shear] = plotfailurepr
 tau = Srz./Szz;
 phi = A.mc.phi;
 cohesion = A.mc.C; mu = tan(phi); c = 2*cohesion*((mu^2 + 1)^(1/2) + mu)./Szz;
+C = 2*cohesion*((mu^2 + 1)^(1/2) + mu);
 
 q = tan(pi/4 + 1/2*phi)^2;
 
@@ -41,8 +42,14 @@ tstar = ((1./((c + q).*(1-c))).^(1/2).*(c + q - 1))/2;
 
 tfail = ((c + pvec./Szz*q - 1).*(c - pvec./Szz + q)).^(1/2)./(pvec./Szz + pvec./Szz*q);
 
+
+
 if plotfigs
+    
+    lw =3; 
+    
 figure
+clrs = parula(4);
 subplot(121)
 plot(Srz,zvec); hold on;
 plot(Srr,zvec);
@@ -58,15 +65,27 @@ ylabel('z')
 xlabel('\tau/p')
 
 figure
-plot(Srr./Szz, zvec,'DisplayName','p/\sigma_{zz})'); hold on
+p1 = plot(Srr./Szz, zvec,'-k','LineWidth',lw,'DisplayName','p/\sigma_{zz}'); hold on
 xl = xlim;
-plot(frz_low,zvec,'DisplayName','r/z');
-plot(frt,zvec,'DisplayName','r/\theta');
-plot(ftz,zvec,'DisplayName','\theta/z');
+p2 = plot(frz_low,zvec, 'Color', clrs(1,:),'LineWidth',lw, 'LineStyle', '-','DisplayName','r/z');
+p3 = plot(frt,zvec,'Color',clrs(2,:),'LineWidth',lw, 'LineStyle', '-','DisplayName','r/\theta');
+p4 = plot(ftz,zvec,'Color',clrs(3,:),'LineWidth',lw, 'LineStyle', '-','DisplayName','\theta/z');
+
+% find C = szz
+[~,ind] = min(abs(Szz-C));
+
+plot(xlim, [zvec(ind), zvec(ind)], '--r')
+
 xlabel('p/S_{zz}')
-ylabel('z');
+ylabel('z (m)');
+
 xlim(xl)
-legend()
+ylim([-6200,0])
+legend([p1, p2, p3, p4], 'Orientation','horizontal','Location','south')
+
+
+
+
 
 
 figure
