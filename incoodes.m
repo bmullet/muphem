@@ -3,8 +3,8 @@ function [zvec,pvec,ugvec,umvec,phivec,rhogvec,chidvec,Qmvec,Qgvec,A] = incoodes
 %   Integrates conduit ODEs from base of conduit (z=-A.depth) to top of
 %   conduit (z=0)
 %
-rtol = 1e-7; %1e-9 works!
-atol = 1e-8;
+rtol = 1e-9; %1e-9 works!
+atol = 1e-9;
 
 
 

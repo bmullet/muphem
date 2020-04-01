@@ -39,8 +39,11 @@ parfor (i = 1:length(lambdas),M)
    
    %B.chamber_fac = (1+B.lambda)/2;
    B = Amodels.initA_MSH(B);
+   
+   x = 415.5555*(B.lambda - 0.77) + 166.9;
+   
    try
-       rvec(i) = fzero(@(r) failure(r,B), [50, 150], options);
+       rvec(i) = fzero(@(r) failure(r,B), [x-10, x+10], options);
    catch ME
        disp('FAILED')
        fail(i) = 1;
@@ -52,7 +55,7 @@ end
 
 function [stressdiff] = failure(r,A)
 
-shear = false;
+shear = true;
 
 A.r = r;
 
