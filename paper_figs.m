@@ -420,6 +420,44 @@ phivec = out{6}; rhogvec = out{7}; chidvec = out{8};
 plotfailureprofiles(A,pvec,Szz,nan(size(Szz)),Srz,zvec,pvec,true);
 
 
+%% Critical radius
+noshear1 = importdata('CriticalRadius/vary_lambda_constant_p_noshear');
+noshear2 = importdata('CriticalRadius/vary_lambda_constant_p_noshear_under7');
+withshear = importdata('CriticalRadius/vary_lambda_constant_p_with_shear_5to1');
+[~,idx1] = min(abs(noshear1(1,:)-0.658));
+[~,idx2] = min(abs(noshear2(1,:)-0.658));
+
+
+plot(noshear1(1,idx1:end),noshear1(2,idx1:end),'-r')
+hold on
+h2 = plot(noshear2(1,1:idx2),noshear2(2,1:idx2),'-r');
+
+h1 = plot(withshear(1,:),withshear(2,:), '-b');
+xlim([0.5,0.75]);
+
+legend([h1,h2], 'With shear','No shear','Location','northwest');
+xlabel('S/\sigma_{zz}');
+ylabel('Min. stable radius (m)')
+
+str = {'  \sigma_{rr} <  \sigma_{\theta\theta} < \sigma_{zz}  '};
+ht = text(0.5,60,str,'Interpreter','tex');
+set(ht,'Rotation',0)
+set(ht,'FontSize',12)
+
+str = {'    \sigma_{rr} < \sigma_{zz} < \sigma_{\theta\theta}  '};
+ht = text(0.62,70,str,'Interpreter','tex');
+set(ht,'Rotation',35)
+set(ht,'FontSize',12)
+
+str = {'  \sigma_{rr} <  \sigma_{\theta\theta} < \sigma_{zz}  '};
+ht = text(0.52,120,str,'Interpreter','tex');
+set(ht,'Rotation',0)
+set(ht,'FontSize',12)
+
+str = {'    \sigma_{rr} < \sigma_{zz} < \sigma_{\theta\theta}  '};
+ht = text(0.65,125,str,'Interpreter','tex');
+set(ht,'Rotation',40)
+set(ht,'FontSize',12)
 
 
 
