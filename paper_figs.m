@@ -417,6 +417,8 @@ phivec = out{6}; rhogvec = out{7}; chidvec = out{8};
 
 [Srr, Szz, Stt, Srz] = kirsch (zvec,pvec,A,ugvec,umvec,rhogvec,phivec,pvec);
 
+A.mc.phi = 30/180*pi;
+
 plotfailureprofiles(A,pvec,Szz,nan(size(Szz)),Srz,zvec,pvec,true);
 
 
@@ -458,6 +460,90 @@ str = {'    \sigma_{rr} < \sigma_{zz} < \sigma_{\theta\theta}  '};
 ht = text(0.65,125,str,'Interpreter','tex');
 set(ht,'Rotation',40)
 set(ht,'FontSize',12)
+
+
+%% Failure depth
+lw = 3;
+
+plastic = importdata('MSHFigures/plastic_failure.txt');
+elastic = importdata('MSHFigures/elastic_solution.txt');
+
+phi = A.mc.phi;
+cohesion = A.mc.C; mu = tan(phi);
+
+C = 2*cohesion*((mu^2 + 1)^(1/2) + mu);
+q = tan(pi/4 + 1/2*phi)^2;
+
+rzrf = @(p, sigz, lambda, beta) sqrt((p./sigz - lambda)./(1/q - C./(q*sigz) - lambda));
+
+rfailzr = rzrf(Srr, Szz, A.lambda);
+
+
+hold on
+rp = plastic(:,1);
+zp = plastic(:,2);
+[zp,idx] = sort(zp);
+rp = rp(idx);
+
+re = elastic(:,1);
+ze = elastic(:,2);
+[ze,idx] = sort(ze);
+re = re(idx);
+
+
+p2 = plot(re,ze,'-r');
+
+p3 = plot(rp,zp,'-k');
+p1 = plot(rfailzr*A.r, zvec,'--b','DisplayName', 'Analytical','LineWidth',3);
+
+legend([p1,p2,p3],'Analytical','FEM Elastic','FEM Elastoplastic ')
+
+xlim([40,50])
+ylim([-3001, 0])
+
+xlabel('r (m)'); ylabel('z (m)')
+
+
+
+%%
+% Eruption progression
+
+clrs = parula(3);
+phi = 38/180*pi;
+figure
+
+set(0,'defaultFigurePosition', [defpos(1) defpos(2) width*100, height*100]);
+
+rR = 1;
+plot_MC(1,0,'-',3);
+
+p2 = plot(xlim, [-1 -1], ':k','LineWidth',2);
+
+
+C = 0;
+b = sin(phi)/sqrt(9 + 3*sin(phi)^2);   a = 6*C*cos(phi)/(sqrt(3)*(3+sin(phi))); % inscribes
+
+colors = {'k','b','g','r'};
+lambda = 0:.0001:5;
+d = [500000];
+
+xlim([0,1])
+ylim([0,1])
+
+
+% define conduit regions
+x = [0.4, 0.5, 0.5, 0.4];
+y = [0.45, 0.45, 0.95, 0.95];
+
+p1 = patch(x,y,'g','FaceAlpha',.4,'LineStyle', 'none');
+
+x = [0.4, 0.5, 0.5, 0.4];
+y = [0.05, 0.05, 0.45, 0.45];
+
+p2 = patch(x,y,'b','FaceAlpha',.4,'LineStyle', 'none');
+
+legend([p1,p2],'Early Widening','Late Collapse','Location','southeast','FontSize',15)
+
 
 
 
