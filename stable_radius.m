@@ -7,8 +7,8 @@
 %%
 
 A = Amodels.initA_MSH;
-A.phi0 = .75;
-A.phiforce = 0.80;
+A.phi0 = .70;
+A.phiforce = 0.75;
 A.chamber_fac = 0.70;
 A.lambda = 0.50;
 
@@ -18,11 +18,11 @@ A = Amodels.initA_MSH(A);
 
 options = optimset('TolX',0.0005,'Display','iter');
 
-lambdas = 0.7:.01:1;
-%lambdas = [0.61];
+%lambdas = 0.5:.01:1;
+lambdas = [0.5:.01:.7];
 rvec = nan(size(lambdas));
 
-M = 6; % max num of workers
+M = 8; % max num of workers
 
 fail = zeros(size(rvec));
 
@@ -31,7 +31,7 @@ A.chamber_fac = 0.80;
 
 
 parfor (i = 1:length(lambdas),M)
- %for i = 1:length(lambdas)
+%for i = 1:length(lambdas)
      
    B = A;
    
@@ -43,7 +43,7 @@ parfor (i = 1:length(lambdas),M)
    x = 415.5555*(B.lambda - 0.77) + 166.9;
    
    try
-       rvec(i) = fzero(@(r) failure(r,B), [x-10, x+10], options);
+       rvec(i) = fzero(@(r) failure(r,B), x, options);
    catch ME
        disp('FAILED')
        fail(i) = 1;
