@@ -4,7 +4,7 @@ function [zvec,pvec,ugvec,umvec,phivec,rhogvec,chidvec,Qmvec,Qgvec,A] = incoodes
 %   conduit (z=0)
 %
 rtol = 1e-13; %1e-9 works!
-atol = 1e-6;
+atol = 1e-7;
 
 
 
@@ -66,13 +66,14 @@ C.U0 = sqrt(C.p0/C.rhom);
 
 C.rhog0 = C.p0/(A.Rw*(A.T));
 C.Re = C.rc*C.rhom*C.U0/C.mu0;
+
 C.Fr = C.U0/sqrt(C.rc*9.8);
 C.k10 = A.phi0^A.m*(A.ftb*A.rb0)^2/8;
 C.k20 = (A.ftb*A.rb0)*A.phi0^((1+3*A.m)/2)/A.Ff0;
 C.St = A.rhom0*C.k10*C.U0/(A.mug*C.rc);
 C.Fo = C.k10*C.U0*C.rhom/(C.k20*A.mug);
 C.delta = C.rhog0/C.rhom;
-A.C = C;
+
 
 u0 = u0/C.U0;
 
@@ -80,6 +81,11 @@ delF = 1; % Turns on/off mass transfer
 eos = eosf(A.delF);
 
 phi0 = fzero(@(phi) exslvphi(phi,u0,p0), 0); % Find phi0
+
+C.rb0 = (3*phi0/(4*pi*A.nb))^(1/3); %characteristic bubble radius
+C.Reb = C.mu0/(C.rb0*C.rhom*C.U0);
+
+A.C = C;
 
 [ rhogtest, ~, utest ] = eos.calcvars(A,phi0,p0);
 
