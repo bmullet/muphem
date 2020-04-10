@@ -8,12 +8,15 @@ A.lambda = 0.50;
 
 A = Amodels.initA_MSH(A);
 
-A.r = 50;
+A.r = 250;
 
 % Search over vs
 
-vs = logspace(-2,1,300);
+%vs = linspace(0.1,10,400);
+vs = logspace(-1,1,400);
 resids = nan(size(vs));
+
+%%
 
 for i = 1:length(vs)
    v = vs(i);
