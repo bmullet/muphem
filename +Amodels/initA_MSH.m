@@ -16,7 +16,7 @@ CRYSTAL_GROWTH = false;
 if (~exist('A'))
     % set up new struct
 
-    A.useForchheimer = true;
+    A.useForchheimer = false;
 
     % Set some constants and containers
     A.lambda = 0.5;
