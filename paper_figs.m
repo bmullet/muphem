@@ -547,14 +547,16 @@ legend([p1,p2],'Early Widening','Late Collapse','Location','southeast','FontSize
 %%
 % Stable radius
 d1 = importdata('CriticalRadius2/vary_lambda_constant_p_no_shear_5to1');
-d2 = importdata('CriticalRadius2/vary_lambda_constant_phi65_5to1');
-d3 = importdata('CriticalRadius2/vary_lambda_constant_phi67_5to1');
+d2 = importdata('CriticalRadius2/vary_lambda_constant_phi65_2');
+d3 = importdata('CriticalRadius2/vary_lambda_constant_phi67_2');
+d4 = importdata('CriticalRadius2/vary_lambda_constant_ezz_5to1');
 
 plot(d3(1,:),d3(2,:)); hold on;
 plot(d2(1,:),d2(2,:));
+plot(d4(1,:),d4(2,:));
 plot(d1(1,:),d1(2,:));
 
-legend('\phi_f = 0.67', '\phi_f = 0.65', 'no shear')
+legend('\phi_f = 0.67', '\phi_f = 0.65', 'shear strain','no shear')
 
 xlabel('S/\sigma_{zz}')
 ylabel('Min. stable radius (m)')
