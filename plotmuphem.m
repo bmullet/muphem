@@ -322,12 +322,12 @@ k = 0.01;
 Ginf = 20e9;
 ez = DGradient(um,z);
 figure
-plot(-ez(z>20),z(z>20));
+plot(-ez(z>-A.fragdepth),z(z>-A.fragdepth));
 hold on;
-crit = @(Ginf) k*Ginf./mu(z>20);
-plot(crit(3e9), z(z>20));
-plot(crit(15e9), z(z>20));
-plot(crit(30e9), z(z>20));
+crit = @(Ginf) k*Ginf./mu(z>-A.fragdepth);
+plot(crit(3e9), z(z>-A.fragdepth));
+plot(crit(15e9), z(z>-A.fragdepth));
+plot(crit(30e9), z(z>-A.fragdepth));
 legend('Strain rate','Critical - 3GPa','Critical - 15GPa','Critical - 30GPa')
 xlabel('\epsilon_{zz}')
 set(gca,'Ydir','reverse')

@@ -3,8 +3,8 @@ function [zvec,pvec,ugvec,umvec,phivec,rhogvec,chidvec,Qmvec,Qgvec,A] = incoodes
 %   Integrates conduit ODEs from base of conduit (z=-A.depth) to top of
 %   conduit (z=0)
 %
-rtol = 1e-10; %1e-9 works!
-atol = 5e-7;
+rtol = 1e-13; %1e-9 works!
+atol = 5e-10;
 
 
 
@@ -97,6 +97,11 @@ end
 
 y0 = [p0 phi0 0]; % format is [p phi delta0];
 
+% Set integration if doing critical strain rate
+if (strcmp(A.fragcond, 'strain rate'))
+    A.phi0 = 0.95;
+end
+
 warning('');
 options = odeset('Events',@FragmentationDepth,'Mass',@mass, 'MStateDependence','strong', 'Stats', 'off', 'NormControl','off','RelTol',rtol,'AbsTol',[atol, atol, atol]);
 sol = ode15s(@(z,y) twophaseODE(z,y,A), zspan, y0, options);
@@ -106,6 +111,24 @@ sol = ode15s(@(z,y) twophaseODE(z,y,A), zspan, y0, options);
 %         disp(A.lambda);
 %         disp(A.r);
 %     end
+
+% modify output if doing critical strain rate
+if (strcmp(A.fragcond, 'strain rate'))
+   % calculate strain rate
+   zover = sol.x'*C.rc;
+   pover = sol.y(1,:)'; phiover = sol.y(2,:)'; duover = sol.y(3,:)'; 
+   [ ~, ~, umover] = eos.calcvars(A,phiover,pover);
+   ez = DGradient(umover*C.U0,zover);
+   
+   % calculate critical strain rate
+   crit = A.ezz.k*A.ezz.Ginf./A.mu(phiover, pover*C.p0);
+   fi = (ez < crit)';
+   sol.x = sol.x(fi);
+   sol.y = sol.y(:,fi);
+   A.fragphi = max(phiover(fi));
+   A.phi0 = A.fragphi;
+   A.phiforce = A.fragphi + 0.05;
+end
 
 zfrag = sol.x'*C.rc;
 
@@ -316,14 +339,14 @@ end
     function [value,isterminal,direction] = FragmentationDepth(~,y)
         % Exsolution depth function
         phi = y(2);
-        value = A.phi0-phi;     % The value that we want to be zero (p = pcrit)
+        value = (A.phi0-phi)-atol*2;     % The value that we want to be zero (p = pcrit)
         isterminal = 1;         % Halt integration
         direction = 0;          % The zero can be approached from either direction
         
     end
 
     function [value,isterminal,direction] = BlowUp(~,y)
-        % Exsolution depth function
+       
         isterminal = 1;
         value = 1;
         direction = 0;
