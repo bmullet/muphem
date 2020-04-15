@@ -7,8 +7,8 @@
 %%
 
 A = Amodels.initA_MSH;
-A.phi0 = .70;
-A.phiforce = 0.75;
+A.phi0 = .67;
+A.phiforce = 0.72;
 A.chamber_fac = 0.80;
 A.lambda = 0.50;
 
@@ -42,10 +42,17 @@ parfor (i = 1:length(lambdas),M)
    %B.chamber_fac = (1+B.lambda)/2;
    B = Amodels.initA_MSH(B);
    
-   if lambdas(i) < 0.58
-    x = 71.58;
+   %if lambdas(i) < 0.58
+    % x = 71.58; % no shear
+   %if lambdas(i) < 0.63 %phi0 = 0.65
+   % x = 113.4;
+   if lambdas(i) < 0.67
+     x = 189.4;
+
    else
-    x = 84.53 + (lambdas(i) - 0.61)*471.40
+    % x = 84.53 + (lambdas(i) - 0.61)*471.40 % no shear, phi0 = 0.70
+    %x = 171.3 + (lambdas(i) - 0.72)*738.64; % phi0 = 0.65
+    x = 213.5 + (lambdas(i) - 0.7)*835.8; % phi0 = 0.65
    end
    
    try
@@ -63,7 +70,7 @@ end
 
 function [stressdiff] = failure(r,A)
 
-shear = false;
+shear = true;
 
 A.r = r;
 

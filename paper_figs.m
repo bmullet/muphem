@@ -544,8 +544,20 @@ p2 = patch(x,y,'b','FaceAlpha',.4,'LineStyle', 'none');
 
 legend([p1,p2],'Early Widening','Late Collapse','Location','southeast','FontSize',15)
 
+%%
+% Stable radius
+d1 = importdata('CriticalRadius2/vary_lambda_constant_p_no_shear_5to1');
+d2 = importdata('CriticalRadius2/vary_lambda_constant_phi65_5to1');
+d3 = importdata('CriticalRadius2/vary_lambda_constant_phi67_5to1');
 
+plot(d3(1,:),d3(2,:)); hold on;
+plot(d2(1,:),d2(2,:));
+plot(d1(1,:),d1(2,:));
 
+legend('\phi_f = 0.67', '\phi_f = 0.65', 'no shear')
+
+xlabel('S/\sigma_{zz}')
+ylabel('Min. stable radius (m)')
 
 function plot_MC(rR,C_over_sigz,symbl,lw)
 clrs = parula(3);
