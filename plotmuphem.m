@@ -317,4 +317,21 @@ set(gca,'XScale','log')
 xlabel('Pressure (Pa)')
 ylabel('\phi')
 
+% plot elongation strain rate
+k = 0.01;
+Ginf = 20e9;
+ez = DGradient(um,z);
+figure
+plot(-ez(z>20),z(z>20));
+hold on;
+crit = @(Ginf) k*Ginf./mu(z>20);
+plot(crit(3e9), z(z>20));
+plot(crit(15e9), z(z>20));
+plot(crit(30e9), z(z>20));
+legend('Strain rate','Critical - 3GPa','Critical - 15GPa','Critical - 30GPa')
+xlabel('\epsilon_{zz}')
+set(gca,'Ydir','reverse')
+ylabel('z')
+
+
 
