@@ -561,6 +561,73 @@ legend('\phi_f = 0.67', '\phi_f = 0.65', 'shear strain','no shear')
 xlabel('S/\sigma_{zz}')
 ylabel('Min. stable radius (m)')
 
+%% Evolution of eruption
+set(0,'defaultFigurePosition', [defpos(1) defpos(2) width*100*4, height*100*2]);
+
+load('FullEruption.mat');
+
+clrs = parula(3);
+
+figure
+h = [231];
+plot_FailureDepthProfiles(h,outearly, lw, clrs)
+h = [232];
+plot_FailureDepthProfiles(h,outmid, lw, clrs)
+h = [233];
+plot_FailureDepthProfiles(h,outlate, lw, clrs)
+
+subplot(2,3,[4:6])
+Ae = outearly{1};
+Am = outmid{1};
+Al = outlate{1};
+plot([0,.5,1],[Ae.r, Am.r, Al.r]./Al.r,'--xk','MarkerSize',20); hold on
+
+%plot([Ae.Pchamber, Am.Pchamber, Al.Pchamber]/Ae.Pchamber, '--r')
+plot([0,.5,1],[Ae.chamber_fac, Am.chamber_fac, Al.chamber_fac], '--xr','MarkerSize',20)
+ylim([0,1.1]);
+
+
+subplot(231); hold on;
+str = {'(a)'};
+ht = text(0.03,-350,str,'Interpreter','tex');
+set(ht,'Rotation',0)
+set(ht,'FontSize',20)
+
+subplot(232); hold on;
+str = {'(b)'};
+ht = text(0.03,-350,str,'Interpreter','tex');
+set(ht,'Rotation',0)
+set(ht,'FontSize',20)
+
+subplot(233); hold on;
+str = {'(c)'};
+ht = text(0.0,-350,str,'Interpreter','tex');
+set(ht,'Rotation',0)
+set(ht,'FontSize',20)
+
+subplot(2,3,[4:6]); hold on;
+str = {'(d)'};
+ht = text(0.02,1.02,str,'Interpreter','tex');
+set(ht,'Rotation',0)
+set(ht,'FontSize',20)
+% 
+% str = {'time $\longrightarrow$'};
+% ht = text(1.97,0.1,str,'Interpreter','latex');
+% ht.FontSize = 1000;
+% set(ht,'Rotation',0)
+% set(ht,'FontSize',20)
+
+xlabel('Normalized Eruption Time')
+ylabel('Parameter Value')
+legend('R/R_{stable}','P_{ch}/\sigma_{zz}','Location','southeast')
+
+
+annotation('textarrow',[0.3,0.35],[0.2,0.2],'String','Conduit Widening ','FontSize',20)
+annotation('textarrow',[0.56,0.61],[0.2,0.2],'String','Stable Eruption ','FontSize',20)
+str = {'Catastrophic', 'Collapse'};
+dim = [.7, 0.01, .1, .23];
+annotation('textbox',dim,'String',str,'FitBoxToText','on','FontSize',20,'HorizontalAlignment','center');
+
 function plot_MC(rR,C_over_sigz,symbl,lw)
 clrs = parula(3);
 phi = 38/180*pi;
@@ -606,4 +673,80 @@ xlabel('S/\sigma_{zz}');
 ylabel('p/\sigma_{zz}');
 ylim([0,5])
 xlim([0,5])
+end
+
+function plot_FailureDepthProfiles(h, out, lw, clrs)
+
+    A = out{1}; zvec = out{2}; pvec = out{3}; ugvec = out{4}; umvec = out{5};
+    phivec = out{6}; rhogvec = out{7};
+
+    [Srr, Szz, ~, Srz] = kirsch (zvec,pvec,A,ugvec,umvec,rhogvec,phivec,pvec);
+       
+tau = Srz./Szz;
+phi = A.mc.phi;
+cohesion = A.mc.C; mu = tan(phi); c = 2*cohesion*((mu^2 + 1)^(1/2) + mu)./Szz;
+C = 2*cohesion*((mu^2 + 1)^(1/2) + mu);
+
+q = tan(pi/4 + 1/2*phi)^2;
+
+fail_rz = @(p,tau,c,q)   .5*(p+1+((p-1)^2 + 4*(tau)^2)^0.5) - c - q*0.5*(p+1-((p-1)^2 + 4*(tau)^2)^0.5);
+fail_rt = @(p,s,tau,c,q) -2*s + p + c + q*0.5*(p + 1 - ((p-1)^2 + 4*(tau)^2)^.5);
+fail_tz = @(p,s,tau,c,q) 0.5*(p + 1 + ((p-1)^2 + 4*(tau)^2)^.5) - c - q*(2*s-p);
+
+frz_low  = nan(length(zvec),1);
+frz_high = nan(length(zvec),1);
+frt = nan(length(zvec),1);
+ftz = nan(length(zvec),1);
+
+s = A.lambda; % Vertical gradient of horizontal stress
+
+for i = 1:length(zvec)
+    try
+        frz_low(i) = fzero(@(x) fail_rz(x, tau(i), c(i), q), 0.237);
+    catch ME
+    end
+    try
+        frz_high(i) = fzero(@(x) fail_rz(x, tau(i), c(i), q), 5);
+    catch ME
+    end
+    try
+        frt(i) = fzero(@(x) fail_rt(x, s, tau(i), c(i), q), [-1, 1]);
+    catch ME
+    end
+    try
+        ftz(i) = fzero(@(x) fail_tz(x, s, tau(i), c(i), q), [-1, 1]);
+    catch ME
+    end
+end
+
+subplot(h)
+p1 = plot(Srr./Szz, zvec,'-k','LineWidth',lw,'DisplayName','p/\sigma_{zz}'); hold on
+xl = xlim;
+p2 = plot(frz_low,zvec, 'Color', clrs(1,:),'LineWidth',lw, 'LineStyle', '-','DisplayName','r/z');
+p3 = plot(frt,zvec,'Color',clrs(2,:),'LineWidth',lw, 'LineStyle', '-','DisplayName','r/\theta');
+p4 = plot(ftz,zvec,'Color',clrs(3,:),'LineWidth',lw, 'LineStyle', '-','DisplayName','\theta/z');
+
+xlim([0 1])
+
+x = [max(frz_low,frt);0];
+y = [zvec;min(zvec)];
+patch(x,y,'k','FaceAlpha',.1,'LineStyle', 'none');
+idx = ~isnan(ftz);
+x = [ftz(idx);1];
+y = [zvec(idx);min(zvec)];
+patch(x,y,'k','FaceAlpha',.1,'LineStyle', 'none');
+
+
+% find C = szz
+[~,ind] = min(abs(Szz-C));
+
+plot(xlim, [zvec(ind), zvec(ind)], '--r')
+
+xlabel('p/\sigma_{zz}')
+ylabel('z (m)');
+
+
+ylim([-6200,0])
+legend([p1, p2, p3, p4], 'Orientation','horizontal','Location','south')
+
 end
