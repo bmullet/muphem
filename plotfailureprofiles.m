@@ -77,7 +77,7 @@ p4 = plot(ftz,zvec,'Color',clrs(3,:),'LineWidth',lw, 'LineStyle', '-','DisplayNa
 plot(xlim, [zvec(ind), zvec(ind)], '--r')
 
 
-xlabel('p/S_{zz}')
+xlabel('p/\sigma_{zz}')
 ylabel('z (m)');
 
 xlim(xl)
