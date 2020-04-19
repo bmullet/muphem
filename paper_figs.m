@@ -546,7 +546,7 @@ legend([p1,p2],'Early Widening','Late Collapse','Location','southeast','FontSize
 
 %%
 % Stable radius
-d1 = importdata('CriticalRadius2/vary_lambda_constant_p_no_shear_5to1');
+d1 = importdata('CriticalRadius2/vary_lambda_constant_phi65_noshear');
 d2 = importdata('CriticalRadius2/vary_lambda_constant_phi65_2');
 d3 = importdata('CriticalRadius2/vary_lambda_constant_phi67_2');
 d4 = importdata('CriticalRadius2/vary_lambda_constant_ezz_5to1');
