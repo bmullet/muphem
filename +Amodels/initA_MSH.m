@@ -95,8 +95,8 @@ if (~exist('A'))
     
     % Fragmentation
     A.f0 = 0.0075;  % Darcy-Weisbach friction factor
-    A.phi0 = .80; % critical gas volume fraction for fragmentation
-    A.phiforce = .85; % start of transition period (should be less than phi0)
+    A.phi0 = .70; % critical gas volume fraction for fragmentation
+    A.phiforce = .75; % start of transition period (should be less than phi0)
     %A.mug = 1e-5; % gas viscosity
     A.mug = 1e-5; % gas viscosity
     A.Rash = 0.001; % ash radius
