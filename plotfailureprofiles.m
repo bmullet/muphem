@@ -82,14 +82,18 @@ ylabel('z (m)');
 
 xlim(xl)
 ylim([-6200,0])
+
+
+x = [max(frz_low,frt);0];
+y = [zvec;min(zvec)];
+patch(x,y,'k','FaceAlpha',.1,'LineStyle', 'none');
+idx = ~isnan(ftz);
+x = [ftz(idx);1];
+y = [zvec(idx);min(zvec)];
+patch(x,y,'k','FaceAlpha',.1,'LineStyle', 'none');
+
 legend([p1, p2, p3, p4], 'Orientation','horizontal','Location','south')
 
-
-
-
-
-
-figure
 end
 
 C = 2*cohesion*((mu^2 + 1)^(1/2) + mu);
@@ -104,6 +108,7 @@ rfailzr = rzrf(Srr, Szz, A.lambda);
 rfailzr2 = rrtf(Srr,Szz,A.lambda);
 
 if plotfigs
+figure
 plot(rfailzr*A.r, zvec, 'DisplayName', 'Analytical','LineWidth',3);
 hold on;
 plot(rfailzr2*A.r, zvec, 'DisplayName', 'Analytical2','LineWidth',3);

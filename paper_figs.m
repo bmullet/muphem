@@ -59,6 +59,13 @@ plot(lambda, cond1(lambda, rR), 'Color', clrs(1,:)); hold on;
 plot(lambda, cond2(lambda, rR), 'Color', clrs(2,:));
 plot(lambda, cond3(lambda, rR), 'Color', clrs(3,:));
 
+patchx = 0:.01:1;
+
+y = [0, cond1(patchx,rR), fliplr(cond2(patchx(patchx>=0.5),rR)), 0];
+x = [0, patchx, fliplr(patchx(patchx>=0.5)), 0];
+
+p1 = patch(x,y,'o','FaceAlpha',.1,'LineStyle', 'none');
+
 xlabel('S/\sigma_{zz}');
 ylabel('p/\sigma_{zz}');
 ylim([0,2])
@@ -126,21 +133,28 @@ ylim([0,2])
 xlim([0,2])
 grid on
 
+y = [0, cond1(patchx,rR), fliplr(cond2(patchx(patchx>=0.5),rR)), 0];
+x = [0, patchx, fliplr(patchx(patchx>=0.5)), 0];
+
+patch(x,y,'o','FaceAlpha',.1,'LineStyle', 'none');
+
 p1 = plot(xlim, [-1 -1], '-k');
 p2 = plot(xlim, [-1 -1], '--k','LineWidth', 2);
 p3 = plot(xlim, [-1 -1], ':k');
 legend([p1, p2, p3],'r/R = 1', 'r/R = 1.3', 'r/R = 2')
 
+
+
 %% Anotations
 subplot(121); hold on;
 str = {'(a)'};
-ht = text(0.03,42,str,'Interpreter','tex');
+ht = text(0.03,1.9,str,'Interpreter','tex');
 set(ht,'Rotation',0)
 set(ht,'FontSize',20)
 
 subplot(122); hold on;
 str = {'(b)'};
-ht = text(0.03,42,str,'Interpreter','tex');
+ht = text(0.03,1.9,str,'Interpreter','tex');
 set(ht,'Rotation',0)
 set(ht,'FontSize',20)
 
@@ -169,35 +183,35 @@ b = sin(phi)/sqrt(9 + 3*sin(phi)^2);   a = 6*C*cos(phi)/(sqrt(3)*(3+sin(phi))); 
 colors = {'k','b','g','r'};
 lambda = 0:.0001:5;
 d = [500000];
-for j = 1:1
-sigz = 2700*9.8*d(j);
-
-fh = @(lam) (2*lam*sigz + (4*a^2 + 16*a*b*lam*sigz + 8*a*b*sigz + 16*b^2*lam^2*sigz^2 + 16*b^2*lam*sigz^2 + 4*b^2*sigz^2 - (4*lam^2*sigz^2)/3 + (8*lam*sigz^2)/3 - (4*sigz^2)/3)^(1/2))/(2*sigz);
-fl = @(lam) (2*lam*sigz - (4*a^2 + 16*a*b*lam*sigz + 8*a*b*sigz + 16*b^2*lam^2*sigz^2 + 16*b^2*lam*sigz^2 + 4*b^2*sigz^2 - (4*lam^2*sigz^2)/3 + (8*lam*sigz^2)/3 - (4*sigz^2)/3)^(1/2))/(2*sigz);
-
-pzp = nan(size(lambda));
-pzm = nan(size(lambda));
-
-for i=1:length(lambda)
-    try
-        pzp(i) =  fh(lambda(i));
-        pzm(i) =  fl(lambda(i));
-    catch
-        1;
-    end
-end
-
-pzp(imag(pzp) ~= 0) = nan;
-pzm(imag(pzm) ~= 0) = nan;
-pz = [fliplr(pzp), pzm];
-lplot = [fliplr(lambda), lambda];
-
-plot(lambda, pzp,strcat('-', colors{j})); hold on
- plot(lambda, pzm,strcat('-', colors{j}));
-%plot(lplot, pz,strcat('-', colors{j})); hold on
-% ylim([0,2])
-% xlim([0,2])
-end
+% for j = 1:1
+% sigz = 2700*9.8*d(j);
+% 
+% fh = @(lam) (2*lam*sigz + (4*a^2 + 16*a*b*lam*sigz + 8*a*b*sigz + 16*b^2*lam^2*sigz^2 + 16*b^2*lam*sigz^2 + 4*b^2*sigz^2 - (4*lam^2*sigz^2)/3 + (8*lam*sigz^2)/3 - (4*sigz^2)/3)^(1/2))/(2*sigz);
+% fl = @(lam) (2*lam*sigz - (4*a^2 + 16*a*b*lam*sigz + 8*a*b*sigz + 16*b^2*lam^2*sigz^2 + 16*b^2*lam*sigz^2 + 4*b^2*sigz^2 - (4*lam^2*sigz^2)/3 + (8*lam*sigz^2)/3 - (4*sigz^2)/3)^(1/2))/(2*sigz);
+% 
+% pzp = nan(size(lambda));
+% pzm = nan(size(lambda));
+% 
+% for i=1:length(lambda)
+%     try
+%         pzp(i) =  fh(lambda(i));
+%         pzm(i) =  fl(lambda(i));
+%     catch
+%         1;
+%     end
+% end
+% 
+% pzp(imag(pzp) ~= 0) = nan;
+% pzm(imag(pzm) ~= 0) = nan;
+% pz = [fliplr(pzp), pzm];
+% lplot = [fliplr(lambda), lambda];
+% 
+% plot(lambda, pzp,strcat('-', colors{j})); hold on
+%  plot(lambda, pzm,strcat('-', colors{j}));
+% %plot(lplot, pz,strcat('-', colors{j})); hold on
+% % ylim([0,2])
+% % xlim([0,2])
+% end
 %legend('\infty','5000','1000','500')
 
 legend([p1,p2],'r/R = 1', 'r/R = 1.2','Location','Southeast')
@@ -212,15 +226,21 @@ legend([p1,p2],'C/\sigma_{zz} = 0', 'C/\sigma_{zz} = 0.5','Location','Southeast'
 
 subplot(121); hold on;
 str = {'(a)'};
-ht = text(0.15,4.7,str,'Interpreter','tex');
+ht = text(0.1,1.2,str,'Interpreter','tex');
 set(ht,'Rotation',0)
 set(ht,'FontSize',20)
+ylim([0,1.3])
+xlim([0,1.3])
 
 subplot(122); hold on;
 str = {'(b)'};
-ht = text(0.15,4.7,str,'Interpreter','tex');
+ht = text(0.1,1.2,str,'Interpreter','tex');
 set(ht,'Rotation',0)
 set(ht,'FontSize',20)
+ylim([0,1.3])
+xlim([0,1.3])
+
+
 
 %% Change of r-z failure with tau
 
@@ -410,6 +430,8 @@ set(ht,'Rotation',0)
 set(ht,'FontSize',20)
 
 %% MSH plot
+set(0,'defaultFigurePosition', [defpos(1) defpos(2) width*100, height*100]);
+
 load('paperfigs/MSH.mat');
 
 A = out{1}; zvec = out{2}; pvec = out{3}; ugvec = out{4}; umvec = out{5};
@@ -420,6 +442,36 @@ phivec = out{6}; rhogvec = out{7}; chidvec = out{8};
 A.mc.phi = 30/180*pi;
 
 plotfailureprofiles(A,pvec,Szz,nan(size(Szz)),Srz,zvec,pvec,true);
+
+%%
+set(0,'defaultFigurePosition', [defpos(1) defpos(2) 3.3*width*100, height*100]);
+load('paperfigs/ExampleEruption.mat');
+
+A = out{1}; zvec = out{2}; pvec = out{3}; ugvec = out{4}; umvec = out{5};
+phivec = out{6}; rhogvec = out{7}; chidvec = out{8};
+
+clrs = parula(2)/1.05;
+subplot(131)
+semilogx(pvec,zvec,'Color',clrs(1,:)); grid on
+xticks([1e5, 1e6, 1e7,1e8])
+xlabel('Pressure (Pa)')
+ylabel('Depth (m)')
+
+
+subplot(132)
+semilogx(umvec,zvec,'Color',clrs(1,:)); hold on
+semilogx(ugvec,zvec,'Color',clrs(2,:)); grid on
+xticks([1e0, 1e1, 1e2])
+legend('$u_m$','$u_g$','Location','northwest','Interpreter','Latex')
+xlabel('Velocity')
+ylabel('Depth (m)')
+
+
+subplot(133)
+semilogx(phivec,zvec,'Color',clrs(1,:)); grid on
+xticks([1e-2 1e-1, 1e0])
+xlabel('Gas Volume Fraction, \phi')
+ylabel('Depth (m)')
 
 
 %% Critical radius
@@ -546,20 +598,36 @@ legend([p1,p2],'Early Widening','Late Collapse','Location','southeast','FontSize
 
 %%
 % Stable radius
+clrs = parula(3);
+set(0,'defaultFigurePosition', [defpos(1) defpos(2) width*100, height*100]);
+
 d1 = importdata('CriticalRadius2/vary_lambda_constant_phi65_noshear');
 d2 = importdata('CriticalRadius2/vary_lambda_constant_phi65_2');
 d3 = importdata('CriticalRadius2/vary_lambda_constant_phi67_2');
 d4 = importdata('CriticalRadius2/vary_lambda_constant_ezz_5to1');
 
-plot(d3(1,:),d3(2,:)); hold on;
-plot(d2(1,:),d2(2,:));
-plot(d4(1,:),d4(2,:));
-plot(d1(1,:),d1(2,:));
+plot(d3(1,:),d3(2,:),'Color',clrs(1,:)); hold on;
+plot(d2(1,:),d2(2,:),'Color',clrs(2,:));
+plot(d4(1,:),d4(2,:),'Color','k','LineStyle','--','LineWidth',3);
+plot(d1(1,:),d1(2,:),'Color',clrs(2,:),'LineStyle','--','LineWidth',3);
 
-legend('\phi_f = 0.67', '\phi_f = 0.65', 'shear strain','no shear')
+legend('$\phi_f = 0.67$', '$\phi_f = 0.65$', '$\dot{\epsilon}_{zz} = k\frac{G_\infty}{\mu}$, no shear','$\phi_f = 0.65$, no shear','Interpreter','Latex','Location','northwest')
 
 xlabel('S/\sigma_{zz}')
 ylabel('Min. stable radius (m)')
+
+xlim([0.5,1]);
+
+str = {'  \sigma_{rr} <  \sigma_{\theta\theta} < \sigma_{zz}  '};
+ht = text(0.5,215,str,'Interpreter','tex');
+set(ht,'Rotation',0)
+set(ht,'FontSize',12)
+
+str = {'    \sigma_{rr} < \sigma_{zz} < \sigma_{\theta\theta}  '};
+ht = text(0.67,220,str,'Interpreter','tex');
+set(ht,'Rotation',43)
+set(ht,'FontSize',12)
+
 
 %% Evolution of eruption
 set(0,'defaultFigurePosition', [defpos(1) defpos(2) width*100*4, height*100*2]);
@@ -586,6 +654,12 @@ plot([0,.5,1],[Ae.r, Am.r, Al.r]./Al.r,'--xk','MarkerSize',20); hold on
 plot([0,.5,1],[Ae.chamber_fac, Am.chamber_fac, Al.chamber_fac], '--xr','MarkerSize',20)
 ylim([0,1.1]);
 
+annotation('textarrow',[0.17,0.14],[0.3,0.37],'String','(a) ','FontSize',18)
+annotation('textarrow',[0.17,0.14],[0.275,0.21],'String','','FontSize',18)
+annotation('textarrow',[0.535,0.525],[0.39,0.405],'String','(b) ','FontSize',18)
+annotation('textarrow',[0.535,0.525],[0.365,0.35],'String','','FontSize',18)
+annotation('textarrow',[0.87,0.895],[0.36,0.405],'String','(c) ','FontSize',18)
+annotation('textarrow',[0.87,0.895],[0.335,0.308],'String','','FontSize',18)
 
 subplot(231); hold on;
 str = {'(a)'};
@@ -620,6 +694,7 @@ set(ht,'FontSize',20)
 xlabel('Normalized Eruption Time')
 ylabel('Parameter Value')
 legend('R/R_{stable}','P_{ch}/\sigma_{zz}','Location','southeast')
+
 
 
 annotation('textarrow',[0.3,0.35],[0.2,0.2],'String','Conduit Widening ','FontSize',20)
@@ -661,6 +736,11 @@ plot(lambda, bound_1(lambda, rR), 'Color', clrs(1,:),'LineWidth',lw, 'LineStyle'
 plot(lambda, bound_2(lambda, rR), 'Color', clrs(2,:),'LineWidth',lw, 'LineStyle', symbl);
 plot(lambda, bound_3(lambda, rR), 'Color', clrs(3,:),'LineWidth',lw, 'LineStyle', symbl);
 
+patchx = 0:.01:1;
+y = [0, bound_1(patchx,rR), fliplr(bound_2(patchx(patchx>=0.5),rR)), 0];
+x = [0, patchx, fliplr(patchx(patchx>=0.5)), 0];
+
+patch(x,y,'o','FaceAlpha',.1,'LineStyle', 'none');
 
 %plot([no_cohesion, no_cohesion], ylim, '--r')
 plot([x1, x2], [A_failure(x1,C,sigz,rR), A_failure(x2,C,sigz,rR)], strcat(symbl,'k'),'LineWidth', lw)

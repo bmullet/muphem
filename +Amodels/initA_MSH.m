@@ -11,7 +11,7 @@ VISCOSITY_MODEL_FLAG = 'Hess and Dingwell';
 VISCOSITY_THETA_G_FLAG = 'None';
 VISCOSITY_THETA_C_FLAG = 'Costa';
 %VISCOSITY_THETA_C_FLAG = 'None';
-FRAGMENTATION_CONDITION = 'strain rate';
+FRAGMENTATION_CONDITION = 'phi';
 CRYSTAL_GROWTH = false;
 
 if (~exist('A'))
@@ -21,7 +21,7 @@ if (~exist('A'))
 
     % Set some constants and containers
     A.lambda = 0.5;
-    A.chamber_fac = 0.7;
+    A.chamber_fac = 0.9;
     A.Patm_ = 1.013e5;     % pascals
     A.vchamber_ = [];
     A.Ptop_ = [];

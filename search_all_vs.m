@@ -12,9 +12,14 @@
 % 
 % %vs = linspace(0.1,10,400);
 % %vs = logspace(-1,log10(15),1000);
-vs = [0.01:.01:1, 1:.05:10]; 
 
-rs = [115];
+A = Amodels.initA_paper(A);
+A.chamber_fac = 0.782;
+A = Amodels.initA_paper(A);
+
+vs = [0.01:.001:.6]; 
+
+rs = [30];
 
 resids = nan(length(rs),length(vs));
 %%

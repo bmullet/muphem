@@ -11,6 +11,7 @@ VISCOSITY_MODEL_FLAG = 'Hess and Dingwell';
 VISCOSITY_THETA_G_FLAG = 'None';
 VISCOSITY_THETA_C_FLAG = 'Costa';
 %VISCOSITY_THETA_C_FLAG = 'None';
+FRAGMENTATION_CONDITION = 'phi';
 CRYSTAL_GROWTH = false;
 
 if (~exist('A'))
@@ -101,6 +102,11 @@ if (~exist('A'))
     A.Rash = 0.001; % ash radius
     A.dragC = 0.8; % drag coefficient
     
+    % For strain rate fragmentation
+    A.fragcond = FRAGMENTATION_CONDITION;
+    A.ezz.k = 0.01;
+    A.ezz.Ginf = 3e9;
+        
     % Lateral gas loss
     A.kw0 = 1e-13; % permability constant (0 - 1e-12) ??? Bounds from kozono/kayaguchi but they have kw = 1e-15 in the paper
     A.kw0 = 0;
