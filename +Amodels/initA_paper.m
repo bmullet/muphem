@@ -41,7 +41,7 @@ if (~exist('A'))
     A.hs = 4.11e-6;
     A.hb = 0.5;
     A.hg = 0.046; %total volatile content
-    A.Pcrit = (A.hg/A.hs)^(1/A.hb);   % Pcrit is pressure when volatiles first exsolve
+    A.Pcrit = (A.hg/A.hs)^(1/A.hb);   % Pcrit is pressure when volatiles first exsolve0
     
     %A.lam = 1-A.hg; % melt mass fraction (1-total volatile mass fraction)
     

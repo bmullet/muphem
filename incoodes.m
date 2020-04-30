@@ -174,25 +174,35 @@ else
     delF = 0;
     eos = eosf(A.delF);
     
-    options = odeset('Events',@RegimeChangeDepth,'Mass',@mass2, 'MStateDependence', 'strong',  'NormControl','off','RelTol',rtol,'AbsTol',[atol, atol, atol],'InitialStep',1e-6);
-warning('');
-    solext = ode15s(@(z,y) twophaseODE(z,y,A), zspan, sol.y(:,end), options);
-    [warnMsg, warnId] = lastwarn;
-%     if ~isempty(warnMsg)
-%         disp(A.v_chamber_i);
-%         disp(A.lambda);
-%         disp(A.r);
-%     end
-    p2e = solext.y(1,:)'; phi2e = solext.y(2,:)'; du2e = solext.y(3,:)'; 
-    z2e = solext.x'*C.rc;
-    [ rhog2e, chi_d2e, um2e ] = eos.calcvars(A,phi2e,p2e);
-    
-    p2e = p2e*C.p0;
-    du2e = du2e*C.U0;
-    rhog2e = rhog2e*C.rhog0;
-    um2e = um2e*C.U0;
-    ug2e = du2e + um2e;
+%     options = odeset('Events',@RegimeChangeDepth,'Mass',@mass2, 'MStateDependence', 'strong',  'NormControl','off','RelTol',rtol,'AbsTol',[atol, atol, atol],'InitialStep',1e-6);
+% warning('');
+%     solext = ode15s(@(z,y) twophaseODE(z,y,A), zspan, sol.y(:,end), options);
+%     [warnMsg, warnId] = lastwarn;
+% %     if ~isempty(warnMsg)
+% %         disp(A.v_chamber_i);
+% %         disp(A.lambda);
+% %         disp(A.r);
+% %     end
+%     p2e = solext.y(1,:)'; phi2e = solext.y(2,:)'; du2e = solext.y(3,:)'; 
+%     z2e = solext.x'*C.rc;
+% %     [ rhog2e, chi_d2e, um2e ] = eos.calcvars(A,phi2e,p2e);
+%     
+%     p2e = p2e*C.p0;
+%     du2e = du2e*C.U0;
+%     rhog2e = rhog2e*C.rhog0;
+%     um2e = um2e*C.U0;
+%     ug2e = du2e + um2e;
 
+    phi2e = [];
+    chi_d2e = [];
+    p2e = [];
+    du2e = [];
+    rhog2e = [];
+    um2e = [];
+    ug2e = [];
+    z2e = [];
+    
+    
     Qm2e = (1-phi2e).*um2e.*A.rhom0;
     Qg2e = phi2e.*ug2e.*rhog2e;
     phivec = [phivec; phi2e];
@@ -200,9 +210,6 @@ warning('');
     Qgvec = [Qgvec; Qg2e];
     rhogvec = [rhogvec; rhog2e];
     chidvec = [chidvec; chi_d2e];
-    
-    nz = length(z2e);
-    zstart = z2e(nz)/C.rc;
     
     if abs(zstart) <  1
         
@@ -218,12 +225,12 @@ warning('');
         delF = 0;
         eos = eosf(A.delF);
         
-        zspan = [zstart 0];
+        zspan = [zstart 0]/C.rc;
         
-        y0 = [p2e(nz)/C.p0 phi2e(nz) du2e(nz)/C.U0];
+        y0 = sol.y(:,end);
         
-        options = odeset('Events',@BlowUp, 'Mass',@mass2, 'MStateDependence', 'strong', 'NormControl','off','RelTol',rtol,'AbsTol',atol,'InitialStep',1e-6);
-        warning off MATLAB:ode15s:IntegrationTolNotMet
+        options = odeset('Events',@BlowUp, 'Mass',@mass2, 'MStateDependence', 'strong', 'NormControl','off','RelTol',rtol*100,'AbsTol',atol*100,'InitialStep',1e-9);
+        warning on MATLAB:ode15s:IntegrationTolNotMet
         [z3,y3] = ode15s(@(z,y) twophaseODE(z,y,A), zspan, y0, options);
         
         z3 = z3*C.rc;
