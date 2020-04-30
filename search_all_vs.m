@@ -13,13 +13,14 @@
 % %vs = linspace(0.1,10,400);
 % %vs = logspace(-1,log10(15),1000);
 
+% should give three solutions
 A = Amodels.initA_paper(A);
 A.chamber_fac = 0.782;
 A = Amodels.initA_paper(A);
 
-vs = [0.01:.001:.6]; 
+vs = [0.01:.001:1]; 
 
-rs = [30];
+rs = [23];
 
 resids = nan(length(rs),length(vs));
 %%
