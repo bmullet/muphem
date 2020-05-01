@@ -342,7 +342,7 @@ xlabel('\epsilon_{zz}')
 set(gca,'Ydir','reverse')
 ylabel('z')
 
-Fmg = interphase((ug-um), phi, rhog, A);
+Fmg = interphase((ug-um), p, phi, rhog, A);
 figure
 plot(Fmg,z)
 set(gca,'Ydir','reverse')
