@@ -342,5 +342,14 @@ xlabel('\epsilon_{zz}')
 set(gca,'Ydir','reverse')
 ylabel('z')
 
+Fmg = interphase((ug-um), phi, rhog, A);
+figure
+plot(Fmg,z)
+set(gca,'Ydir','reverse')
+xlabel('F_{mg}')
+ylabel('Depth (m)')
+
+end
+
 
 
