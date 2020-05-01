@@ -15,32 +15,34 @@
 
 % should give three solutions
 
-% A = Amodels.initA_paper();
-% A.phi0 = 0.70;
-% A.phiforce = 0.75;
-% A.chamber_fac = 0.782;
-% A.r = 30;
-% A = Amodels.initA_paper(A);
-
-% try with Degruyter
-
-A = Amodels.initA_Degruyter2012;
+A = Amodels.initA_paper();
 A.phi0 = 0.70;
 A.phiforce = 0.701;
 A.chamber_fac = 0.782;
 A.r = 30;
+A = Amodels.initA_paper(A);
+phis = [0.782];
 
-phis = [1, 0.8, 0.7, 0.6];
+% try with Degruyter
 
-vs = [0.01:.01:3]; 
+% A = Amodels.initA_Degruyter2012;
+% A.phi0 = 0.70;
+% A.phiforce = 0.7001;
+% A.chamber_fac = 0.782;
+% A.r = 30;
+% 
+% phis = [1, 0.8, 0.7, 0.6];
 
-resids = nan(length(rs),length(vs));
+vs = [0.01:.01:1]; 
+
+resids = nan(length(phis),length(phis));
 %%
 for i = 1:length(phis)
     A.chamber_fac = phis(i);
     disp(A.phiforce)
     textprogressbar(sprintf('phif: %.2d\n',A.phiforce));
     A.Pchamber = (1.01e5+A.depth*A.g*A.k.rho)*A.chamber_fac;
+    
 for j = 1:length(vs) 
    textprogressbar(j/length(vs)*100);
    v = vs(j);
