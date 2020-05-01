@@ -13,25 +13,34 @@
 % %vs = linspace(0.1,10,400);
 % %vs = logspace(-1,log10(15),1000);
 
-% Shows three solutions for case of smoothing
-% A = Amodels.initA_paper(A);
+% should give three solutions
+
+% A = Amodels.initA_paper();
+% A.phi0 = 0.70;
+% A.phiforce = 0.75;
 % A.chamber_fac = 0.782;
+% A.r = 30;
 % A = Amodels.initA_paper(A);
 
-A = Amodels.initA_paper(A);
-A.chamber_fac = .9;
-A = Amodels.initA_paper(A);
+% try with Degruyter
 
-vs = [0.001:.001:1]; 
+A = Amodels.initA_Degruyter2012;
+A.phi0 = 0.70;
+A.phiforce = 0.701;
+A.chamber_fac = 0.782;
+A.r = 30;
 
-rs = [100];
+phis = [1, 0.8, 0.7, 0.6];
+
+vs = [0.01:.01:3]; 
 
 resids = nan(length(rs),length(vs));
 %%
-for i = 1:length(rs)
-    A.r = rs(i);
-    disp(A.r)
-    textprogressbar(sprintf('radius: %.2d\n',A.r));
+for i = 1:length(phis)
+    A.chamber_fac = phis(i);
+    disp(A.phiforce)
+    textprogressbar(sprintf('phif: %.2d\n',A.phiforce));
+    A.Pchamber = (1.01e5+A.depth*A.g*A.k.rho)*A.chamber_fac;
 for j = 1:length(vs) 
    textprogressbar(j/length(vs)*100);
    v = vs(j);
@@ -52,7 +61,7 @@ for j = 1:length(vs)
 end
 textprogressbar('done!')
 
-plot(vs,resids(i,:),'DisplayName',num2str(rs(i))); hold on
+plot(vs,resids(i,:),'DisplayName',num2str(phis(i))); hold on
 plot(xlim,[0,0],'--r')
 %ylim([-100, 100])
 legend('show')
