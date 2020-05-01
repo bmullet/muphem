@@ -42,6 +42,15 @@ disp('Pressure at conduit exit:')
 disp(min(p));
 
 figure()
+plot(um,zprint,ug,zprint)
+hold on
+set(gca,'XScale','log')
+xlabel('Velocity (m/s)')
+set(gca,'Ydir','reverse')
+ylabel('depth (km)')
+
+
+figure()
 % um, ug vs. z
 hold on
 subplot(1,8,1)
