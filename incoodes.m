@@ -6,7 +6,7 @@ function [zvec,pvec,ugvec,umvec,phivec,rhogvec,chidvec,Qmvec,Qgvec,A] = incoodes
 rtol = 1e-13; %1e-9 works!
 atol = 5e-10;
 
-
+A.zsmooth = 500; % how long to do smoothing for (m)
 
 warning off MATLAB:ode15s:IntegrationTolNotMet
 
@@ -87,6 +87,8 @@ C.rb0 = (3*phi0/(4*pi*A.nb))^(1/3); %characteristic bubble radius
 C.Reb = C.mu0/(C.rb0*C.rhom*C.U0);
 
 A.C = C;
+
+A.zsmooth = A.zsmooth/C.rc;
 
 [ rhogtest, ~, utest ] = eos.calcvars(A,phi0,p0);
 
@@ -327,10 +329,10 @@ end
         
     end
      
-    function [value,isterminal,direction] = RegimeChangeDepth(~,y)
+    function [value,isterminal,direction] = RegimeChangeDepth(z,y)
         % Regime change depth function
-        phi = y(2);
-        value = A.phiforce-phi;     % The value that we want to be zero (p = pcrit)
+      
+        value = z - (A.fragdepth/C.rc + A.zsmooth);     % The value that we want to be zero (p = pcrit)
         isterminal = 1;         % Halt integration
         direction = 0;          % The zero can be approached from either direction
         
