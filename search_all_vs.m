@@ -43,9 +43,7 @@ for i = 1:length(phis)
     A.Pchamber = (1.01e5+A.depth*A.g*A.k.rho)*A.chamber_fac;
 for j = 1:length(vs) 
    textprogressbar(j/length(vs)*100);
-   v = vs(j);
-   A.v_chamber_i = v;
-   
+   v = vs(j);   
    [zvec,pvec,~,~,~,~,~,~,~,A] = incoodes(A);
    
    if max(zvec) < 0

@@ -297,11 +297,9 @@ hold on
 set(gca,'XScale','log')
 xlabel('Velocity (m/s)')
 ylabel('z (m)')
-legend('Melt', 'Gas')
 xl=xlim;
-hold on
-plot([min(xl) max(xl)],[zex zex],'k--')
-plot([min(xl) max(xl)],[A.fragdepth A.fragdepth],'r--')
+
+plot([min(xl) max(xl)],[-A.fragdepth -A.fragdepth],'r--')
 set(gca,'Ydir','reverse')
 
 figure
@@ -316,6 +314,7 @@ loglog(p,phi);
 set(gca,'XScale','log')
 xlabel('Pressure (Pa)')
 ylabel('\phi')
+
 
 % plot elongation strain rate
 k = 0.01;
