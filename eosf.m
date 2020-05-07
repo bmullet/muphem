@@ -28,12 +28,12 @@ function [ beta ] = betaofp(A,p)
 
 chi_d = chidofp(A,p);
 chi_c = A.xc(p*A.Pchamber);
-dxddp = A.hb * chi_d / p;
+dxddp = A.hb .* chi_d ./ p;
 dxcdp = 0;
-if (chi_c ~= 0) && (chi_c ~= A.xcmax)
+if any(chi_c ~= 0) && any(chi_c ~= A.xcmax)
     dxcdp = A.xcexp * (chi_c - A.xc0) / p;
 end
-beta = 1 / (chi_d - chi_c * chi_d + 1) * ((1-chi_c)*dxddp - chi_d * (dxcdp));
+beta = 1 ./ (chi_d - chi_c .* chi_d + 1) .* ((1-chi_c).*dxddp - chi_d .* (dxcdp));
 
 function [ um ] = umofphi (A,phi,chid,p)
 
