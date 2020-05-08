@@ -170,6 +170,8 @@ if abs(max(zfrag)) <  1
 else
     % Did not reach surface, so keep going!
     A.umf = umfrag(end)/C.U0; % to be used for new phi calculation
+    A.phi0 = sol.y(2,end);
+    
     A.delF = 0;
     delF = 0;
     eos = eosf(A.delF);
