@@ -223,6 +223,8 @@ else
         
         A.delF = 0;
         delF = 0;
+        A.phi0 = sol.y(2,end);
+        
         eos = eosf(A.delF);
         
         zspan = [zstart 0]/C.rc;
