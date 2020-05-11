@@ -73,10 +73,10 @@ dydz(3) = um*(1-phi)*(-zeta*1/A.C.Fr^2*(1/ug-1/um) + Fmw/(1-phi) - Fgw2/phi + la
             end
             
             
-            Fmg2 = -3/8*phi*(1-phi)*A.dragC*A.C.rc/A.Rash*rhog*abs(du)*(du)*A.C.delta;
+            Fmg2 = -3/8*phi*(1-phi)*A.dragC*A.C.rc/A.Rash*rhog*abs(du)*(du)*A.C.delta*100;
           
 
-            if phi<A.phi0
+            if A.delF
                 Fmg = Fmg1;
             else
                 Fmg = Fmg2;

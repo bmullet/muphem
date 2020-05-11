@@ -223,7 +223,7 @@ else
         
         A.delF = 0;
         delF = 0;
-        A.phi0 = sol.y(2,end);
+        A.du0 = sol.y(:,end);
         
         eos = eosf(A.delF);
         
