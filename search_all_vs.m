@@ -33,7 +33,7 @@ phis = [0.782];
 % 
 % phis = [1, 0.8, 0.7, 0.6];
 
-vs = [0.01:.01:1]; 
+vs = [0.01:.02:1]; 
 
 resids = nan(length(phis),length(phis));
 %%
@@ -48,7 +48,7 @@ for j = 1:length(vs)
    v = vs(j);
    A.v_chamber_i = v;
    
-   [zvec,pvec,~,~,~,~,~,~,~,A] = incoodes(A);
+   [zvec,pvec,~,~,~,~,~,~,~,Ar] = incoodes(A);
    
    if max(zvec) < 0
        % did not make it to surface

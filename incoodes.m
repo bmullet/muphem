@@ -6,7 +6,7 @@ function [zvec,pvec,ugvec,umvec,phivec,rhogvec,chidvec,Qmvec,Qgvec,A] = incoodes
 rtol = 1e-13; %1e-9 works!
 atol = 5e-10;
 
-A.zsmooth = 500; % how long to do smoothing for (m)
+A.zsmooth = 1000; % how long to do smoothing for (m)
 
 warning off MATLAB:ode15s:IntegrationTolNotMet
 

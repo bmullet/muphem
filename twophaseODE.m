@@ -77,18 +77,17 @@ dydz(3) = um*(1-phi)*(-zeta*1/A.C.Fr^2*(1/ug-1/um) + Fmw/(1-phi) - Fgw2/phi + la
           
             pf = A.phiforce;
                        
-            if phi<A.phi0
+            if A.delF
                 Fmg = Fmg1;
-            elseif (phi>=A.phi0)
+            else
                 if abs(z-A.fragdepth/A.C.rc) < A.zsmooth
-                    t = (phi-A.phi0)/(pf-A.phi0);
+                    t = (z-A.fragdepth/A.C.rc)/A.zsmooth;
                     Fmg = -1*(abs(Fmg1))^(1-t)*(abs(Fmg2))^(t)*sign(ug-um);
+                    %Fmg = cos(pi/2*t)^2*Fmg1 + sin(pi/2*t)^2*Fmg2;
                 else
                     Fmg = Fmg2;
                 end
-            else
-                Fmg=0;
-            end                     
+            end                  
                 
     end
 
