@@ -42,6 +42,15 @@ disp('Pressure at conduit exit:')
 disp(min(p));
 
 figure()
+plot(um,zprint,ug,zprint)
+hold on
+set(gca,'XScale','log')
+xlabel('Velocity (m/s)')
+set(gca,'Ydir','reverse')
+ylabel('depth (km)')
+
+
+figure()
 % um, ug vs. z
 hold on
 subplot(1,8,1)
@@ -297,9 +306,11 @@ hold on
 set(gca,'XScale','log')
 xlabel('Velocity (m/s)')
 ylabel('z (m)')
+legend('Melt', 'Gas')
 xl=xlim;
-
-plot([min(xl) max(xl)],[-A.fragdepth -A.fragdepth],'r--')
+hold on
+plot([min(xl) max(xl)],[zex zex],'k--')
+plot([min(xl) max(xl)],[A.fragdepth A.fragdepth],'r--')
 set(gca,'Ydir','reverse')
 
 figure
@@ -314,7 +325,6 @@ loglog(p,phi);
 set(gca,'XScale','log')
 xlabel('Pressure (Pa)')
 ylabel('\phi')
-
 
 % plot elongation strain rate
 k = 0.01;
@@ -331,6 +341,27 @@ legend('Strain rate','Critical - 3GPa','Critical - 15GPa','Critical - 30GPa')
 xlabel('\epsilon_{zz}')
 set(gca,'Ydir','reverse')
 ylabel('z')
+
+figure
+plot(phi,z); hold on;
+xlabel('\phi')
+ylabel('Depth (m)')
+set(gca,'Ydir','reverse')
+xl = xlim();
+plot([min(xl) max(xl)],[abs(A.fragdepth), abs(A.fragdepth)],'r--')
+
+[Fmg,Fmg1,Fmg2] = interphase((ug-um), p, phi, rhog, A);
+figure
+plot(Fmg,z)
+set(gca,'Ydir','reverse')
+xlabel('F_{mg}')
+ylabel('Depth (m)')
+hold on
+plot(Fmg1,z,'--r');
+plot(Fmg2,z,'--b');
+
+
+end
 
 
 

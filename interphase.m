@@ -1,15 +1,17 @@
-    function Fmg = interphase(duv, pv, phiv, rhogv,A)
+    function [Fmg, Fmg1v, Fmg2v] = interphase(duv, pv, phiv, rhogv,A)
+        duv = duv./A.C.U0;
+        pv = pv./A.C.p0;
+        rhogv = rhogv./A.C.rhog0;
+        
         Fmg = nan(size(duv));
+        Fmg1v = nan(size(duv));
+        Fmg2v = nan(size(duv));
         
-        
-            for n = 1:length(duv)
+        for n = 1:length(duv)
                 du = duv(n);
                 phi = phiv(n);
                 rhog = rhogv(n);
                 p = pv(n);
-                
-                rb = (3*phi/(4*pi*A.nb))^(1/3); %bubble radius
-              
                 
                 rb = (3*phi/(4*pi*A.nb))^(1/3); %bubble radius
                 rbnd = rb/A.C.rb0;
@@ -27,10 +29,13 @@
                 Fmg2 = -3/8*phi*(1-phi)*A.dragC*A.C.rc/A.Rash*rhog*abs(du)*(du)*A.C.delta*100;
                 
                 
-                if A.delF
+                if phi > A.phi0
                     Fmg(n) = Fmg1;
                 else
-                    Fmg = Fmg2;
+                    Fmg(n) = Fmg2;
                 end
                 
-            end
+                
+                Fmg1v(n) = Fmg1;
+                Fmg2v(n) = Fmg2;
+        end
