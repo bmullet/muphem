@@ -33,23 +33,24 @@ phis = [0.782];
 % 
 % phis = [1, 0.8, 0.7, 0.6];
 phis = [1];
-vs = [0.01:.01:3]; 
+vs = [0.01:.01:1]; 
 
 resids = nan(length(phis),length(vs));
+phi0s = nan(length(vs), 3);
+
 %%
 for i = 1:length(phis)
 %     A.chamber_fac = phis(i);
 %     disp(A.phiforce)
-     %textprogressbar(sprintf('phif: %.2d\n',A.phiforce));
+     textprogressbar(sprintf('phif: %.2d\n',A.phiforce));
      A.Pchamber = (1.01e5+A.depth*A.g*A.k.rho)*A.chamber_fac;
 %     
 for j = 1:length(vs) 
-   %textprogressbar(j/length(vs)*100);
+   textprogressbar(j/length(vs)*100);
    v = vs(j);
    A.v_chamber_i = v;
    
    [zvec,pvec,~,~,~,~,~,~,~,Ar] = incoodes(A);
-   disp(Ar.phi0);
    
    if max(zvec) < 0
        % did not make it to surface
@@ -60,9 +61,13 @@ for j = 1:length(vs)
    end
    
    resids(i,j) = resid;
+   phi0s(j,:) = Ar.du0;
   
 end
+
 textprogressbar('done!')
+
+figure
 
 plot(vs,resids(i,:),'DisplayName',num2str(phis(i))); hold on
 plot(xlim,[0,0],'--r')

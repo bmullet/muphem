@@ -171,6 +171,7 @@ else
     % Did not reach surface, so keep going!
     A.umf = umfrag(end)/C.U0; % to be used for new phi calculation
     A.phi0 = sol.y(2,end);
+    A.du0 = sol.y(:,end);
     
     A.delF = 0;
     delF = 0;
