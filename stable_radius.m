@@ -12,6 +12,7 @@ A.phi0 = .65;
 A.phiforce = 0.70;
 A.chamber_fac = 0.80;
 A.lambda = 0.50;
+A.nb = 1e10;
 
 A = Amodels.initA_MSH(A);
 
