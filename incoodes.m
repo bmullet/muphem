@@ -84,7 +84,7 @@ eos = eosf(A.delF);
 phi0 = fzero(@(phi) exslvphi(phi,u0,p0), 0); % Find phi0
 
 C.rb0 = (3*phi0/(4*pi*A.nb))^(1/3); %characteristic bubble radius
-C.Reb = C.mu0/(C.rb0*C.rhom*C.U0);
+C.Reb = (C.rb0*C.rhom*C.U0)/C.mu0;
 
 A.C = C;
 
@@ -177,7 +177,7 @@ else
     delF = 0;
     eos = eosf(A.delF);
     
-    options = odeset('Events',@RegimeChangeDepth,'Mass',@mass2, 'MStateDependence', 'strong',  'NormControl','off','RelTol',rtol,'AbsTol',[atol, atol, atol],'InitialStep',1e-6);
+    options = odeset('Events',@RegimeChangeDepth,'Mass',@mass2, 'MStateDependence', 'strong',  'NormControl','off','RelTol',rtol,'AbsTol',[atol, atol, atol*1e6],'InitialStep',1e-6);
 warning('');
     solext = ode15s(@(z,y) twophaseODE(z,y,A), zspan, sol.y(:,end), options);
     [warnMsg, warnId] = lastwarn;
