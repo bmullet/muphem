@@ -18,10 +18,10 @@
 A = Amodels.initA_paper();
 A.phi0 = 0.70;
 A.phiforce = 0.701;
-A.chamber_fac = 0.782;
+%A.chamber_fac = 1;
 A.r = 30;
 A = Amodels.initA_paper(A);
-phis = [0.782];
+phis = [0.8];
 
 % try with Degruyter
 
@@ -32,15 +32,15 @@ phis = [0.782];
 % A.r = 30;
 % 
 % phis = [1, 0.8, 0.7, 0.6];
-phis = [1];
-vs = [0.01:.01:1]; 
+%phis = [1];
+vs = [0.01:.05:1.5]; 
 
 resids = nan(length(phis),length(vs));
 phi0s = nan(length(vs), 3);
 
 %%
 for i = 1:length(phis)
-%     A.chamber_fac = phis(i);
+     A.chamber_fac = phis(i);
 %     disp(A.phiforce)
      textprogressbar(sprintf('phif: %.2d\n',A.phiforce));
      A.Pchamber = (1.01e5+A.depth*A.g*A.k.rho)*A.chamber_fac;
@@ -61,16 +61,14 @@ for j = 1:length(vs)
    end
    
    resids(i,j) = resid;
-   phi0s(j,:) = Ar.du0;
+   %phi0s(j,:) = Ar.du0;
   
 end
 
 textprogressbar('done!')
 
-figure
-
 plot(vs,resids(i,:),'DisplayName',num2str(phis(i))); hold on
-plot(xlim,[0,0],'--r')
+plot(xlim,[0,0],'--r','HandleVisibility','off')
 %ylim([-100, 100])
 legend('show')
 drawnow()

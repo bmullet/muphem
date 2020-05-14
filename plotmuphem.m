@@ -349,6 +349,12 @@ set(gca,'Ydir','reverse')
 xlabel('F_{mg}')
 ylabel('Depth (m)')
 
+figure
+semilogx((ug-um),z)
+set(gca,'Ydir','reverse')
+xlabel('\Delta u')
+ylabel('Depth (m)')
+
 end
 
 
