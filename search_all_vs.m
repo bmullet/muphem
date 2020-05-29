@@ -34,12 +34,16 @@ phis = [0.8];
 % phis = [1, 0.8, 0.7, 0.6];
 %phis = [1];
 
+
+
+%%
+
+phis = [100];
+vs = [0.01:.01:1.5]; 
+
 resids = nan(length(phis),length(vs));
 phi0s = nan(length(vs), 3);
 
-%%
-phis = [100];
-vs = [0.01:.01:1.5]; 
 
 for i = 1:length(phis)
      %A.chamber_fac = phis(i);
