@@ -379,11 +379,12 @@ end
 subplot(121)
 plot(pz,abs(th),'Color',clrs(ii,:),'DisplayName',"\tau/p = " + num2str(tp)); hold on;
 xlabel('p/\sigma_{zz}')
-ylabel('Rotation (degrees)')
+ylabel('\alpha (degrees)')
 
 
 end
 ylim([0,45])
+title('Rotation of Principal Stresses','Interpreter','Latex')
 legend('Location','Southeast')
     
 %% t-star
@@ -403,8 +404,9 @@ subplot(122)
 [C,p1] = contour(C,PHI/pi*180,abs(ts), [ 0.1, 0.25, 0.5, 1, 2]);
 p1.LineWidth = lw;
 clabel(C,p1,'FontSize',17,'Color','black')
-xlabel('C/\sigma_{zz}')
+xlabel('C_0/\sigma_{zz}')
 ylabel('\phi (degrees)')
+title('Contours of Constant $\tau^*$','Interpreter','Latex')
 % set(p1, 'EdgeColor','none')
 % colorbar
 % colormap('jet')
@@ -443,7 +445,7 @@ A.mc.phi = 30/180*pi;
 
 plotfailureprofiles(A,pvec,Szz,nan(size(Szz)),Srz,zvec,pvec,true);
 
-%%
+%% Example Eruption
 set(0,'defaultFigurePosition', [defpos(1) defpos(2) 3.3*width*100, height*100]);
 load('paperfigs/ExampleEruption.mat');
 
@@ -463,7 +465,7 @@ semilogx(umvec,zvec,'Color',clrs(1,:)); hold on
 semilogx(ugvec,zvec,'Color',clrs(2,:)); grid on
 xticks([1e0, 1e1, 1e2])
 legend('$u_m$','$u_g$','Location','northwest','Interpreter','Latex')
-xlabel('Velocity')
+xlabel('Velocity (m/s)')
 ylabel('Depth (m)')
 
 
@@ -632,7 +634,7 @@ set(ht,'FontSize',12)
 %% Evolution of eruption
 set(0,'defaultFigurePosition', [defpos(1) defpos(2) width*100*4, height*100*2]);
 
-load('FullEruption.mat');
+load('FullEruption2.mat');
 
 clrs = parula(3);
 
@@ -693,13 +695,13 @@ set(ht,'FontSize',20)
 
 xlabel('Normalized Eruption Time')
 ylabel('Parameter Value')
-legend('R/R_{stable}','P_{ch}/\sigma_{zz}','Location','southeast')
+legend('R/R_{max}','P_{ch}/\sigma_{zz}','Location','southeast')
 
 
 
 annotation('textarrow',[0.3,0.35],[0.2,0.2],'String','Conduit Widening ','FontSize',20)
 annotation('textarrow',[0.56,0.61],[0.2,0.2],'String','Stable Eruption ','FontSize',20)
-str = {'Catastrophic', 'Collapse'};
+str = {'Termination via','Catastrophic Collapse'};
 dim = [.7, 0.01, .1, .23];
 annotation('textbox',dim,'String',str,'FitBoxToText','on','FontSize',20,'HorizontalAlignment','center');
 
