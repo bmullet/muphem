@@ -103,14 +103,14 @@ if (strcmp(A.fragcond, 'strain rate'))
 end
 
 warning('');
-options = odeset('Events',@FragmentationDepth,'Mass',@mass, 'MStateDependence','strong', 'Stats', 'off', 'NormControl','off','RelTol',rtol,'AbsTol',[atol, atol, atol]);
+options = odeset('Events',@FragmentationDepth,'Mass',@mass, 'MStateDependence','strong', 'Stats', 'off', 'NormControl','off','RelTol',rtol*1e4,'AbsTol',[atol, atol, atol]*1e4);
 sol = ode15s(@(z,y) twophaseODE(z,y,A), zspan, y0, options);
 [warnMsg, warnId] = lastwarn;
-%     if ~isempty(warnMsg)
-%         disp(A.v_chamber_i);
-%         disp(A.lambda);
-%         disp(A.r);
-%     end
+    if ~isempty(warnMsg)
+        disp(A.v_chamber_i);
+        disp(A.lambda);
+        disp(A.r);
+    end
 
 % modify output if doing critical strain rate
 if (strcmp(A.fragcond, 'strain rate'))
@@ -177,15 +177,23 @@ else
     delF = 0;
     eos = eosf(A.delF);
     
-    options = odeset('Events',@RegimeChangeDepth,'Mass',@mass2, 'MStateDependence', 'strong',  'NormControl','off','RelTol',rtol,'AbsTol',[atol, atol, atol*1e6],'InitialStep',1e-6);
-warning('');
+    lastwarn('');
+    
+    step_tol = [atol, atol, atol*1e6];
+    
+    options = odeset('Events',@RegimeChangeDepth,'Mass',@mass2, 'MStateDependence', 'strong',  'NormControl','off','RelTol',rtol,'AbsTol',step_tol,'InitialStep',1e-14);
+    
     solext = ode15s(@(z,y) twophaseODE(z,y,A), zspan, sol.y(:,end), options);
-    [warnMsg, warnId] = lastwarn;
-%     if ~isempty(warnMsg)
-%         disp(A.v_chamber_i);
-%         disp(A.lambda);
-%         disp(A.r);
-%     end
+    [warnMsg, ~] = lastwarn;
+    if ~isempty(warnMsg)
+       pvec = nan;
+       ugvec = nan;
+       umvec = nan;
+       zvec = nan;
+       return
+    end
+    
+    
     p2e = solext.y(1,:)'; phi2e = solext.y(2,:)'; du2e = solext.y(3,:)'; 
     z2e = solext.x'*C.rc;
     [ rhog2e, chi_d2e, um2e ] = eos.calcvars(A,phi2e,p2e);

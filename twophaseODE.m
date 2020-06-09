@@ -1,8 +1,6 @@
 function [ dydz ] = twophaseODE( z,y,A )
 %TWOPHASEODE ode system of equations for two phasesystem
-% TODO: 
-%   - MULTIPLY THIRD EQUATION BY QmQg
-%   - FIUGRE OUT WHAT THE HECK WITH FMG
+
 eos = eosf(A.delF);
 p = y(1); phi = y(2); du = y(3);
 [rhog, ~, um] = eos.calcvars(A,phi,p);
@@ -71,7 +69,7 @@ dydz(3) = um*(1-phi)*(-zeta*1/A.C.Fr^2*(1/ug-1/um) + Fmw/(1-phi) - Fgw2/phi + la
 
             else
                 Fmg1 = -1/A.C.Reb * A.C.rc/A.C.rb0 * 1/rbnd^2 * (9/2*phi*(1-phi)*A.mu(phi,p*A.C.p0)/A.C.mu0*(du));
-                
+                Fmg1 = Fmg1 * A.fricfac;
             end
             
             
