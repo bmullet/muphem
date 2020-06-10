@@ -22,7 +22,7 @@ A.phiforce = 0.701;
 A.r = 30;
 A = Amodels.initA_paper(A);
 A.fricfac = 1;
-phis = [0.8];
+phis = [0.77];
 
 % try with Degruyter
 
@@ -71,8 +71,6 @@ for i = 1:length(phis)
             if counter > 20
                 break
             end
-            
-
             
         end
         if isnan(zvec)

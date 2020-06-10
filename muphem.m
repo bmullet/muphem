@@ -26,8 +26,8 @@ end
 %c0 = findc0(A); 
 % %A.c0 = c0;
 % vbounds = [(sqrt(A.r) - 5.2)/1.6];            % Set upper boundary at 10% speed of sound at critical pressure       
-vbounds = [sqrt(A.r*1.2)/2-2.7]+0.2;
-%vbounds = 0.4;
+%vbounds = [sqrt(A.r*1.2)/2-2.7]+0.2;
+vbounds = .7;
 options = optimset('Display','iter');
 %options = optimset();
 v_fzero = fzero(@(v) matchPatm(v,A),vbounds,options);
@@ -35,7 +35,13 @@ v_fzero = fzero(@(v) matchPatm(v,A),vbounds,options);
 A.v_chamber_i = v_fzero;
 
 % Collect Solution
-[zvec,pvec,ugvec,umvec,phivec,rhogvec,chidvec,Qmvec,Qgvec,A] = incoodes(A);
+A.fricfac = 2;
+zvec = nan;
+
+while isnan(zvec)
+    A.fricfac = A.fricfac * 0.5;
+    [zvec,pvec,ugvec,umvec,phivec,rhogvec,chidvec,Qmvec,Qgvec,A] = incoodes(A);    
+end
 
 % Output Solution
 if (plot)
