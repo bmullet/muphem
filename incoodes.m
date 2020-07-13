@@ -141,9 +141,11 @@ pfrag = sol.y(1,:)'; phifrag = sol.y(2,:)'; dufrag = sol.y(3,:)';
 LHS = zeros(length(pfrag), 3);
 RHS = LHS;
 
+grads = DGradient(sol.y, sol.x, 2,  '2ndorder');
+
 for i = 1:length(pfrag)
     M = mass(nan, [pfrag(i), phifrag(i), dufrag(i)]);
-    LHS(i,:) = sum(M,2)';
+    LHS(i,:) = M*grads(:,i);
     RHS(i,:) = twophaseODE(nan, [pfrag(i), phifrag(i), dufrag(i)], A)';
 end
 
@@ -210,9 +212,26 @@ else
     end
     
     
+    
+    
     p2e = solext.y(1,:)'; phi2e = solext.y(2,:)'; du2e = solext.y(3,:)'; 
     z2e = solext.x'*C.rc;
     [ rhog2e, chi_d2e, um2e ] = eos.calcvars(A,phi2e,p2e);
+    
+    
+    LHS = zeros(length(p2e), 3);
+    RHS = LHS;
+    
+    grads = DGradient(solext.y, solext.x, 2,  '2ndorder');
+    
+    for i = 1:length(p2e)
+        M = mass2(nan, [p2e(i), phi2e(i), du2e(i)]);
+        LHS(i,:) = M*grads(:,i);
+        RHS(i,:) = twophaseODE(nan, [p2e(i), phi2e(i), du2e(i)], A)';
+    end
+    
+    A.LHS = [A.LHS; LHS];
+    A.RHS = [A.RHS; RHS];
     
     p2e = p2e*C.p0;
     du2e = du2e*C.U0;
@@ -251,12 +270,28 @@ else
         
         options = odeset('Events',@BlowUp, 'Mass',@mass2, 'MStateDependence', 'strong', 'NormControl','off','RelTol',rtol,'AbsTol',atol,'InitialStep',1e-6);
         warning off MATLAB:ode15s:IntegrationTolNotMet
-        [z3,y3] = ode15s(@(z,y) twophaseODE(z,y,A), zspan, y0, options);
         
-        z3 = z3*C.rc;
-        p3 = y3(:,1); phi3 = y3(:,2); du3 = y3(:,3);
+        sol = ode15s(@(z,y) twophaseODE(z,y,A), zspan, y0, options);
+
+        z3 = sol.x'*C.rc;
+        p3 = sol.y(1,:)'; phi3 = sol.y(2,:)'; du3 = sol.y(3,:)';
         
         [ rhog3, chi_d3, um3 ] = eos.calcvars(A,phi3,p3);
+        
+        LHS = zeros(length(p3), 3);
+        RHS = LHS;
+        
+        grads = DGradient(sol.y, sol.x, 2,  '2ndorder');
+        
+        for i = 1:length(p3)
+            M = mass2(nan, [p3(i), phi3(i), du3(i)]);
+            LHS(i,:) = M*grads(:,i);
+            RHS(i,:) = twophaseODE(nan, [p3(i), phi3(i), du3(i)], A)';
+        end
+        
+        A.LHS = [A.LHS; LHS];
+        A.RHS = [A.RHS; RHS];
+        
         p3 = p3*C.p0;
         du3 = du3*C.U0;
         rhog3 = rhog3*C.rhog0;
