@@ -31,7 +31,7 @@ chi_c = A.xc(p*A.Pchamber);
 dxddp = A.hb .* chi_d ./ p;
 dxcdp = 0;
 if any(chi_c ~= 0) && any(chi_c ~= A.xcmax)
-    dxcdp = A.xcexp * (chi_c - A.xc0) / p;
+    dxcdp = A.xcexp .* (chi_c - A.xc0) ./ p;
 end
 beta = 1 ./ (chi_d - chi_c .* chi_d + 1) .* ((1-chi_c).*dxddp - chi_d .* (dxcdp));
 

@@ -21,6 +21,9 @@ options = odeset('Events',@ExsolutionDepth,'NormControl','on','RelTol',2.5e-14,'
 y0 = [A.Pchamber];
 u0 = A.v_chamber_i;
 
+LHS = [];
+RHS = [];
+
 if A.Pchamber > pcrit
 
     [z1,y1,ze,ze,ze] = ode45(@(z,y) singlephaseODE(z,y,u0,A),zspan,y0,options);
@@ -134,6 +137,19 @@ zfrag = sol.x'*C.rc;
 
 pfrag = sol.y(1,:)'; phifrag = sol.y(2,:)'; dufrag = sol.y(3,:)'; 
 [ rhogfrag, chidfrag, umfrag] = eos.calcvars(A,phifrag,pfrag);
+
+LHS = zeros(length(pfrag), 3);
+RHS = LHS;
+
+for i = 1:length(pfrag)
+    M = mass(nan, [pfrag(i), phifrag(i), dufrag(i)]);
+    LHS(i,:) = sum(M,2)';
+    RHS(i,:) = twophaseODE(nan, [pfrag(i), phifrag(i), dufrag(i)], A)';
+end
+
+A.LHS = LHS;
+A.RHS = RHS;
+
 
 ugfrag = umfrag + dufrag;
 
@@ -284,19 +300,19 @@ end
         beta = eos.calcbeta(A,p);
         
 
-        alpha = -1/p*((1-phi)*um + phi*ug*rhog*C.delta)/(1/ug + (1-phi)/phi*1/um);
+        alpha = -1./p.*((1-phi).*um + phi.*ug.*rhog.*C.delta)./(1./ug + (1-phi)./phi.*1./um);
         
-        gam2 = (1/p*ug + um*((1-phi)*rhom/(rhog*phi*(C.rhog0)) + 1)*(beta));
+        gam2 = (1./p.*ug + um.*((1-phi).*rhom./(rhog.*phi.*(C.rhog0)) + 1).*(beta));
         
-        Gamma = (1-phi)/phi*(1-um/(ug*rhog*C.delta))*(beta);
+        Gamma = (1-phi)./phi.*(1-um./(ug.*rhog.*C.delta)).*(beta);
         
-        gammat = 1 + alpha*(1-p*Gamma) + (1-phi)*um*beta*du;
+        gammat = 1 + alpha.*(1-p.*Gamma) + (1-phi).*um.*beta.*du;
         
-        md = -(alpha*p/ug + ug*rhog*phi*C.delta);
+        md = -(alpha.*p./ug + ug.*rhog.*phi.*C.delta);
         
-        qm = (1-phi)*um;
+        qm = (1-phi).*um;
         
-        gamma3 = (1/(rhog*ug)*1/C.delta - 1/(um) - (um*(1-phi)/(rhog*phi)*1/C.delta + um)*beta);
+        gamma3 = (1./(rhog.*ug).*1./C.delta - 1./(um) - (um.*(1-phi)./(rhog.*phi).*1./C.delta + um).*beta);
         
         M = zeros(3,3);
         M(1,:) = [gam2, (ug/phi + um/(1-phi)), 1]; %mass balance
