@@ -39,7 +39,32 @@ set(0, 'defaultFigurePaperPosition', defsize);
 set(0,'DefaultAxesFontName', 'Arial')
 set(0,'DefaultTextFontname', 'Arial')
 
+%% k and q
 
+phi = 0:1:50;
+q = tand(45 + 1/2*phi).^2;
+k = 1./q .* (1/2.7*(q-1) +1);
+plot(phi,k); hold on
+plot(phi,1./q,'--r')
+legend('With pore pressure', 'Without pore pressure')
+xlabel('\phi'); 
+ylabel('k')
+
+%
+figure
+phi = A.mc.phi;
+cohesion = A.mc.C; mu = tan(phi); c = 2*cohesion*((mu^2 + 1)^(1/2) + mu)./Szz;
+C = 2*cohesion*((mu^2 + 1)^(1/2) + mu);
+q = tan(pi/4 + 1/2*phi)^2;
+d = 0:3000;
+
+k = 1./q .* (1/2.7*(q-1) +1 - C./(2700*9.8*d));
+
+plot(d,k)
+k = 1./q .* (1 - C./(2700*9.8*d)); hold on;
+plot(d,k,'--r'); ylim([0,1])
+legend('With pore pressure', 'Without pore pressure')
+xlabel('depth (m)'); ylabel('k')
 %% Stress regimes
 figure
 
@@ -443,7 +468,11 @@ phivec = out{6}; rhogvec = out{7}; chidvec = out{8};
 
 A.mc.phi = 30/180*pi;
 
-plotfailureprofiles(A,pvec,Szz,nan(size(Szz)),Srz,zvec,pvec,true);
+porep = -zvec*0;
+plotfailureprofiles(A,pvec,Szz,nan(size(Szz)),Srz,zvec,pvec,true,porep);
+
+porep = -zvec*1000*9.8;
+plotfailureprofiles(A,pvec,Szz,nan(size(Szz)),Srz,zvec,pvec,true,porep);
 
 %% Example Eruption
 set(0,'defaultFigurePosition', [defpos(1) defpos(2) 3.3*width*100, height*100]);
@@ -705,6 +734,67 @@ str = {'Termination via','Catastrophic Collapse'};
 dim = [.7, 0.01, .1, .23];
 annotation('textbox',dim,'String',str,'FitBoxToText','on','FontSize',20,'HorizontalAlignment','center');
 
+%% Three solutions
+set(0,'defaultFigurePosition', [defpos(1) defpos(2) width*100*4, height*100*2]);
+
+load('ThreeSolutions.mat');
+
+solutions = {out_lowv, out_midv, out_highv};
+
+figure
+clrs = parula(3);
+
+solstr = {'low','med','high'};
+for i = 1:length(solutions)
+    out = solutions{i};
+    
+    A = out{1}; zvec = out{2}; pvec = out{3}; ugvec = out{4}; umvec = out{5};
+    phivec = out{6}; rhogvec = out{7};
+    
+    % p v z
+    subplot(221)
+    semilogx(pvec,zvec, 'Color', clrs(i,:),'LineWidth',lw, 'LineStyle', '-','DisplayName',solstr{i}); hold on
+    grid on
+    xticks([1e5, 1e6, 1e7,1e8])
+    xlabel('Pressure (Pa)')
+    ylabel('z (m)')
+    legend show
+    legend('Orientation','horizontal','Location','south')
+
+    % p v phi
+    subplot(222)
+    semilogx(umvec, zvec, 'Color', clrs(i,:),'LineWidth',lw, 'LineStyle', '-','DisplayName',[solstr{i} ', u_m']); hold on;
+    semilogx(ugvec, zvec, 'Color', clrs(i,:),'LineWidth',lw, 'LineStyle', '--','DisplayName',[solstr{i} ', u_g']);
+    grid on
+    ylabel('z (m)')
+    xlabel('u (m/s)')
+    xticks([1e5, 1e6, 1e7,1e8])
+    legend show
+    legend('Location','southeast')
+    
+    % p v u
+    subplot(223)
+    semilogx(pvec,phivec, 'Color', clrs(i,:),'LineWidth',lw, 'LineStyle', '-','DisplayName',solstr{i}); hold on;
+    grid on
+    xticks([1e5, 1e6, 1e7,1e8])
+    xlabel('Pressure (Pa)')
+    ylabel('\phi')
+    legend show
+    legend('Orientation','horizontal','Location','south')
+ 
+    
+    % u v z
+    subplot(224)   
+    loglog(pvec, umvec, 'Color', clrs(i,:),'LineWidth',lw, 'LineStyle', '-','DisplayName',[solstr{i} ', u_m']); hold on;
+    loglog(pvec, ugvec, 'Color', clrs(i,:),'LineWidth',lw, 'LineStyle', '--','DisplayName',[solstr{i} ', u_g']);
+    grid on
+    xlabel('Pressure (Pa)')
+    ylabel('v (m/s)')
+    xticks([1e5, 1e6, 1e7,1e8])
+    legend show
+end
+
+
 function plot_MC(rR,C_over_sigz,symbl,lw)
 clrs = parula(3);
 phi = 38/180*pi;
@@ -713,7 +803,6 @@ cohesion = 5e6; mu = tan(phi); C = 2*cohesion*((mu^2 + 1)^(1/2) + mu);
 q = tan(pi/4 + 1/2*phi)^2;
 sigz = 2700*9.8*500;
 C = C_over_sigz*sigz;
-
 
 lambda = linspace(0.01,5,500);
 bound_1 = @(lambda, rR) lambda;

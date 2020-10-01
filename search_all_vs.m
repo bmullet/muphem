@@ -22,7 +22,7 @@ A.phiforce = 0.701;
 A.r = 30;
 A = Amodels.initA_paper(A);
 A.fricfac = 1;
-phis = [0.77];
+phis = [.7, .77, .85, 1];
 
 % try with Degruyter
 
@@ -40,7 +40,7 @@ phis = [0.77];
 %%
 
 %phis = [100];
-vs = [0.01:.005:1];
+vs = [0.01:.01:2];
 
 resids = nan(length(phis),length(vs));
 phi0s = nan(length(vs), 3);

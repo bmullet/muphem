@@ -1,16 +1,17 @@
-function [with_shear, no_shear, failure_shear, failure_no_shear] = plotfailureprofiles(A,Srr,Szz,Stt,Srz,zvec,pvec,plotfigs)
+function [with_shear, no_shear, failure_shear, failure_no_shear] = plotfailureprofiles(A,Srr,Szz,Stt,Srz,zvec,pvec,plotfigs,porep)
 
 
 tau = Srz./Szz;
+pp = porep./Szz;
 phi = A.mc.phi;
 cohesion = A.mc.C; mu = tan(phi); c = 2*cohesion*((mu^2 + 1)^(1/2) + mu)./Szz;
 C = 2*cohesion*((mu^2 + 1)^(1/2) + mu);
 
 q = tan(pi/4 + 1/2*phi)^2;
 
-fail_rz = @(p,tau,c,q)   .5*(p+1+((p-1)^2 + 4*(tau)^2)^0.5) - c - q*0.5*(p+1-((p-1)^2 + 4*(tau)^2)^0.5);
-fail_rt = @(p,s,tau,c,q) -2*s + p + c + q*0.5*(p + 1 - ((p-1)^2 + 4*(tau)^2)^.5);
-fail_tz = @(p,s,tau,c,q) 0.5*(p + 1 + ((p-1)^2 + 4*(tau)^2)^.5) - c - q*(2*s-p);
+fail_rz = @(p,tau,pp,c,q)   (.5*(p+1+((p-1)^2 + 4*(tau)^2)^0.5)-pp) - c - q*(0.5*(p+1-((p-1)^2 + 4*(tau)^2)^0.5)-pp);
+fail_rt = @(p,s,tau,pp,c,q) -(2*s - p - pp) + c + q*(0.5*(p + 1 - ((p-1)^2 + 4*(tau)^2)^.5) - pp);
+fail_tz = @(p,s,tau,pp,c,q) (0.5*(p + 1 + ((p-1)^2 + 4*(tau)^2)^.5) - pp) - c - q*(2*s-p - pp);
 
 frz_low  = nan(length(zvec),1);
 frz_high = nan(length(zvec),1);
@@ -21,26 +22,27 @@ s = A.lambda; % Vertical gradient of horizontal stress
 
 for i = 1:length(zvec)
     try
-        frz_low(i) = fzero(@(x) fail_rz(x, tau(i), c(i), q), 0.237);
+        frz_low(i) = fzero(@(x) fail_rz(x, tau(i), pp(i), c(i), q), 0.237);
     catch ME
     end
     try
-        frz_high(i) = fzero(@(x) fail_rz(x, tau(i), c(i), q), 5);
+        frz_high(i) = fzero(@(x) fail_rz(x, tau(i), pp(i), c(i), q), 5);
     catch ME
     end
     try
-        frt(i) = fzero(@(x) fail_rt(x, s, tau(i), c(i), q), [-1, 1]);
+        frt(i) = fzero(@(x) fail_rt(x, s, tau(i), pp(i), c(i), q), [-1, 1]);
     catch ME
     end
     try
-        ftz(i) = fzero(@(x) fail_tz(x, s, tau(i), c(i), q), [-1, 1]);
+        ftz(i) = fzero(@(x) fail_tz(x, s, tau(i), pp(i), c(i), q), [-1, 1]);
     catch ME
     end
 end
 
 tstar = ((1./((c + q).*(1-c))).^(1/2).*(c + q - 1))/2;
 
-tfail = ((c + pvec./Szz*q - 1).*(c - pvec./Szz + q)).^(1/2)./(pvec./Szz + pvec./Szz*q);
+% old code, not up to date with pore pressure
+%tfail = ((c + pvec./Szz*q - 1).*(c - pvec./Szz + q)).^(1/2)./(pvec./Szz + pvec./Szz*q);
 
 
 
