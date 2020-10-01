@@ -20,7 +20,7 @@ if (~exist('A'))
     A.useForchheimer = false;
 
     % Set some constants and containers
-    A.lambda = 0.5;
+    A.lambda = 0.75;
     A.chamber_fac = 0.9;
     A.Patm_ = 1.013e5;     % pascals
     A.vchamber_ = [];

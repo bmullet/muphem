@@ -192,8 +192,8 @@ set(0,'defaultFigurePosition', [defpos(1) defpos(2) 2.2*width*100, height*100]);
 
 subplot(121)
 rR = 1;
-plot_MC(1,0,'-',3);
-plot_MC(1.2,0,':',2);
+plot_MC(1,0,'-',3,1/2.7);
+%plot_MC(1.2,0,':',2);
 p2 = plot(xlim, [-1 -1], ':k','LineWidth',2);
 p1 = plot(xlim, [-1 -1], '-k','LineWidth',3);
 
@@ -243,8 +243,8 @@ legend([p1,p2],'r/R = 1', 'r/R = 1.2','Location','Southeast')
 
 subplot(122)
 rR = 1;
-plot_MC(1,0,'-',3);
-plot_MC(1,0.5,':',2);
+plot_MC(1,0,'-',3,0);
+plot_MC(1,0.5,':',2,0);
 p2 = plot(xlim, [-1 -1], ':k','LineWidth',2);
 p1 = plot(xlim, [-1 -1], '-k','LineWidth',3);
 legend([p1,p2],'C/\sigma_{zz} = 0', 'C/\sigma_{zz} = 0.5','Location','Southeast')
@@ -795,7 +795,9 @@ for i = 1:length(solutions)
 end
 
 
-function plot_MC(rR,C_over_sigz,symbl,lw)
+function plot_MC(rR,C_over_sigz,symbl,lw,pp)
+% pp: pore pressure gradient (Pp/sigma_z)
+
 clrs = parula(3);
 phi = 38/180*pi;
 cohesion = 5e6; mu = tan(phi); C = 2*cohesion*((mu^2 + 1)^(1/2) + mu);
@@ -823,23 +825,23 @@ x4 = fzero(@(x) D_failure(x,C,sigz,rR) - bound_1(x, rR), 0.6);
 x5 = fzero(@(x) E_failure(x,C,sigz,rR) - bound_2(x, rR), 0.6);
 x6 = fzero(@(x) F_failure(x,C,sigz,rR) - bound_3(x, rR), 0.6);
 
-plot(lambda, bound_1(lambda, rR), 'Color', clrs(1,:),'LineWidth',lw, 'LineStyle', symbl); hold on;
-plot(lambda, bound_2(lambda, rR), 'Color', clrs(2,:),'LineWidth',lw, 'LineStyle', symbl);
-plot(lambda, bound_3(lambda, rR), 'Color', clrs(3,:),'LineWidth',lw, 'LineStyle', symbl);
+plot(to_unprimed(lambda, pp), to_unprimed(bound_1(lambda, rR), pp), 'Color', clrs(1,:),'LineWidth',lw, 'LineStyle', symbl); hold on;
+plot(to_unprimed(lambda, pp), to_unprimed(bound_2(lambda, rR), pp), 'Color', clrs(2,:),'LineWidth',lw, 'LineStyle', symbl);
+plot(to_unprimed(lambda, pp), to_unprimed(bound_3(lambda, rR), pp), 'Color', clrs(3,:),'LineWidth',lw, 'LineStyle', symbl);
 
 patchx = 0:.01:1;
-y = [0, bound_1(patchx,rR), fliplr(bound_2(patchx(patchx>=0.5),rR)), 0];
-x = [0, patchx, fliplr(patchx(patchx>=0.5)), 0];
+y = [0, to_unprimed(bound_1(patchx,rR), pp), to_unprimed(fliplr(bound_2(patchx(patchx>=0.5),rR)),pp), 0];
+x = [0, to_unprimed(patchx,pp), to_unprimed(fliplr(patchx(patchx>=0.5)),pp), 0];
 
 patch(x,y,'o','FaceAlpha',.1,'LineStyle', 'none');
 
 %plot([no_cohesion, no_cohesion], ylim, '--r')
-plot([x1, x2], [A_failure(x1,C,sigz,rR), A_failure(x2,C,sigz,rR)], strcat(symbl,'k'),'LineWidth', lw)
-plot([x2, x3], [B_failure(x2,C,sigz,rR), B_failure(x3,C,sigz,rR)], strcat(symbl,'k'),'LineWidth', lw)
-plot([x3, x4], [C_failure(x3,C,sigz,rR), C_failure(x4,C,sigz,rR)], strcat(symbl,'k'),'LineWidth', lw)
-plot([x4, x5], [D_failure(x4,C,sigz,rR), D_failure(x5,C,sigz,rR)], strcat(symbl,'k'),'LineWidth', lw)
-plot([x5, x6], [E_failure(x5,C,sigz,rR), E_failure(x6,C,sigz,rR)], strcat(symbl,'k'),'LineWidth', lw)
-plot([x1, x6], [F_failure(x1,C,sigz,rR), F_failure(x6,C,sigz,rR)], strcat(symbl,'k'),'LineWidth', lw)
+plot(to_unprimed([x1, x2],pp), to_unprimed([A_failure(x1,C,sigz,rR), A_failure(x2,C,sigz,rR)],pp), strcat(symbl,'k'),'LineWidth', lw)
+plot(to_unprimed([x2, x3],pp), to_unprimed([B_failure(x2,C,sigz,rR), B_failure(x3,C,sigz,rR)],pp), strcat(symbl,'k'),'LineWidth', lw)
+plot(to_unprimed([x3, x4],pp), to_unprimed([C_failure(x3,C,sigz,rR), C_failure(x4,C,sigz,rR)],pp), strcat(symbl,'k'),'LineWidth', lw)
+plot(to_unprimed([x4, x5],pp), to_unprimed([D_failure(x4,C,sigz,rR), D_failure(x5,C,sigz,rR)],pp), strcat(symbl,'k'),'LineWidth', lw)
+plot(to_unprimed([x5, x6],pp), to_unprimed([E_failure(x5,C,sigz,rR), E_failure(x6,C,sigz,rR)],pp), strcat(symbl,'k'),'LineWidth', lw)
+plot(to_unprimed([x1, x6],pp), to_unprimed([F_failure(x1,C,sigz,rR), F_failure(x6,C,sigz,rR)],pp), strcat(symbl,'k'),'LineWidth', lw)
 xlabel('S/\sigma_{zz}');
 ylabel('p/\sigma_{zz}');
 ylim([0,5])
@@ -921,3 +923,4 @@ ylim([-6200,0])
 legend([p1, p2, p3, p4], 'Orientation','horizontal','Location','south')
 
 end
+
