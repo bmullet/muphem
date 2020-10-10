@@ -1,3 +1,11 @@
+%% Distribute solution
+A = out{1}; zvec = out{2}; pvec = out{3}; ugvec = out{4}; umvec = out{5};
+phivec = out{6}; rhogvec = out{7}; chidvec = out{8}; Qmvec = out{9}; Qgvec = out{10}; failure = out{11};
+Srz = nan(size(phivec));
+    mu = A.mu(phivec,pvec);
+    Srz(zvec<A.fragdepth) = 4*mu(zvec<A.fragdepth).*umvec(zvec<A.fragdepth)/A.r;
+    Srz(zvec>=A.fragdepth) = A.f0*rhogvec(zvec>=A.fragdepth).*ugvec(zvec>=A.fragdepth).^2./2;
+
 %% Test 1 - Test for uniqueness
 A = initA();
 z = 1:A.depth;
@@ -381,13 +389,7 @@ for i = 1:length(v)
     resid(i) = matchPatm(vi, A);
 end
 
-%% Distribute solution
-A = out{1}; zvec = out{2}; pvec = out{3}; ugvec = out{4}; umvec = out{5};
-phivec = out{6}; rhogvec = out{7}; chidvec = out{8}; Qmvec = out{9}; Qgvec = out{10}; failure = out{11};
-Srz = nan(size(phivec));
-    mu = A.mu(phivec,pvec);
-    Srz(zvec<A.fragdepth) = 4*mu(zvec<A.fragdepth).*umvec(zvec<A.fragdepth)/A.r;
-    Srz(zvec>=A.fragdepth) = A.f0*rhogvec(zvec>=A.fragdepth).*ugvec(zvec>=A.fragdepth).^2./2;
+
 
 %% Do MSH_Degruyter test
 semilogx(pvz(:,1),pvz(:,2),'or')

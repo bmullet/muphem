@@ -24,7 +24,7 @@ while isnan(zvec)
     [zvec,pvec,~,~,~,~,~,~,~,Ar] = incoodes(A);
     
     if counter > 20
-        error('Friction decreased to crazy low levels! Check problem.')
+        break
     end
     
     counter = counter + 1;

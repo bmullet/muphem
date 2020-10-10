@@ -50,10 +50,12 @@ legend('With pore pressure', 'Without pore pressure')
 xlabel('\phi'); 
 ylabel('k')
 
-%
+%%
 figure
+
 phi = A.mc.phi;
-cohesion = A.mc.C; mu = tan(phi); c = 2*cohesion*((mu^2 + 1)^(1/2) + mu)./Szz;
+cohesion = A.mc.C; 
+mu = tan(phi); c = 2*cohesion*((mu^2 + 1)^(1/2) + mu)./Szz;
 C = 2*cohesion*((mu^2 + 1)^(1/2) + mu);
 q = tan(pi/4 + 1/2*phi)^2;
 d = 0:3000;
@@ -243,8 +245,8 @@ legend([p1,p2],'r/R = 1', 'r/R = 1.2','Location','Southeast')
 
 subplot(122)
 rR = 1;
-plot_MC(1,0,'-',3,0);
-plot_MC(1,0.5,':',2,0);
+plot_MC(1,0,'-',3,1/2.7);
+plot_MC(1,0.5,':',2,1/2.7);
 p2 = plot(xlim, [-1 -1], ':k','LineWidth',2);
 p1 = plot(xlim, [-1 -1], '-k','LineWidth',3);
 legend([p1,p2],'C/\sigma_{zz} = 0', 'C/\sigma_{zz} = 0.5','Location','Southeast')

@@ -46,7 +46,6 @@ resids = nan(length(phis),length(vs));
 phi0s = nan(length(vs), 3);
 fricfacs = nan(size(resids));
 
-
 for i = 1:length(phis)
     A.chamber_fac = phis(i);
     %     disp(A.phiforce)

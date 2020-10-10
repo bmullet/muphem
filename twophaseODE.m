@@ -82,7 +82,8 @@ dydz(3) = um*(1-phi)*(-zeta*1/A.C.Fr^2*(1/ug-1/um) + Fmw/(1-phi) - Fgw2/phi + la
             elseif (phi>=A.phi0) && (phi<pf)
                 if A.delF
                     Fmg = Fmg1;
-                   
+                elseif A.endTransition
+                    Fmg = Fmg2;                   
                 else
                     t = (phi-A.phi0)/(pf-A.phi0);
                     Fmg = -1*(abs(Fmg1))^(1-t)*(abs(Fmg2))^(t)*sign(ug-um);

@@ -4,7 +4,7 @@ function [zvec,pvec,ugvec,umvec,phivec,rhogvec,chidvec,Qmvec,Qgvec,A] = incoodes
 %   conduit (z=0)
 %
 rtol = 1e-13; %1e-9 works!
-atol = 5e-10;
+atol = 5e-11;
 
 
 
@@ -14,6 +14,7 @@ debug = false;
 
 %% First integrate until we reach p critical (where gas first exsolves)
 A.delF = 1; % Turns on/off mass transfer
+A.endTransition = false; % Flag to mark end of transition phase
 eos = eosf(A.delF);
 pcrit = A.Pcrit*0.99; % allow pressure to drop slightly below exsolution so that Qg ~= 0 (overpressure develops)
 zspan = [-A.depth 0];
@@ -138,14 +139,14 @@ zfrag = sol.x'*C.rc;
 pfrag = sol.y(1,:)'; phifrag = sol.y(2,:)'; dufrag = sol.y(3,:)'; 
 [ rhogfrag, chidfrag, umfrag] = eos.calcvars(A,phifrag,pfrag);
 
-LHS = zeros(length(pfrag), 3);
-RHS = LHS;
+LHS = zeros(length(pfrag), 3, 3);
+RHS = zeros(length(pfrag),3);
 
 grads = DGradient(sol.y, sol.x, 2,  '2ndorder');
 
 for i = 1:length(pfrag)
     M = mass(nan, [pfrag(i), phifrag(i), dufrag(i)]);
-    LHS(i,:) = M*grads(:,i);
+    LHS(i,:,:) = M.*repmat(grads(:,i),1,3);
     RHS(i,:) = twophaseODE(nan, [pfrag(i), phifrag(i), dufrag(i)], A)';
 end
 
@@ -197,7 +198,7 @@ else
     
     lastwarn('');
     
-    step_tol = [atol, atol, atol*1e6];
+    step_tol = [atol, atol, atol/100];
     
     options = odeset('Events',@RegimeChangeDepth,'Mass',@mass2, 'MStateDependence', 'strong',  'NormControl','off','RelTol',rtol,'AbsTol',step_tol,'InitialStep',1e-14);
     
@@ -211,27 +212,26 @@ else
        return
     end
     
-    
-    
+
     
     p2e = solext.y(1,:)'; phi2e = solext.y(2,:)'; du2e = solext.y(3,:)'; 
     z2e = solext.x'*C.rc;
     [ rhog2e, chi_d2e, um2e ] = eos.calcvars(A,phi2e,p2e);
     
-    
-    LHS = zeros(length(p2e), 3);
-    RHS = LHS;
+    LHS = zeros(length(p2e), 3, 3);
+    RHS = zeros(length(p2e),3);
     
     grads = DGradient(solext.y, solext.x, 2,  '2ndorder');
     
     for i = 1:length(p2e)
         M = mass2(nan, [p2e(i), phi2e(i), du2e(i)]);
-        LHS(i,:) = M*grads(:,i);
+        LHS(i,:,:) = M.*repmat(grads(:,i),1,3);
         RHS(i,:) = twophaseODE(nan, [p2e(i), phi2e(i), du2e(i)], A)';
     end
     
     A.LHS = [A.LHS; LHS];
     A.RHS = [A.RHS; RHS];
+
     
     p2e = p2e*C.p0;
     du2e = du2e*C.U0;
@@ -259,7 +259,10 @@ else
         
     else
 
-        
+      
+        % Set flag for marking we are done with transition
+        A.endTransition = true;
+          
         A.delF = 0;
         delF = 0;
         eos = eosf(A.delF);
@@ -278,14 +281,14 @@ else
         
         [ rhog3, chi_d3, um3 ] = eos.calcvars(A,phi3,p3);
         
-        LHS = zeros(length(p3), 3);
-        RHS = LHS;
+        LHS = zeros(length(p3), 3, 3);
+        RHS = zeros(length(p3),3);
         
         grads = DGradient(sol.y, sol.x, 2,  '2ndorder');
         
         for i = 1:length(p3)
             M = mass2(nan, [p3(i), phi3(i), du3(i)]);
-            LHS(i,:) = M*grads(:,i);
+            LHS(i,:,:) = M.*repmat(grads(:,i),1,3);
             RHS(i,:) = twophaseODE(nan, [p3(i), phi3(i), du3(i)], A)';
         end
         
