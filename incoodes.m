@@ -146,7 +146,7 @@ grads = DGradient(sol.y, sol.x, 2,  '2ndorder');
 
 for i = 1:length(pfrag)
     M = mass(nan, [pfrag(i), phifrag(i), dufrag(i)]);
-    LHS(i,:,:) = M.*repmat(grads(:,i),1,3);
+    LHS(i,:,:) = M.*repmat(grads(:,i)',3,1);
     RHS(i,:) = twophaseODE(nan, [pfrag(i), phifrag(i), dufrag(i)], A)';
 end
 
@@ -225,7 +225,7 @@ else
     
     for i = 1:length(p2e)
         M = mass2(nan, [p2e(i), phi2e(i), du2e(i)]);
-        LHS(i,:,:) = M.*repmat(grads(:,i),1,3);
+        LHS(i,:,:) = M.*repmat(grads(:,i)',3,1);
         RHS(i,:) = twophaseODE(nan, [p2e(i), phi2e(i), du2e(i)], A)';
     end
     
@@ -288,7 +288,7 @@ else
         
         for i = 1:length(p3)
             M = mass2(nan, [p3(i), phi3(i), du3(i)]);
-            LHS(i,:,:) = M.*repmat(grads(:,i),1,3);
+            LHS(i,:,:) = M.*repmat(grads(:,i)',3,1);
             RHS(i,:) = twophaseODE(nan, [p3(i), phi3(i), du3(i)], A)';
         end
         
