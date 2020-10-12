@@ -6,7 +6,6 @@ p = y(1); phi = y(2); du = y(3);
 [rhog, ~, um] = eos.calcvars(A,phi,p);
 ug = du + um;
 
-
 g = A.g;
 
 if (A.delF)
@@ -82,26 +81,33 @@ end
             end
             
             
-            Fmg2 = -3/8*phi*(1-phi)*A.dragC*A.C.rc/A.Rash*rhog*abs(du)*(du)*A.C.delta;
+            Fmg2 = -3/8*phi*(1-phi)*A.dragC*A.C.rc/A.Rash*rhog*abs(du)*(du)*A.C.delta*1000;
           
-            pf = A.phiforce;
-                       
-            if phi<A.phi0
-                Fmg = Fmg1;
-            elseif (phi>=A.phi0) && (phi<pf)
-                if A.delF
-                    Fmg = Fmg1;
-                elseif A.endTransition
-                    Fmg = Fmg2;                   
-                else
-                    t = (phi-A.phi0)/(pf-A.phi0);
-                    Fmg = -1*(abs(Fmg1))^(1-t)*(abs(Fmg2))^(t)*sign(ug-um);
-                end
-            elseif phi>=pf
-                Fmg = Fmg2;
+            if A.delF
+               Fmg = Fmg1;
+               
             else
-                Fmg=0;
-            end                     
+                phif = A.phi0 - 0.01;
+                
+                if phi > A.phi0
+                   Fmg = Fmg2;
+                elseif phi > phif
+                   phif = A.phi0 - 0.01;
+                   t = (phi - phif)/(A.phi0 - phif);
+                   Fmg =  - (abs(Fmg2)^t * abs(Fmg1)^(1-t));
+                else
+                   Fmg = Fmg1;
+                end
+                    
+            end
+%             if phi < A.phi0
+%                % Before fragmentation
+%                Fmg = Fmg1;
+%             else
+%                % After fragmentation
+%                Fmg = Fmg2;
+%             end
+                     
                 
     end
 

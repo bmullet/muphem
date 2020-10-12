@@ -184,7 +184,7 @@ chidvec = [chidvec; chidfrag];
 nz = length(zfrag);
 zstart = zfrag(nz);
 A.fragdepth = zstart;
-zspan = [zstart 0]/C.rc;
+
 
 
 % Do fragmentation depth to surface integration, if needed
@@ -210,37 +210,38 @@ else
     
     lastwarn('');
     
-    step_tol = [atol, atol, atol/100];
+    % Set flag for marking we are done with transition
+    A.endTransition = true;
     
-    options = odeset('Events',@RegimeChangeDepth,'Mass',@mass2, 'MStateDependence', 'strong',  'NormControl','off','RelTol',rtol,'AbsTol',step_tol,'InitialStep',1e-14);
+    A.delF = 0;
+    delF = 0;
+    eos = eosf(A.delF);
     
-    solext = ode15s(@(z,y) twophaseODE(z,y,A, false), zspan, sol.y(:,end), options);
-    [warnMsg, ~] = lastwarn;
-    if ~isempty(warnMsg)
-       pvec = nan;
-       ugvec = nan;
-       umvec = nan;
-       zvec = nan;
-       return
-    end
+    zspan = [zstart 0]/C.rc;
     
+    y0 = sol.y(:,end);
 
+    options = odeset('Events',@BlowUp, 'Mass',@mass2, 'MStateDependence', 'strong', 'NormControl','off','RelTol',rtol*1e4,'AbsTol',atol*1e4,'InitialStep',1e-6);
+    %warning off MATLAB:ode15s:IntegrationTolNotMet
+
+    sol = ode15s(@(z,y) twophaseODE(z,y,A, false), zspan, y0, options);
+
+    z3 = sol.x'*C.rc;
+    p3 = sol.y(1,:)'; phi3 = sol.y(2,:)'; du3 = sol.y(3,:)';
     
-    p2e = solext.y(1,:)'; phi2e = solext.y(2,:)'; du2e = solext.y(3,:)'; 
-    z2e = solext.x'*C.rc;
-    [ rhog2e, chi_d2e, um2e ] = eos.calcvars(A,phi2e,p2e);
-       
-    RHS.eq1 = zeros(length(p2e),NUM_TERMS_EQ1);
-    RHS.eq2 = zeros(length(p2e),NUM_TERMS_EQ2);
-    RHS.eq3 = zeros(length(p2e),NUM_TERMS_EQ3);
+    [ rhog3, chi_d3, um3 ] = eos.calcvars(A,phi3,p3);
     
-    grads = DGradient(solext.y, solext.x, 2,  '2ndorder');
+    RHS.eq1 = zeros(length(p3),NUM_TERMS_EQ1);
+    RHS.eq2 = zeros(length(p3),NUM_TERMS_EQ2);
+    RHS.eq3 = zeros(length(p3),NUM_TERMS_EQ3);
     
-    for i = 1:length(p2e)
-        M = mass2(nan, [p2e(i), phi2e(i), du2e(i)]);
+    grads = DGradient(sol.y, sol.x, 2,  '2ndorder');
+
+    for i = 1:length(p3)
+        M = mass2(nan, [p3(i), phi3(i), du3(i)]);
         LHS(i,:,:) = M.*repmat(grads(:,i)',3,1);
         
-        RHStemp = twophaseODE(nan, [p2e(i), phi2e(i), du2e(i)], A, true);
+        RHStemp = twophaseODE(nan, [p3(i), phi3(i), du3(i)], A, true);
         RHS.eq1(i,:) = RHStemp.RHS1(:);
         RHS.eq2(i,:) = RHStemp.RHS2(:);
         RHS.eq3(i,:) = RHStemp.RHS3(:);
@@ -250,98 +251,26 @@ else
     A.RHS.eq1 = [A.RHS.eq1; RHS.eq1];
     A.RHS.eq2 = [A.RHS.eq2; RHS.eq2];
     A.RHS.eq3 = [A.RHS.eq3; RHS.eq3];
+    p3 = p3*C.p0;
+    du3 = du3*C.U0;
+    rhog3 = rhog3*C.rhog0;
+    um3 = um3*C.U0;
     
-    p2e = p2e*C.p0;
-    du2e = du2e*C.U0;
-    rhog2e = rhog2e*C.rhog0;
-    um2e = um2e*C.U0;
-    ug2e = du2e + um2e;
-
-    Qm2e = (1-phi2e).*um2e.*A.rhom0;
-    Qg2e = phi2e.*ug2e.*rhog2e;
-    phivec = [phivec; phi2e];
-    Qmvec = [Qmvec; Qm2e];
-    Qgvec = [Qgvec; Qg2e];
-    rhogvec = [rhogvec; rhog2e];
-    chidvec = [chidvec; chi_d2e];
+    ug3 = du3 + um3;
     
-    nz = length(z2e);
-    zstart = z2e(nz)/C.rc;
-    
-    if abs(zstart) <  1
-        
-        zvec  = [z1; zfrag; z2e];
-        pvec = [p1; pfrag; p2e];
-        ugvec = [ug1; ugfrag; ug2e];
-        umvec = [um1; umfrag; um2e];    
-        
-    else
-
-      
-        % Set flag for marking we are done with transition
-        A.endTransition = true;
-          
-        A.delF = 0;
-        delF = 0;
-        eos = eosf(A.delF);
-        
-        zspan = [zstart 0];
-        
-        y0 = [p2e(nz)/C.p0 phi2e(nz) du2e(nz)/C.U0];
-        
-        options = odeset('Events',@BlowUp, 'Mass',@mass2, 'MStateDependence', 'strong', 'NormControl','off','RelTol',rtol,'AbsTol',atol,'InitialStep',1e-6);
-        warning off MATLAB:ode15s:IntegrationTolNotMet
-        
-        sol = ode15s(@(z,y) twophaseODE(z,y,A, false), zspan, y0, options);
-
-        z3 = sol.x'*C.rc;
-        p3 = sol.y(1,:)'; phi3 = sol.y(2,:)'; du3 = sol.y(3,:)';
-        
-        [ rhog3, chi_d3, um3 ] = eos.calcvars(A,phi3,p3);
-        
-        RHS.eq1 = zeros(length(p3),NUM_TERMS_EQ1);
-        RHS.eq2 = zeros(length(p3),NUM_TERMS_EQ2);
-        RHS.eq3 = zeros(length(p3),NUM_TERMS_EQ3);
-        
-        grads = DGradient(sol.y, sol.x, 2,  '2ndorder');
-        
-        for i = 1:length(p3)
-            M = mass2(nan, [p3(i), phi3(i), du3(i)]);
-            LHS(i,:,:) = M.*repmat(grads(:,i)',3,1);
-
-            RHStemp = twophaseODE(nan, [p3(i), phi3(i), du3(i)], A, true);
-            RHS.eq1(i,:) = RHStemp.RHS1(:);
-            RHS.eq2(i,:) = RHStemp.RHS2(:);
-            RHS.eq3(i,:) = RHStemp.RHS3(:);
-        end
-        
-        A.LHS = [A.LHS; LHS];
-        A.RHS.eq1 = [A.RHS.eq1; RHS.eq1];
-        A.RHS.eq2 = [A.RHS.eq2; RHS.eq2];
-        A.RHS.eq3 = [A.RHS.eq3; RHS.eq3];
-        
-        p3 = p3*C.p0;
-        du3 = du3*C.U0;
-        rhog3 = rhog3*C.rhog0;
-        um3 = um3*C.U0;
-        
-        ug3 = du3 + um3;
-        
-        Qm3 = (1-phi3).*um3.*A.rhom0;
-        Qg3 = phi3.*ug3.*rhog3;
-        phivec = [phivec; phi3];
-        Qmvec = [Qmvec; Qm3];
-        Qgvec = [Qgvec; Qg3];
-        rhogvec = [rhogvec; rhog3];
-        chidvec = [chidvec; chi_d3];
-        zvec  = [z1; zfrag; z2e; z3];
-        pvec = [p1; pfrag; p2e; p3];
-        ugvec = [ug1; ugfrag; ug2e; ug3];
-        umvec = [um1; umfrag; um2e; um3];
+    Qm3 = (1-phi3).*um3.*A.rhom0;
+    Qg3 = phi3.*ug3.*rhog3;
+    phivec = [phivec; phi3];
+    Qmvec = [Qmvec; Qm3];
+    Qgvec = [Qgvec; Qg3];
+    rhogvec = [rhogvec; rhog3];
+    chidvec = [chidvec; chi_d3];
+    zvec  = [z1; zfrag;  z3];
+    pvec = [p1; pfrag; p3];
+    ugvec = [ug1; ugfrag;  ug3];
+    umvec = [um1; umfrag; um3];
     end
     
-end
-
 if (debug)
        fprintf('Ex depth = %.2f\n', A.exdepth);    
        fprintf('frag depth = %.2f\n', A.fragdepth); 

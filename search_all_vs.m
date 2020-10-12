@@ -13,7 +13,7 @@
 % %vs = linspace(0.1,10,400);
 % %vs = logspace(-1,log10(15),1000);
 
-% should give three solutions
+%% should give one solution
 
 A = Amodels.initA_paper();
 A.phi0 = 0.70;
@@ -22,7 +22,23 @@ A.phiforce = 0.701;
 A.r = 30;
 A = Amodels.initA_paper(A);
 A.fricfac = 1;
-phis = [.7, .77, .85, 1];
+
+A.chamber_fac = 1;
+%     disp(A.phiforce)
+
+A.Pchamber = (1.01e5+A.depth*A.g*A.k.rho)*A.chamber_fac;
+
+%% should give three solutions
+
+A = Amodels.initA_paper();
+A.phi0 = 0.70;
+A.phiforce = 0.701;
+%A.chamber_fac = 1;
+A.r = 30;
+A = Amodels.initA_paper(A);
+A.fricfac = 1;
+phis = [.7, .8, 1];
+
 
 % try with Degruyter
 
@@ -39,7 +55,7 @@ phis = [.7, .77, .85, 1];
 
 %%
 
-%phis = [100];
+%phis = [0.85, 0.95];
 vs = [0.01:.01:2];
 
 resids = nan(length(phis),length(vs));
