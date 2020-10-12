@@ -33,7 +33,8 @@ end
 if isnan(zvec)
     resid = -100;
 elseif max(zvec) < 0
-    % did not make it to surface
+    % did not make it to surface, must be choked!
+    disp('choked!')
     resid = abs(max(zvec))*10;
 else
     % made it to surface but pressure is too high

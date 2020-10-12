@@ -1,4 +1,4 @@
-function [ dydz ] = twophaseODE( z,y,A )
+function [ dydz ] = twophaseODE( z,y,A,seperate_terms)
 %TWOPHASEODE ode system of equations for two phasesystem
 
 eos = eosf(A.delF);
@@ -6,7 +6,7 @@ p = y(1); phi = y(2); du = y(3);
 [rhog, ~, um] = eos.calcvars(A,phi,p);
 ug = du + um;
 
-dydz = zeros(3,1);
+
 g = A.g;
 
 if (A.delF)
@@ -28,11 +28,20 @@ else
 end
 
 lambda = (1/(um*(1-phi)) + 1/(ug*phi*rhog*A.C.delta));
+
 %Set RHS of equations
-%dydz(1) = -G/(phi*rhog);
-dydz(1) = 0;
-dydz(2) = -zeta*1/A.C.Fr^2*(phi*rhog*A.C.delta + (1-phi)) - Fmw - Fgw1;
-dydz(3) = um*(1-phi)*(-zeta*1/A.C.Fr^2*(1/ug-1/um) + Fmw/(1-phi) - Fgw2/phi + lambda*Fmg);
+dydz.RHS1 = 0;
+dydz.RHS2 = [-zeta*1/A.C.Fr^2*(phi*rhog*A.C.delta +(1-phi)), -Fmw, -Fgw1];
+dydz.RHS3 = um*(1-phi)*[-zeta*1/A.C.Fr^2*(1/ug-1/um), Fmw/(1-phi), -Fgw2/phi,  lambda*Fmg];
+
+if (~seperate_terms)
+    temp = dydz;
+    dydz = zeros(3,1);
+    % do not need to seperate terms, so return RHS of equations as vector
+    dydz(1) = sum(temp.RHS1);
+    dydz(2) = sum(temp.RHS2);
+    dydz(3) = sum(temp.RHS3);
+end
 
     function G = gasloss()
         % put gas loss function here

@@ -3,10 +3,15 @@ function [zvec,pvec,ugvec,umvec,phivec,rhogvec,chidvec,Qmvec,Qgvec,A] = incoodes
 %   Integrates conduit ODEs from base of conduit (z=-A.depth) to top of
 %   conduit (z=0)
 %
-rtol = 1e-13; %1e-9 works!
+
+% Number of terms on the right hand side of the governing equations (see twophaseODE)
+NUM_TERMS_EQ1 = 1;
+NUM_TERMS_EQ2 = 3;
+NUM_TERMS_EQ3 = 4;
+
+% Integration error tolerances
+rtol = 1e-13;
 atol = 5e-11;
-
-
 
 warning off MATLAB:ode15s:IntegrationTolNotMet
 
@@ -108,7 +113,7 @@ end
 
 warning('');
 options = odeset('Events',@FragmentationDepth,'Mass',@mass, 'MStateDependence','strong', 'Stats', 'off', 'NormControl','off','RelTol',rtol*1e4,'AbsTol',[atol, atol, atol]*1e4);
-sol = ode15s(@(z,y) twophaseODE(z,y,A), zspan, y0, options);
+sol = ode15s(@(z,y) twophaseODE(z,y,A, false), zspan, y0, options);
 [warnMsg, warnId] = lastwarn;
     if ~isempty(warnMsg)
         disp(A.v_chamber_i);
@@ -140,14 +145,21 @@ pfrag = sol.y(1,:)'; phifrag = sol.y(2,:)'; dufrag = sol.y(3,:)';
 [ rhogfrag, chidfrag, umfrag] = eos.calcvars(A,phifrag,pfrag);
 
 LHS = zeros(length(pfrag), 3, 3);
-RHS = zeros(length(pfrag),3);
+
+RHS.eq1 = zeros(length(pfrag),NUM_TERMS_EQ1);
+RHS.eq2 = zeros(length(pfrag),NUM_TERMS_EQ2);
+RHS.eq3 = zeros(length(pfrag),NUM_TERMS_EQ3);
 
 grads = DGradient(sol.y, sol.x, 2,  '2ndorder');
 
 for i = 1:length(pfrag)
     M = mass(nan, [pfrag(i), phifrag(i), dufrag(i)]);
     LHS(i,:,:) = M.*repmat(grads(:,i)',3,1);
-    RHS(i,:) = twophaseODE(nan, [pfrag(i), phifrag(i), dufrag(i)], A)';
+    RHStemp = twophaseODE(nan, [pfrag(i), phifrag(i), dufrag(i)], A, true);
+    RHS.eq1(i,:) = RHStemp.RHS1(:);
+    RHS.eq2(i,:) = RHStemp.RHS2(:);
+    RHS.eq3(i,:) = RHStemp.RHS3(:);
+    
 end
 
 A.LHS = LHS;
@@ -202,7 +214,7 @@ else
     
     options = odeset('Events',@RegimeChangeDepth,'Mass',@mass2, 'MStateDependence', 'strong',  'NormControl','off','RelTol',rtol,'AbsTol',step_tol,'InitialStep',1e-14);
     
-    solext = ode15s(@(z,y) twophaseODE(z,y,A), zspan, sol.y(:,end), options);
+    solext = ode15s(@(z,y) twophaseODE(z,y,A, false), zspan, sol.y(:,end), options);
     [warnMsg, ~] = lastwarn;
     if ~isempty(warnMsg)
        pvec = nan;
@@ -217,21 +229,27 @@ else
     p2e = solext.y(1,:)'; phi2e = solext.y(2,:)'; du2e = solext.y(3,:)'; 
     z2e = solext.x'*C.rc;
     [ rhog2e, chi_d2e, um2e ] = eos.calcvars(A,phi2e,p2e);
-    
-    LHS = zeros(length(p2e), 3, 3);
-    RHS = zeros(length(p2e),3);
+       
+    RHS.eq1 = zeros(length(p2e),NUM_TERMS_EQ1);
+    RHS.eq2 = zeros(length(p2e),NUM_TERMS_EQ2);
+    RHS.eq3 = zeros(length(p2e),NUM_TERMS_EQ3);
     
     grads = DGradient(solext.y, solext.x, 2,  '2ndorder');
     
     for i = 1:length(p2e)
         M = mass2(nan, [p2e(i), phi2e(i), du2e(i)]);
         LHS(i,:,:) = M.*repmat(grads(:,i)',3,1);
-        RHS(i,:) = twophaseODE(nan, [p2e(i), phi2e(i), du2e(i)], A)';
+        
+        RHStemp = twophaseODE(nan, [p2e(i), phi2e(i), du2e(i)], A, true);
+        RHS.eq1(i,:) = RHStemp.RHS1(:);
+        RHS.eq2(i,:) = RHStemp.RHS2(:);
+        RHS.eq3(i,:) = RHStemp.RHS3(:);
     end
     
     A.LHS = [A.LHS; LHS];
-    A.RHS = [A.RHS; RHS];
-
+    A.RHS.eq1 = [A.RHS.eq1; RHS.eq1];
+    A.RHS.eq2 = [A.RHS.eq2; RHS.eq2];
+    A.RHS.eq3 = [A.RHS.eq3; RHS.eq3];
     
     p2e = p2e*C.p0;
     du2e = du2e*C.U0;
@@ -274,26 +292,33 @@ else
         options = odeset('Events',@BlowUp, 'Mass',@mass2, 'MStateDependence', 'strong', 'NormControl','off','RelTol',rtol,'AbsTol',atol,'InitialStep',1e-6);
         warning off MATLAB:ode15s:IntegrationTolNotMet
         
-        sol = ode15s(@(z,y) twophaseODE(z,y,A), zspan, y0, options);
+        sol = ode15s(@(z,y) twophaseODE(z,y,A, false), zspan, y0, options);
 
         z3 = sol.x'*C.rc;
         p3 = sol.y(1,:)'; phi3 = sol.y(2,:)'; du3 = sol.y(3,:)';
         
         [ rhog3, chi_d3, um3 ] = eos.calcvars(A,phi3,p3);
         
-        LHS = zeros(length(p3), 3, 3);
-        RHS = zeros(length(p3),3);
+        RHS.eq1 = zeros(length(p3),NUM_TERMS_EQ1);
+        RHS.eq2 = zeros(length(p3),NUM_TERMS_EQ2);
+        RHS.eq3 = zeros(length(p3),NUM_TERMS_EQ3);
         
         grads = DGradient(sol.y, sol.x, 2,  '2ndorder');
         
         for i = 1:length(p3)
             M = mass2(nan, [p3(i), phi3(i), du3(i)]);
             LHS(i,:,:) = M.*repmat(grads(:,i)',3,1);
-            RHS(i,:) = twophaseODE(nan, [p3(i), phi3(i), du3(i)], A)';
+
+            RHStemp = twophaseODE(nan, [p3(i), phi3(i), du3(i)], A, true);
+            RHS.eq1(i,:) = RHStemp.RHS1(:);
+            RHS.eq2(i,:) = RHStemp.RHS2(:);
+            RHS.eq3(i,:) = RHStemp.RHS3(:);
         end
         
         A.LHS = [A.LHS; LHS];
-        A.RHS = [A.RHS; RHS];
+        A.RHS.eq1 = [A.RHS.eq1; RHS.eq1];
+        A.RHS.eq2 = [A.RHS.eq2; RHS.eq2];
+        A.RHS.eq3 = [A.RHS.eq3; RHS.eq3];
         
         p3 = p3*C.p0;
         du3 = du3*C.U0;

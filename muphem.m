@@ -10,7 +10,7 @@ function [ varargout ] = muphem( varargin )
 end
 
 function [ vargout ] = multiflow2(op,A,varargin)
-plot = true;
+plot = false;
 
 if length(varargin) > 0
     params = varargin{1};
