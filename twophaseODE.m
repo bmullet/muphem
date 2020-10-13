@@ -87,27 +87,9 @@ end
                Fmg = Fmg1;
                
             else
-                phif = A.phi0 - 0.01;
-                
-                if phi > A.phi0
-                   Fmg = Fmg2;
-                elseif phi > phif
-                   phif = A.phi0 - 0.01;
-                   t = (phi - phif)/(A.phi0 - phif);
-                   Fmg =  - (abs(Fmg2)^t * abs(Fmg1)^(1-t));
-                else
-                   Fmg = Fmg1;
-                end
+                Fmg = Fmg2;
                     
-            end
-%             if phi < A.phi0
-%                % Before fragmentation
-%                Fmg = Fmg1;
-%             else
-%                % After fragmentation
-%                Fmg = Fmg2;
-%             end
-                     
+            end           
                 
     end
 

@@ -18,6 +18,7 @@
 A = Amodels.initA_paper();
 A.phi0 = 0.70;
 A.phiforce = 0.701;
+
 %A.chamber_fac = 1;
 A.r = 30;
 A = Amodels.initA_paper(A);
@@ -34,8 +35,10 @@ A = Amodels.initA_paper();
 A.phi0 = 0.70;
 A.phiforce = 0.701;
 %A.chamber_fac = 1;
-A.r = 30;
+A.r = 100;
+A.hg = 0.03;
 A = Amodels.initA_paper(A);
+A.hg = 0.03;
 A.fricfac = 1;
 phis = [.7, .8, 1];
 

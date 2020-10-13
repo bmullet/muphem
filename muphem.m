@@ -30,8 +30,8 @@ end
 vbounds = A.u0;
 options = optimset('Display','iter');
 %options = optimset();
-v_fzero = fzero(@(v) matchPatm(v,A),vbounds,options);
-%v_fzero = vbounds;
+%v_fzero = fzero(@(v) matchPatm(v,A),vbounds,options);
+v_fzero = vbounds;
 A.v_chamber_i = v_fzero;
 
 % Collect Solution
