@@ -31,7 +31,7 @@ function [Smax,Sfail,failure,S,failstress] = mcfailure(A,Srr,Szz,Stt,Srz,zvec)
     Smin = min(principalstress,[],2);
     Smax = max(principalstress,[],2);
     
-    qu = 2*A.mc.C*tan(pi/4+A.mc.phi/2);
+    qu = 2*A.mc.C(zvec)*tan(pi/4+A.mc.phi/2);
     Sfail = qu + (Smin-ppore)*tan(pi/4+A.mc.phi/2)^2;
     
     if any((Smax-ppore)>Sfail)

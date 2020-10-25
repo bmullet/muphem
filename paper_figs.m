@@ -54,11 +54,12 @@ ylabel('k')
 figure
 
 phi = A.mc.phi;
-cohesion = A.mc.C; 
+d = 0:3000;
+cohesion = A.mc.C(-d); 
 mu = tan(phi); c = 2*cohesion*((mu^2 + 1)^(1/2) + mu)./Szz;
 C = 2*cohesion*((mu^2 + 1)^(1/2) + mu);
 q = tan(pi/4 + 1/2*phi)^2;
-d = 0:3000;
+
 
 k = 1./q .* (1/2.7*(q-1) +1 - C./(2700*9.8*d));
 
@@ -195,7 +196,7 @@ set(0,'defaultFigurePosition', [defpos(1) defpos(2) 2.2*width*100, height*100]);
 subplot(121)
 rR = 1;
 plot_MC(1,0,'-',3,1/2.7);
-%plot_MC(1.2,0,':',2);
+plot_MC(1.3,0,':',2,1/2.7);
 p2 = plot(xlim, [-1 -1], ':k','LineWidth',2);
 p1 = plot(xlim, [-1 -1], '-k','LineWidth',3);
 
@@ -241,15 +242,15 @@ d = [500000];
 % end
 %legend('\infty','5000','1000','500')
 
-legend([p1,p2],'r/R = 1', 'r/R = 1.2','Location','Southeast')
+legend([p1,p2],'r/R = 1', 'r/R = 1.3','Location','Southeast')
 
 subplot(122)
 rR = 1;
 plot_MC(1,0,'-',3,1/2.7);
-plot_MC(1,0.5,':',2,1/2.7);
+plot_MC(1,1,':',2,1/2.7);
 p2 = plot(xlim, [-1 -1], ':k','LineWidth',2);
 p1 = plot(xlim, [-1 -1], '-k','LineWidth',3);
-legend([p1,p2],'C/\sigma_{zz} = 0', 'C/\sigma_{zz} = 0.5','Location','Southeast')
+legend([p1,p2],'C/\sigma_{zz} = 0', 'C/\sigma_{zz} = 1','Location','Southeast')
 
 subplot(121); hold on;
 str = {'(a)'};
@@ -808,7 +809,7 @@ q = tan(pi/4 + 1/2*phi)^2;
 sigz = 2700*9.8*500;
 C = C_over_sigz*sigz;
 
-lambda = linspace(0.01,5,500);
+lambda = linspace(-10,5,500);
 bound_1 = @(lambda, rR) lambda;
 bound_2 = @(lambda, rR) lambda*(rR^2 + 1) - rR^2;
 bound_3 = @(lambda, rR) lambda*(1 - rR^2) + rR^2;
@@ -832,8 +833,8 @@ plot(to_unprimed(lambda, pp), to_unprimed(bound_2(lambda, rR), pp), 'Color', clr
 plot(to_unprimed(lambda, pp), to_unprimed(bound_3(lambda, rR), pp), 'Color', clrs(3,:),'LineWidth',lw, 'LineStyle', symbl);
 
 patchx = 0:.01:1;
-y = [0, to_unprimed(bound_1(patchx,rR), pp), to_unprimed(fliplr(bound_2(patchx(patchx>=0.5),rR)),pp), 0];
-x = [0, to_unprimed(patchx,pp), to_unprimed(fliplr(patchx(patchx>=0.5)),pp), 0];
+y = [0, to_unprimed(bound_1(patchx,rR), pp), fliplr(to_unprimed(bound_2(patchx,rR), pp)), 0];
+x = [0, to_unprimed(patchx,pp), fliplr(to_unprimed(patchx,pp)), 0];
 
 patch(x,y,'o','FaceAlpha',.1,'LineStyle', 'none');
 

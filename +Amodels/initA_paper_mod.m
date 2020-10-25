@@ -5,10 +5,10 @@ function [A] = initA(A)
 %INITA Sets up struct A with constants and containers
 % MODEL FLAGS (used to quickly change model)
 %VISCOSITY_MODEL_FLAG = 'Hess and Dingwell';
-%VISCOSITY_THETA_G_FLAG = 'None';
+VISCOSITY_THETA_G_FLAG = 'None';
 VISCOSITY_MODEL_FLAG = 'Hess and Dingwell';
 %VISCOSITY_MODEL_FLAG = 'None';
-VISCOSITY_THETA_G_FLAG = 'None';
+%VISCOSITY_THETA_G_FLAG = 'Bagdassarove-Dingwell';
 VISCOSITY_THETA_C_FLAG = 'Costa';
 %VISCOSITY_THETA_C_FLAG = 'None';
 FRAGMENTATION_CONDITION = 'phi';
@@ -16,16 +16,18 @@ CRYSTAL_GROWTH = false;
 
 if (~exist('A'))
     % set up new struct
-
+    
+    A.u0 = 1;
+    
     A.useForchheimer = false;
 
     % Set some constants and containers
-    A.lambda = 0.5;
+    A.lambda = 0.55;
     A.chamber_fac = (2*A.lambda + 1)/3;
     A.Patm_ = 1.013e5;     % pascals
     A.vchamber_ = [];
     A.Ptop_ = [];
-    A.r = 40;             % Conduit radius
+    A.r = 100;             % Conduit radius
     A.depth = 5300;          % Length
     A.Bchm = 1e-10;      % Chamber compressibility (sphere)
     %A.Bchm = 1e-7;       % Chamber compressibility (sill)
@@ -40,7 +42,7 @@ if (~exist('A'))
     %A.hs = 4.1e-6;
     A.hs = 4.11e-6;
     A.hb = 0.5;
-    A.hg = 0.03; %total volatile content
+    A.hg = 0.04; %total volatile content
     A.Pcrit = (A.hg/A.hs)^(1/A.hb);   % Pcrit is pressure when volatiles first exsolve
     
     %A.lam = 1-A.hg; % melt mass fraction (1-total volatile mass fraction)
@@ -65,7 +67,7 @@ if (~exist('A'))
     %A.T = 886;
     
     %A.mu = 100;         % liquid viscosity, Pa s (BASALT)    
-    A.mu = 1e6;         % liquid viscosity, Pa s (ANDESITE)
+    A.mu = 1e4;         % liquid viscosity, Pa s (ANDESITE)
     %A.mu = 1e5;         % liquid viscosity, Pa s (DACITE)
     %A.mu = 1e9;         % liquid viscosity, Pa s (RHYOLITE)
     %A.mu = 1000;         % test vis a vis eric
@@ -89,7 +91,11 @@ if (~exist('A'))
     % Mohr Coulomb Failure
     %A.mc.C = 9e6;
     %A.mc.C = 8e6;
-    A.mc.C = 5e6;
+    %A.mc.C = 5e6;
+
+    
+    A.mc.C = @cohesion;
+    
     %A.mc.phi = deg2rad(15);
     A.mc.phi = deg2rad(35);
     
@@ -130,10 +136,9 @@ if (~exist('A'))
      
     A.mu0 = A.mu;
     
-
     
-    xc0 = 0.40; % Crystal content
-    xcmax = 0.40;
+    xc0 = 0.20; % Crystal content
+    xcmax = 0.20;
     A.xcmax = xcmax;
     A.xc0 = xc0;
     A.xcexp = -0.5226;
@@ -196,4 +201,14 @@ end
     
     
    
+end
+
+function C = cohesion(zvec)
+    C_surface = 5e6;
+    C_bottom = 20e6;
+    C_transition_depth = -2000;
+
+    m = (C_surface - C_bottom)/(0 - C_transition_depth);
+    C = (zvec > C_transition_depth).*(C_surface + m*zvec);
+    C = C + (zvec <= C_transition_depth)*(C_bottom);
 end

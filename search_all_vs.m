@@ -67,7 +67,7 @@ fricfacs = nan(size(resids));
 
 for i = 1:length(phis)
     A.chamber_fac = phis(i);
-    %     disp(A.phiforce)
+ 
     textprogressbar(sprintf('phif: %.2d\n',A.phiforce));
     A.Pchamber = (1.01e5+A.depth*A.g*A.k.rho)*A.chamber_fac;
     

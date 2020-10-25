@@ -4,7 +4,7 @@ function [with_shear, no_shear, failure_shear, failure_no_shear] = plotfailurepr
 tau = Srz./Szz;
 pp = porep./Szz;
 phi = A.mc.phi;
-cohesion = A.mc.C; mu = tan(phi); c = 2*cohesion*((mu^2 + 1)^(1/2) + mu)./Szz;
+cohesion = A.mc.C(zvec); mu = tan(phi); c = 2*cohesion*((mu^2 + 1)^(1/2) + mu)./Szz;
 C = 2*cohesion*((mu^2 + 1)^(1/2) + mu);
 
 q = tan(pi/4 + 1/2*phi)^2;
@@ -42,13 +42,10 @@ end
 tstar = ((1./((c + q).*(1-c))).^(1/2).*(c + q - 1))/2;
 
 % old code, not up to date with pore pressure
-%tfail = ((c + pvec./Szz*q - 1).*(c - pvec./Szz + q)).^(1/2)./(pvec./Szz + pvec./Szz*q);
-
 
 
 if plotfigs
-    
-    lw =3; 
+lw =3; 
     
 figure
 clrs = parula(4);
@@ -67,14 +64,20 @@ ylabel('z')
 xlabel('\tau/p')
 
 figure
+
+plotfrz = (frz_low>=frt);
+plotfrt = ~plotfrz;
+% add back in a point for overlap
+plotfrz(min(find(plotfrt))) = 1;
+
 p1 = plot(Srr./Szz, zvec,'-k','LineWidth',lw,'DisplayName','p/\sigma_{zz}'); hold on
 xl = xlim;
-p2 = plot(frz_low,zvec, 'Color', clrs(1,:),'LineWidth',lw, 'LineStyle', '-','DisplayName','r/z');
-p3 = plot(frt,zvec,'Color',clrs(2,:),'LineWidth',lw, 'LineStyle', '-','DisplayName','r/\theta');
+p2 = plot(frz_low(plotfrz),zvec(plotfrz), 'Color', clrs(1,:),'LineWidth',lw, 'LineStyle', '-','DisplayName','r/z');
+p3 = plot(frt(plotfrt),zvec(plotfrt),'Color',clrs(2,:),'LineWidth',lw, 'LineStyle', '-','DisplayName','r/\theta');
 p4 = plot(ftz,zvec,'Color',clrs(3,:),'LineWidth',lw, 'LineStyle', '-','DisplayName','\theta/z');
 
 % find C = szz
-[~,ind] = min(abs(Szz-C));
+[~,ind] = min(abs(Szz-C+(q-1)*porep));
 
 plot(xlim, [zvec(ind), zvec(ind)], '--r')
 
@@ -82,7 +85,8 @@ plot(xlim, [zvec(ind), zvec(ind)], '--r')
 xlabel('p/\sigma_{zz}')
 ylabel('z (m)');
 
-xlim(xl)
+
+xlim([0,1])
 ylim([-6200,0])
 
 
@@ -90,8 +94,8 @@ x = [max(frz_low,frt);0];
 y = [zvec;min(zvec)];
 patch(x,y,'k','FaceAlpha',.1,'LineStyle', 'none');
 idx = ~isnan(ftz);
-x = [ftz(idx);1];
-y = [zvec(idx);min(zvec)];
+x = [ftz(idx);1;1];
+y = [zvec(idx);max(zvec(idx));min(zvec)];
 patch(x,y,'k','FaceAlpha',.1,'LineStyle', 'none');
 
 legend([p1, p2, p3, p4], 'Orientation','horizontal','Location','south')
