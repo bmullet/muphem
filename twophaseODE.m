@@ -81,7 +81,7 @@ end
             end
             
             
-            Fmg2 = -3/8*phi*(1-phi)*A.dragC*A.C.rc/A.Rash*rhog*abs(du)*(du)*A.C.delta*1000;
+            Fmg2 = -3/8*phi*(1-phi)*A.dragC*A.C.rc/A.Rash*rhog*abs(du)*(du)*A.C.delta;
           
             if A.delF
                Fmg = Fmg1;
