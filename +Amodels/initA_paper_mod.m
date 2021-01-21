@@ -6,8 +6,8 @@ function [A] = initA(A)
 % MODEL FLAGS (used to quickly change model)
 %VISCOSITY_MODEL_FLAG = 'Hess and Dingwell';
 VISCOSITY_THETA_G_FLAG = 'None';
-VISCOSITY_MODEL_FLAG = 'Hess and Dingwell';
-%VISCOSITY_MODEL_FLAG = 'None';
+VISCOSITY_MODEL_FLAG = 'Hess and Dingwell'; % Rhyolite
+%VISCOSITY_MODEL_FLAG = 'Whittington et al.'; % Dacite
 %VISCOSITY_THETA_G_FLAG = 'Bagdassarove-Dingwell';
 VISCOSITY_THETA_C_FLAG = 'Costa';
 %VISCOSITY_THETA_C_FLAG = 'None';
@@ -17,18 +17,19 @@ CRYSTAL_GROWTH = false;
 if (~exist('A'))
     % set up new struct
     
-    A.u0 = 1;
+    A.u0 = 4;
     
     A.useForchheimer = false;
 
     % Set some constants and containers
-    A.lambda = 0.55;
-    A.chamber_fac = (2*A.lambda + 1)/3;
+    A.lambda = @stressratio;
+    
     A.Patm_ = 1.013e5;     % pascals
     A.vchamber_ = [];
     A.Ptop_ = [];
     A.r = 100;             % Conduit radius
-    A.depth = 5300;          % Length
+    A.depth = 5000;          % Length
+    A.chamber_fac = (2*A.lambda(-A.depth) + 1)/3;
     A.Bchm = 1e-10;      % Chamber compressibility (sphere)
     %A.Bchm = 1e-7;       % Chamber compressibility (sill)
     A.Vchm = 3e10;        % Chamber volume
@@ -211,4 +212,15 @@ function C = cohesion(zvec)
     m = (C_surface - C_bottom)/(0 - C_transition_depth);
     C = (zvec > C_transition_depth).*(C_surface + m*zvec);
     C = C + (zvec <= C_transition_depth)*(C_bottom);
+end
+
+function k = stressratio(zvec)
+    k_surface = 0.65;
+    k_bottom = 0.65;
+    k_transition_depth = -2000;
+
+    m = (k_surface - k_bottom)/(0 - k_transition_depth);
+    k = (zvec > k_transition_depth).*(k_surface + m*zvec);
+    k = k + (zvec <= k_transition_depth)*(k_bottom);
+
 end

@@ -5,8 +5,9 @@ function [Srr, Szz, Stt, Srz] = kirsch (zvec,p,A,ugvec,umvec,rhogvec,phivec,pvec
     Srr = p;    
     Szz = 1.01e5 + A.k.rho*(z)*A.g;
     
-    S = A.k.K*Szz;     % Poisson's ratio stress condition
+    %S = A.k.K*Szz;     % Poisson's ratio stress condition
     %S = Szz;            % Isotropic stress condition
+    S = A.lambda(zvec).*Szz; % uses the k ratio
     Stt = 2*(S)-p;
     
     Srz = nan(size(Stt));

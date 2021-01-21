@@ -68,7 +68,7 @@ k = 1./q .* (1 - C./(2700*9.8*d)); hold on;
 plot(d,k,'--r'); ylim([0,1])
 legend('With pore pressure', 'Without pore pressure')
 xlabel('depth (m)'); ylabel('k')
-%% Stress regimes
+%% FIGURE - Stress regimes
 figure
 
 clrs = parula(3);
@@ -94,7 +94,7 @@ x = [0, patchx, fliplr(patchx(patchx>=0.5)), 0];
 
 p1 = patch(x,y,'o','FaceAlpha',.1,'LineStyle', 'none');
 
-xlabel('S/\sigma_{zz}');
+xlabel('k = S/\sigma_{zz}');
 ylabel('p/\sigma_{zz}');
 ylim([0,2])
 xlim([0,2])
@@ -186,17 +186,18 @@ ht = text(0.03,1.9,str,'Interpreter','tex');
 set(ht,'Rotation',0)
 set(ht,'FontSize',20)
 
-%% Failure
+%% FIGURE - Failure and stable regions
 clrs = parula(3);
 phi = 38/180*pi;
 figure
 
 set(0,'defaultFigurePosition', [defpos(1) defpos(2) 2.2*width*100, height*100]);
 
+pp = 1/2.7;
 subplot(121)
 rR = 1;
-plot_MC(1,0,'-',3,1/2.7);
-plot_MC(1.3,0,':',2,1/2.7);
+plot_MC(1,0,'-',3,pp);
+plot_MC(1.3,0,':',2,pp);
 p2 = plot(xlim, [-1 -1], ':k','LineWidth',2);
 p1 = plot(xlim, [-1 -1], '-k','LineWidth',3);
 
@@ -246,17 +247,27 @@ legend([p1,p2],'r/R = 1', 'r/R = 1.3','Location','Southeast')
 
 subplot(122)
 rR = 1;
-plot_MC(1,0,'-',3,1/2.7);
-plot_MC(1,1,':',2,1/2.7);
+plot_MC(1,0,'-',3,pp);
+plot_MC(1,0.5,':',2,pp);
 p2 = plot(xlim, [-1 -1], ':k','LineWidth',2);
 p1 = plot(xlim, [-1 -1], '-k','LineWidth',3);
-legend([p1,p2],'C/\sigma_{zz} = 0', 'C/\sigma_{zz} = 1','Location','Southeast')
+legend([p1,p2],'C/\sigma_{zz} = 0', 'C/\sigma_{zz} = 0.5','Location','Southeast')
 
 subplot(121); hold on;
 str = {'(a)'};
 ht = text(0.1,1.2,str,'Interpreter','tex');
 set(ht,'Rotation',0)
 set(ht,'FontSize',20)
+str = {'Stable'};
+ht = text(0.8,0.8,str,'Interpreter','tex');
+set(ht,'Rotation',0)
+set(ht,'FontSize',30)
+set(ht,'Color',[.3,.3,.3])
+str = {'Unstable'};
+ht = text(0.05,0.8,str,'Interpreter','tex');
+set(ht,'Rotation',0)
+set(ht,'FontSize',30)
+set(ht,'Color',[.3,.3,.3])
 ylim([0,1.3])
 xlim([0,1.3])
 
@@ -265,31 +276,46 @@ str = {'(b)'};
 ht = text(0.1,1.2,str,'Interpreter','tex');
 set(ht,'Rotation',0)
 set(ht,'FontSize',20)
+str = {'Stable'};
+ht = text(0.8,0.8,str,'Interpreter','tex');
+set(ht,'Rotation',0)
+set(ht,'FontSize',30)
+set(ht,'Color',[.3,.3,.3])
+str = {'Unstable'};
+ht = text(0.05,0.8,str,'Interpreter','tex');
+set(ht,'Rotation',0)
+set(ht,'FontSize',30)
+set(ht,'Color',[.3,.3,.3])
 ylim([0,1.3])
 xlim([0,1.3])
 
 
 
 %% Change of r-z failure with tau
+% TODO: add pore pressure
 
 set(0,'defaultFigurePosition', [defpos(1) defpos(2) width*100, height*100]);
+pp = 1/2.7;
 
-
-tau_flag = 'sigz'; % Can be 'p' or 'sigz' for how to normalize
+tau_flag = 'p'; % Can be 'p' or 'sigz' for how to normalize
 
 clrs = parula(3);
-s = 0.05:0.01:1;
+s = -1:0.01:1; % 
 fades = [0.25, 1]; % fade factor
-taus = [0.0, 0.4];
+taus = [0.0, 1/2.8]; % how much (normalized) tau to add
+frz_upper_search = [5,1.05]; % where to do fzero search for frz upper solution
 
 if tau_flag == 'p'
- fail_rz = @(p,tau,c,q)   .5*(p+1+((p-1)^2 + 4*(tau*p)^2)^0.5) - c - q*0.5*(p+1-((p-1)^2 + 4*(tau*p)^2)^0.5);
- fail_rt = @(p,s,tau,c,q) - 2*s + p + c + q*0.5*(p + 1 - ((p-1)^2 + 4*(tau*p)^2)^.5);
- fail_tz = @(p,s,tau,c,q) 0.5*(p + 1 + ((p-1)^2 + 4*(tau*p)^2)^.5) - c - q*(2*s-p);
+ % "tau" is normalized by p, so tau = tau/p
+ % c, p, pp are normalized by sigmaz
+ fail_rz = @(p,tau,c,q,pp)   .5*(p+1+((p-1)^2 + 4*(tau*p)^2)^0.5) - pp - c - q*(0.5*(p+1-((p-1)^2 + 4*(tau*p)^2)^0.5) - pp);
+ fail_rt = @(p,s,tau,c,q,pp) - (2*s - p - pp) + c + q*(0.5*(p + 1 - ((p-1)^2 + 4*(tau*p)^2)^.5) - pp);
+ fail_tz = @(p,s,tau,c,q,pp) (0.5*(p + 1 + ((p-1)^2 + 4*(tau*p)^2)^.5) - pp) - c - q*(2*s-p - pp);
 else
- fail_rz = @(p,tau,c,q)   .5*(p+1+((p-1)^2 + 4*(tau)^2)^0.5) - c - q*0.5*(p+1-((p-1)^2 + 4*(tau)^2)^0.5);
- fail_rt = @(p,s,tau,c,q) - 2*s + p + c + q*0.5*(p + 1 - ((p-1)^2 + 4*(tau)^2)^.5);
- fail_tz = @(p,s,tau,c,q) 0.5*(p + 1 + ((p-1)^2 + 4*(tau)^2)^.5) - c - q*(2*s-p);
+ % c, p, pp, tau are normalized by sigmaz
+ fail_rz = @(p,tau,c,q,pp)   (.5*(p+1+((p-1)^2 + 4*(tau)^2)^0.5)- pp) - c - q*(0.5*(p+1-((p-1)^2 + 4*(tau)^2)^0.5) - pp);
+ fail_rt = @(p,s,tau,c,q,pp) - (2*s - p - pp) + c + q*(0.5*(p + 1 - ((p-1)^2 + 4*(tau)^2)^.5)-pp);
+ fail_tz = @(p,s,tau,c,q,pp) (0.5*(p + 1 + ((p-1)^2 + 4*(tau)^2)^.5) - pp) - c - q*((2*s-p)-pp);
 end
 
 c = 0;
@@ -304,29 +330,30 @@ tau = taus(ii);
 fade = fades(ii);
     
 frz = ones(size(s));
-frz_lower = frz * fzero(@(x) fail_rz(x,tau,c,q), 0.237);
-frz_upper = frz * fzero(@(x) fail_rz(x,tau,c,q), 5);
+frz_lower = frz * fzero(@(x) fail_rz(x,tau,c,q,pp), 0.237);
+frz_upper = frz * fzero(@(x) fail_rz(x,tau,c,q,pp), frz_upper_search(ii));
 frt = nan(size(s));
 ftz = nan(size(s));
 
 for i = 1:length(s)
     
     try
-        frt(i) = fzero(@(x) fail_rt(x, s(i), tau, c, q), [-1, 1]);
+        frt(i) = fzero(@(x) fail_rt(x, s(i), tau, c, q, pp), [-1, 1]);
         
     catch ME
         disp('no soln')
     end
     
     try
-        ftz(i) = fzero(@(x) fail_tz(x, s(i), tau, c, q), [-1, 1]);
+        ftz(i) = fzero(@(x) fail_tz(x, s(i), tau, c, q, pp), [-1, 1]);
     catch ME
         disp('no soln')
     end
 end
 
-i1 = (frz_lower > frt) & ((frz_lower < ftz) + isnan(ftz));
-i2 = (frz_upper > frt) & ((frz_upper < ftz) + isnan(ftz));
+i1 = (frz_lower > frt) & ((frz_lower < ftz) + isnan(ftz).*(s>0));
+i2 = (frz_upper > frt) & ((frz_upper < ftz) + isnan(ftz).*(s>0));
+
 
 p1 = plot(s(i1), frz_lower(i1),':k'); hold on;
 p1.Color(4) = fade;
@@ -341,8 +368,8 @@ p1 = plot(s(i3), frt(i3),'Color', [0 0 0], 'LineStyle', ':');
 p1.Color(4) = fade;
 p1 = plot(s(i4), ftz(i4),'Color', [0 0 0], 'LineStyle', ':');
 p1.Color(4) = fade;
-xlim([0,1])
-ylim([0,1])
+% xlim([0,1])
+% ylim([0,1])
 xlabel('S/\sigma_{zz}')
 ylabel('p/\sigma_{zz}')
 
@@ -379,16 +406,16 @@ for i = 1:length(s)
    pzt(i) = fzero(@(x) bound_rz(x,s(i),tau),2*s(i) - 1-tau);
 end
 
-p1 = plot(s,prt,'Color', clrs(1,:), 'LineStyle', '-'); hold on
+p1 = plot(to_unprimed(s,pp),to_unprimed(prt,pp),'Color', clrs(1,:), 'LineStyle', '-'); hold on
 p1.Color(4) = fade;
-p1 = plot(s,pzt,'Color', clrs(2,:), 'LineStyle', '-');
+p1 = plot(to_unprimed(s,pp),to_unprimed(pzt,pp),'Color', clrs(2,:), 'LineStyle', '-');
 p1.Color(4) = fade;
-ylim([0,1])
-xlim([0,1])
+%ylim([0,1])
+%xlim([0,1])
 
 end
 
-%%
+%% FIGURE - shear traction rotations and tau star contours
 set(0,'defaultFigurePosition', [defpos(1) defpos(2) 2.2*width*100, height*100]);
 
 taus = [0.0, 0.01, 0.2, 1, 5, 50];
@@ -417,19 +444,20 @@ legend('Location','Southeast')
     
 %% t-star
 
-tstar = @(c,q)  ((1./((c + q).*(1-c))).^(1/2).*(c + q - 1))/2;
+tstar = @(c,q, pp)  ((1./((c + q + pp.*(1-q)).*(1-c+pp.*(q-1)))).^(1/2).*(c + pp + q.*(1-pp) - 1))/2;
 
 phi = [0:.1:45]*pi/180;
 dt = 0.001;
 c = 0:.01:1-dt;
 q = tan(pi/4 + 1/2*phi).^2;
+pp=1/2.7;
 
 [C,Q] = meshgrid(c,q);
 [~,PHI] = meshgrid(c,phi);
 
-ts = tstar(C,Q);
+ts = tstar(C,Q,pp);
 subplot(122)
-[C,p1] = contour(C,PHI/pi*180,abs(ts), [ 0.1, 0.25, 0.5, 1, 2]);
+[C,p1] = contour(C,PHI/pi*180,abs(ts), [ 0.1:.1:.8]);
 p1.LineWidth = lw;
 clabel(C,p1,'FontSize',17,'Color','black')
 xlabel('C_0/\sigma_{zz}')
@@ -601,7 +629,7 @@ figure
 set(0,'defaultFigurePosition', [defpos(1) defpos(2) width*100, height*100]);
 
 rR = 1;
-plot_MC(1,0,'-',3);
+plot_MC(1,0,'-',3,0);
 
 p2 = plot(xlim, [-1 -1], ':k','LineWidth',2);
 
@@ -747,6 +775,7 @@ solutions = {out_lowv, out_midv, out_highv};
 figure
 clrs = parula(3);
 
+
 solstr = {'low','med','high'};
 for i = 1:length(solutions)
     out = solutions{i};
@@ -797,12 +826,85 @@ for i = 1:length(solutions)
     legend show
 end
 
+%% Find admissable values of k
+plot_MC(1,0,'-',3,pp); hold on;
+plot_MC(1,1,'--',2,pp);
+plot_MC(1,3,':',2,pp);
+p3 = plot(xlim, [-1 -1], ':k','LineWidth',2); 
+p1 = plot(xlim, [-1 -1], '-k','LineWidth',3);
+p2 = plot(xlim, [-1 -1], '--k','LineWidth',3);
+grid on
+xlim([0,1])
+ylim([0,1])
+legend([p1,p2,p3], "C/\sigma_{zz}=0", "C/\sigma_{zz}=1", "C/\sigma_{zz}=3")
 
 function plot_MC(rR,C_over_sigz,symbl,lw,pp)
+% rR: r/R, non-deminsional conduit radius
+% C_over_sigz: UCS divided by vertical stress
+% symbl: symbol for plotting
+% lw: line weight for plotting
 % pp: pore pressure gradient (Pp/sigma_z)
 
 clrs = parula(3);
-phi = 38/180*pi;
+phi = 35/180*pi;
+%cohesion = 5e6; mu = tan(phi); C = 2*cohesion*((mu^2 + 1)^(1/2) + mu);
+
+q = tan(pi/4 + 1/2*phi)^2;
+sigz = 2700*9.8*500;
+C = C_over_sigz*sigz;
+
+lambda = linspace(-10,5,500);
+bound_1 = @(lambda, rR) lambda;
+bound_2 = @(lambda, rR) lambda*(rR^2 + 1) - rR^2;
+bound_3 = @(lambda, rR) lambda*(1 - rR^2) + rR^2;
+
+A_failure = @(x,c,sig_z,rR) rR^2*(1/q-c/(q*sig_z)) + x*(1-rR^2);
+B_failure = @(x,c,sig_z,rR) x/(q+1)*(rR^2+1) - c/sig_z * 1/(q+1)*rR^2 - q/(q+1)*x*(rR^2-1);
+C_failure = @(x,c,sig_z,rR) x*(rR^2 + 1) - rR^2*(c/sig_z + q);
+D_failure = @(x,c,sig_z,rR) x*(1-rR^2) + rR^2*(c/sig_z + q);
+E_failure = @(x,c,sig_z,rR) 1/(1+q)*(c/(sig_z)*rR^2 + x*(q*(rR^2 + 1) + (1-rR^2)));
+F_failure = @(x,c,sig_z,rR) rR^2*(c/(q*sig_z)- 1/q) + x*(1+rR^2) ; 
+
+x1 = fzero(@(x) A_failure(x,C,sigz,rR) - bound_1(x, rR), 0.6);
+x2 = fzero(@(x) B_failure(x,C,sigz,rR) - bound_2(x, rR), 0.6);
+x3 = fzero(@(x) C_failure(x,C,sigz,rR) - bound_3(x, rR), 0.6);
+x4 = fzero(@(x) D_failure(x,C,sigz,rR) - bound_1(x, rR), 0.6);
+x5 = fzero(@(x) E_failure(x,C,sigz,rR) - bound_2(x, rR), 0.6);
+x6 = fzero(@(x) F_failure(x,C,sigz,rR) - bound_3(x, rR), 0.6);
+
+plot(to_unprimed(lambda, pp), to_unprimed(bound_1(lambda, rR), pp), 'Color', clrs(1,:),'LineWidth',lw, 'LineStyle', symbl); hold on;
+plot(to_unprimed(lambda, pp), to_unprimed(bound_2(lambda, rR), pp), 'Color', clrs(2,:),'LineWidth',lw, 'LineStyle', symbl);
+plot(to_unprimed(lambda, pp), to_unprimed(bound_3(lambda, rR), pp), 'Color', clrs(3,:),'LineWidth',lw, 'LineStyle', symbl);
+
+patchx = 0:.01:1;
+y = [0, to_unprimed(bound_1(patchx,rR), pp), fliplr(to_unprimed(bound_2(patchx,rR), pp)), 0];
+x = [0, to_unprimed(patchx,pp), fliplr(to_unprimed(patchx,pp)), 0];
+
+patch(x,y,'o','FaceAlpha',.1,'LineStyle', 'none');
+
+%plot([no_cohesion, no_cohesion], ylim, '--r')
+plot(to_unprimed([x1, x2],pp), to_unprimed([A_failure(x1,C,sigz,rR), A_failure(x2,C,sigz,rR)],pp), strcat(symbl,'k'),'LineWidth', lw)
+plot(to_unprimed([x2, x3],pp), to_unprimed([B_failure(x2,C,sigz,rR), B_failure(x3,C,sigz,rR)],pp), strcat(symbl,'k'),'LineWidth', lw)
+plot(to_unprimed([x3, x4],pp), to_unprimed([C_failure(x3,C,sigz,rR), C_failure(x4,C,sigz,rR)],pp), strcat(symbl,'k'),'LineWidth', lw)
+plot(to_unprimed([x4, x5],pp), to_unprimed([D_failure(x4,C,sigz,rR), D_failure(x5,C,sigz,rR)],pp), strcat(symbl,'k'),'LineWidth', lw)
+plot(to_unprimed([x5, x6],pp), to_unprimed([E_failure(x5,C,sigz,rR), E_failure(x6,C,sigz,rR)],pp), strcat(symbl,'k'),'LineWidth', lw)
+plot(to_unprimed([x1, x6],pp), to_unprimed([F_failure(x1,C,sigz,rR), F_failure(x6,C,sigz,rR)],pp), strcat(symbl,'k'),'LineWidth', lw)
+xlabel('k');
+ylabel('p/\sigma_{zz}');
+ylim([0,5])
+xlim([0,5])
+end
+
+function plot_MC2(rR,C_over_sigz,symbl,lw,pp)
+% Just like above, but not using the "to_unprimed" construction
+% rR: r/R, non-deminsional conduit radius
+% C_over_sigz: UCS divided by vertical stress
+% symbl: symbol for plotting
+% lw: line weight for plotting
+% pp: pore pressure gradient (Pp/sigma_z)
+
+clrs = parula(3);
+phi = 35/180*pi;
 cohesion = 5e6; mu = tan(phi); C = 2*cohesion*((mu^2 + 1)^(1/2) + mu);
 
 q = tan(pi/4 + 1/2*phi)^2;
@@ -845,13 +947,15 @@ plot(to_unprimed([x3, x4],pp), to_unprimed([C_failure(x3,C,sigz,rR), C_failure(x
 plot(to_unprimed([x4, x5],pp), to_unprimed([D_failure(x4,C,sigz,rR), D_failure(x5,C,sigz,rR)],pp), strcat(symbl,'k'),'LineWidth', lw)
 plot(to_unprimed([x5, x6],pp), to_unprimed([E_failure(x5,C,sigz,rR), E_failure(x6,C,sigz,rR)],pp), strcat(symbl,'k'),'LineWidth', lw)
 plot(to_unprimed([x1, x6],pp), to_unprimed([F_failure(x1,C,sigz,rR), F_failure(x6,C,sigz,rR)],pp), strcat(symbl,'k'),'LineWidth', lw)
-xlabel('S/\sigma_{zz}');
+xlabel('k');
 ylabel('p/\sigma_{zz}');
 ylim([0,5])
 xlim([0,5])
 end
 
 function plot_FailureDepthProfiles(h, out, lw, clrs)
+% TODO: add depth-dependent UCS
+% how is this different from plotfailureprofiles?
 
     A = out{1}; zvec = out{2}; pvec = out{3}; ugvec = out{4}; umvec = out{5};
     phivec = out{6}; rhogvec = out{7};
@@ -899,7 +1003,7 @@ subplot(h)
 p1 = plot(Srr./Szz, zvec,'-k','LineWidth',lw,'DisplayName','p/\sigma_{zz}'); hold on
 xl = xlim;
 p2 = plot(frz_low,zvec, 'Color', clrs(1,:),'LineWidth',lw, 'LineStyle', '-','DisplayName','r/z');
-p3 = plot(frt,zvec,'Color',clrs(2,:),'LineWidth',lw, 'LineStyle', '-','DisplayName','r/\theta');
+%p3 = plot(frt,zvec,'Color',clrs(2,:),'LineWidth',lw, 'LineStyle', '-','DisplayName','r/\theta');
 p4 = plot(ftz,zvec,'Color',clrs(3,:),'LineWidth',lw, 'LineStyle', '-','DisplayName','\theta/z');
 
 xlim([0 1])
@@ -914,16 +1018,16 @@ patch(x,y,'k','FaceAlpha',.1,'LineStyle', 'none');
 
 
 % find C = szz
-[~,ind] = min(abs(Szz-C));
+%[~,ind] = min(abs(Szz-C));
 
-plot(xlim, [zvec(ind), zvec(ind)], '--r')
+plot(xlim, [A.fragdepth, A.fragdepth], '--r')
 
 xlabel('p/\sigma_{zz}')
 ylabel('z (m)');
 
 
 ylim([-6200,0])
-legend([p1, p2, p3, p4], 'Orientation','horizontal','Location','south')
+%legend([p1, p2, p3, p4], 'Orientation','horizontal','Location','south')
+legend([p1, p2, p4], 'Orientation','horizontal','Location','south')
 
 end
-

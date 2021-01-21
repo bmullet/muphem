@@ -10,8 +10,8 @@ NUM_TERMS_EQ2 = 3;
 NUM_TERMS_EQ3 = 4;
 
 % Integration error tolerances
-rtol = 1e-13;
-atol = 5e-11;
+rtol = 1e-14;
+atol = 1e-14;
 
 warning off MATLAB:ode15s:IntegrationTolNotMet
 
