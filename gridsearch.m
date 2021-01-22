@@ -4,17 +4,17 @@
 %% CONDUCT GRID SEARCH
 
 % Get list of json input files
-json_dir = '../multiphase_test';
+json_dir = '../multiphase_test2';
 jsons = dir(json_dir);
 jsons = {jsons.name};
 idx = cellfun(@(x) contains(x,'.json'),jsons);
 jsons = jsons(idx);
 
-A = Amodels.initA_Degruyter2012;
+A = Amodels.initA_paper_mod;
 
 for i=1:length(jsons)
     % Run muphem code
-    input_json = ['../multiphase_test/' jsons{i}];
+    input_json = ['../multiphase_test2/' jsons{i}];
     params = jsondecode(fileread(input_json));
     try
         out = muphem('multiflow2',0,A,params);
@@ -22,10 +22,15 @@ for i=1:length(jsons)
         % Save output
         output_name = [input_json(1:end-5) '.mat'];
         save(output_name, 'out');
-        catchcd
+        disp('Made a save!')
+    catch ERROR
+        disp(ERROR)
+        
     end
 
 end
+
+return
 
 %% xc
 mat_dir = './multiphase_test';
@@ -78,6 +83,7 @@ end
 
 legend(L,xc_fac)
 
+return
 
 %% radius
 mat_dir = './multiphase_test';

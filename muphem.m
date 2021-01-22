@@ -10,16 +10,16 @@ function [ varargout ] = muphem( varargin )
 end
 
 function [ vargout ] = multiflow2(op,A,varargin)
-plot = true;
+plot = false;
 
 if length(varargin) > 0
     params = varargin{1};
-    A.depth = params.depth;
-    A.xc0 = params.xc;
-    A.radius = params.radius;
-    A.T = params.T;
-    A.Pchamber = A.depth*9.8*2700;
-    A = Amodels.initA_Degruyter2012(A); % rebuild functions
+    A.depth = (params.depth);
+    A.xc0 = (params.xc);
+    A.r = (params.radius);
+    A.T = (params.T);
+    A.hg = (params.water);
+    A = Amodels.initA_paper_mod(A); % rebuild functions
 end
 
 % Perform shooting method via fzero
@@ -28,8 +28,8 @@ end
 % vbounds = [(sqrt(A.r) - 5.2)/1.6];            % Set upper boundary at 10% speed of sound at critical pressure       
 %vbounds = [sqrt(A.r*1.2)/2-2.7]+0.2;
 vbounds = A.u0;
-options = optimset('Display','iter');
-%options = optimset();
+%options = optimset('Display','iter');
+options = optimset();
 v_fzero = fzero(@(v) matchPatm(v,A),vbounds,options);
 %v_fzero = vbounds;
 A.v_chamber_i = v_fzero;
@@ -53,10 +53,10 @@ end
 [Smax,Sfail,failure,Sprincipal,sigmavals] = mcfailure(A,Srr,Szz,Stt,Srz,zvec);
 
 % Plot balance equations
-plotbalances(A,zvec,pvec,ugvec,umvec,phivec,rhogvec,chidvec);
+%plotbalances(A,zvec,pvec,ugvec,umvec,phivec,rhogvec,chidvec);
 
 % Plot slip directions
-slip = plotslipsurfaces(zvec,Sprincipal,A,plot);
+%slip = plotslipsurfaces(zvec,Sprincipal,A,plot);
 porep = -zvec*1000*9.8;
 [shear, no_shear, failure_shear, failure_no_shear] = plotfailureprofiles(A,Srr,Szz,Stt,Srz,zvec,pvec,plot,porep);
 
