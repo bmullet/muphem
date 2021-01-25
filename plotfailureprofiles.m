@@ -23,7 +23,7 @@ frz_high_notau = nan(length(zvec),1);
 frt_notau = nan(length(zvec),1);
 ftz_notau = nan(length(zvec),1);
 
-% TODO: Make sure zvec is depth negative
+% TODO: change these to analytical expressions
 s = A.lambda(zvec); % Vertical gradient of horizontal stress
 
 for i = 1:length(zvec)
@@ -130,33 +130,6 @@ if plotfigs
 end
 
 
-% C = 2*cohesion*((mu^2 + 1)^(1/2) + mu);
-% 
-% q = tan(pi/4 + 1/2*phi)^2;
-% 
-% rzrf = @(p, sigz, lambda, beta) sqrt((p./sigz - lambda)./(1/q - C./(q*sigz) - lambda));
-% rzrf2 = @(p,sigz, lambda, beta) (q*sigz.*(((lambda - p./sigz).*(C - sigz + lambda.*q.*sigz))./(q*sigz)).^(1/2))./(C - sigz + lambda.*q.*sigz);
-% rrtf = @(p, sig_z, x) (sig_z.*(q + 1).*(-((p./sig_z - x).*(C - sig_z.*x + q.*sig_z.*x))./(sig_z.*(q + 1))).^(1/2))./(C - sig_z.*x + q.*sig_z.*x);
-% 
-% rfailzr = rzrf(Srr, Szz, A.lambda);
-% rfailzr2 = rrtf(Srr,Szz,A.lambda);
-% 
-% if plotfigs
-%     figure
-%     plot(rfailzr*A.r, zvec, 'DisplayName', 'Analytical','LineWidth',3);
-%     hold on;
-%     plot(rfailzr2*A.r, zvec, 'DisplayName', 'Analytical2','LineWidth',3);
-%     
-%     plot([A.r, A.r], ylim, '--r')
-%     
-%     % xlim([100, 115]);
-%     % ylim([-2900, -1100]);
-%     % xlim([80, 180])
-%     % ylim([-3000, 0])
-%     legend show
-%     
-% end
-
 [~,ind] = min(abs(zvec - A.fragdepth)); % find index of fragmentation depth
 ind = ind - 1; % max shear stress is one step below
 
@@ -164,7 +137,6 @@ shear_condition = max(frz_low,frt);
 no_shear_condition = max(frz_low_notau, frt_notau);
 
 with_shear = shear_condition(ind)/(Srr(ind)/Szz(ind)) - 1;
-
 no_shear = no_shear_condition(ind)/(Srr(ind)/Szz(ind)) - 1;
 
 failure_shear = any(shear_condition./(Srr./Szz) > 1);

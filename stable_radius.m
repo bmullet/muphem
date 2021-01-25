@@ -4,48 +4,51 @@
 % A = Amodels.initA_MSH(A);
 % r = fzero(@(r) failure(r,A), [50, 180], options);
 
+%% test
+
+%sd = failure(15, B);
+
 %%
 
-A = Amodels.initA_paper_mod;
+A = Amodels.initA_paper_dacite;
 A.fragcond = 'phi';
-A.phi0 = .65;
-A.chamber_fac = 0.5;
-
-A = Amodels.initA_paper_mod(A);
+%A.phi0 = .65;
+%A.chamber_fac = 0.5;
 
 % do fzero
 
 options = optimset('TolX',0.0005,'Display','iter');
 
-lambdas = [0.5:.01:1];
+lambdas = [.6:.01:2];
 
 rvec = nan(size(lambdas));
 
-M = 8; % max num of workers
+M = 6; % max num of workers
 
 fail = zeros(size(rvec));
 
 %%
-
 
 parfor (i = 1:length(lambdas),M)
 %for i = 1:length(lambdas)
      
    B = A;
    
-   B.lambda = lambdas(i);
+   B.lambda = @(x) ones(size(x))*lambdas(i);
+   B.chamber_fac = (2*lambdas(i) + 1)/3;
+   B = Amodels.initA_paper_dacite(B);
    
-   B = Amodels.initA_paper_mod(B);
-   
-   x = 100
-    
+   %x = lambdas(i)*30 + 10;
+   %x = 15;
+   x = -lambdas(i)*15 + 45
    try
        rvec(i) = fzero(@(r) failure(r,B), x, options);
        disp('Found one!')
        disp(rvec(i))
    catch ME
-       disp('FAILED')
-       fail(i) = 1;
+      disp('FAILED')
+      disp(ME)
+      fail(i) = 1;
    end
 end
 
@@ -54,7 +57,7 @@ end
 
 function [stressdiff] = failure(r,A)
 
-shear = true;
+shear = false;
 
 A.r = r;
 

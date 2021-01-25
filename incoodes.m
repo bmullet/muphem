@@ -116,6 +116,8 @@ options = odeset('Events',@FragmentationDepth,'Mass',@mass, 'MStateDependence','
 sol = ode15s(@(z,y) twophaseODE(z,y,A, false), zspan, y0, options);
 [warnMsg, warnId] = lastwarn;
     if ~isempty(warnMsg)
+        disp("Warning received")
+        disp(warnMsg)
         disp(A.v_chamber_i);
         disp(A.lambda);
         disp(A.r);
