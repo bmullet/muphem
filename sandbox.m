@@ -1,6 +1,9 @@
 %% Distribute solution
 A = out{1}; zvec = out{2}; pvec = out{3}; ugvec = out{4}; umvec = out{5};
-phivec = out{6}; rhogvec = out{7}; chidvec = out{8}; Qmvec = out{9}; Qgvec = out{10}; failure = out{11};
+phivec = out{6}; rhogvec = out{7}; chidvec = out{8}; Qmvec = out{9}; Qgvec = out{10}; 
+with_shear_low = out{11}; no_shear_low = out{12}; with_shear_high = out{13};
+no_shear_high = out{14}; failure_shear = out{15}; failure_no_shear  = out{16};
+
 Srz = nan(size(phivec));
     mu = A.mu(phivec,pvec);
     Srz(zvec<A.fragdepth) = 4*mu(zvec<A.fragdepth).*umvec(zvec<A.fragdepth)/A.r;
@@ -750,6 +753,43 @@ csvwrite("tau_" + NAME + ".csv", [zvec, Srz]);
 
 
 
-%% Aiy-Corona
+%% Search over T and xc
+Ts = [1050, 1100, 1150, 1200];
 
-SantaClara = [7, 9, 11, 14, 20, 24, 32, 37, 43, 45, 48, 66, 79, 91, 114, 138, 155, 175, 189, 196, 263, 302, 321, 375, 459, 542] ;
+A = Amodels.initA_paper_dacite;
+out = cell(length(Ts),1);
+tauoverp = nan(size(Ts));
+
+
+parfor i = 1:length(Ts)
+  B = A;
+  B.T = Ts(i);
+  B = Amodels.initA_paper_dacite(B);
+  out{i} = muphem('multiflow2',0,B);
+  tauoverp(i) = max(out{i}{18}./out{i}{17})
+  %tauoverp(i) = max(out{i}{18})
+end
+
+figure
+plot(Ts, tauoverp)
+
+%%
+xc0s = [0.2, 0.25, 0.3, 0.35];
+
+A = Amodels.initA_paper_dacite;
+out = cell(length(xc0s),1);
+tauoverp = nan(size(xc0s));
+
+
+parfor i = 1:length(xc0s)
+  B = A;
+  B.xc0 = xc0s(i);
+  B = Amodels.initA_paper_dacite(B);
+  out{i} = muphem('multiflow2',0,B);
+  %tauoverp(i) = max(out{i}{18}./out{i}{17})
+  tauoverp(i) = max(out{i}{18})
+end
+
+figure
+plot(xc0s, tauoverp)
+

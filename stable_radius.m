@@ -8,10 +8,13 @@
 
 %sd = failure(15, B);
 
-%%
+% Doing the maximum or minimum radius test
+max_or_min = "min";
+
 
 A = Amodels.initA_paper_dacite;
 A.fragcond = 'phi';
+A.phi0 = 0.75;
 %A.phi0 = .65;
 %A.chamber_fac = 0.5;
 
@@ -19,9 +22,17 @@ A.fragcond = 'phi';
 
 options = optimset('TolX',0.0005,'Display','iter');
 
-lambdas = [.6:.01:2];
+lambdas = [0.6:.1:1.5];
 
 rvec = nan(size(lambdas));
+rz = nan(size(lambdas));
+zr = nan(size(lambdas));
+rt = nan(size(lambdas));
+tr = nan(size(lambdas));
+tz = nan(size(lambdas));
+zt = nan(size(lambdas));
+outs = cell(size(lambdas));
+
 
 M = 6; % max num of workers
 
@@ -38,13 +49,34 @@ parfor (i = 1:length(lambdas),M)
    B.chamber_fac = (2*lambdas(i) + 1)/3;
    B = Amodels.initA_paper_dacite(B);
    
-   %x = lambdas(i)*30 + 10;
+   %x = lambdas(i)*50 + 10;
    %x = 15;
-   x = -lambdas(i)*15 + 45
+   %x = -lambdas(i)*15 + 45; % minimum
+   %x = 30;
+   %x = -lambdas(i)*(40) + 90; % no shear minimum
+   x = -lambdas(i)*(33) + 79.8; % with shear minimum
+   %x = (lambdas(i) - 2)*(-96.42) + 15 % maximum
    try
-       rvec(i) = fzero(@(r) failure(r,B), x, options);
+       [r, mech] = fzero(@(r) failure(r,B,max_or_min), x, options);
+       [stressdiff, mech, out] = failure(r,B,max_or_min)
+       rvec(i) = r;
+       outs{i} = out;
+       switch mech
+           case "r/z"
+               rz(i) = r;
+           case "z/r"
+               zr(i) = r;
+           case "z/t"
+               zt(i) = r;
+           case "t/z"
+               tz(i) = r;
+           case "r/t"
+               rt(i) = r;
+           case "t/r"
+               tr(i) = r;
+       end
        disp('Found one!')
-       disp(rvec(i))
+       disp(r)
    catch ME
       disp('FAILED')
       disp(ME)
@@ -55,7 +87,7 @@ end
 %csvwrite('no_shear.csv',[lambdas; rvec])
 
 
-function [stressdiff] = failure(r,A)
+function [stressdiff, mech, out] = failure(r,A,max_or_min)
 
 shear = false;
 
@@ -64,20 +96,21 @@ A.r = r;
 out = muphem('multiflow2',0,A);
 
 if shear 
-stressdiff = out{11};
-f = out{13};
-
+    if max_or_min == "min"
+        stressdiff = out{11};
+        mech = out{19}{1};
+    else % must be max
+        stressdiff = out{13};
+        mech = out{19}{2};
+    end
 else
-    
-stressdiff = out{12}; % no shear is 12, shear is 11
-f = out{14};
-
-end
-
-if (stressdiff < 0) && f
-    % failure but not at fragmentation
-    stressdiff = 1;
-    
+    if max_or_min == "min"
+        stressdiff = out{12}; % no shear is 12, shear is 11
+        mech = out{19}{3};
+    else % must be max
+        stressdiff = out{14};
+        mech = out{19}{4};
+    end
 end
 
 end

@@ -27,7 +27,7 @@ if (~exist('A'))
     A.Patm_ = 1.013e5;     % pascals
     A.vchamber_ = [];
     A.Ptop_ = [];
-    A.r = 30;             % Conduit radius
+    A.r = 50;             % Conduit radius
     A.depth = 5000;          % Length
     A.chamber_fac = (2*A.lambda(-A.depth) + 1)/3;
     A.Bchm = 1e-10;      % Chamber compressibility (sphere)
@@ -64,7 +64,8 @@ if (~exist('A'))
     %A.T = 1200;         % K (temperature of magma) (BASALT)
     
     %A.T = 1100;          % K (temperature of magma) (ANDESITE)
-    A.T = 1150;          % K (temperature of magma) (DACITE) (1000-1300)
+    A.T = 1100;          % K (temperature of magma) (DACITE) (1000-1300) (was 1150)
+    
     %A.T = 900;          % K (temperature of magma) (RHYOLITE)
     %A.T = 886;
     
@@ -103,7 +104,6 @@ if (~exist('A'))
     % Fragmentation
     A.f0 = 0.0075;  % Darcy-Weisbach friction factor
     A.phi0 = .80; % critical gas volume fraction for fragmentation
-    A.phiforce = .85; % start of transition period (should be less than fgw0)
     %A.mug = 1e-5; % gas viscosity
     A.mug = 1e-5; % gas viscosity
     A.Rash = 0.001; % ash radius
@@ -138,7 +138,7 @@ if (~exist('A'))
     A.mu0 = A.mu;
     
     
-    xc0 = 0.30; % Crystal content
+    xc0 = 0.30; % Crystal content (was 0.30)
     xcmax = 0.30;
     A.xcmax = xcmax;
     A.xc0 = xc0;
@@ -206,7 +206,7 @@ end
 
 function C = cohesion(zvec)
     C_surface = 5e6;
-    C_bottom = 15e6;
+    C_bottom = 20e6;
     C_transition_depth = -3000;
 
     m = (C_surface - C_bottom)/(0 - C_transition_depth);

@@ -447,19 +447,19 @@ legend('Location','Southeast')
 tstar = @(c,q, pp)  ((1./((c + q + pp.*(1-q)).*(1-c+pp.*(q-1)))).^(1/2).*(c + pp + q.*(1-pp) - 1))/2;
 
 phi = [0:.1:45]*pi/180;
-dt = 0.001;
-c = 0:.01:1-dt;
+c = 0:.01:3;
 q = tan(pi/4 + 1/2*phi).^2;
 pp=1/2.7;
+%pp = 0;
 
 [C,Q] = meshgrid(c,q);
 [~,PHI] = meshgrid(c,phi);
 
 ts = tstar(C,Q,pp);
-subplot(122)
-[C,p1] = contour(C,PHI/pi*180,abs(ts), [ 0.1:.1:.8]);
+%subplot(122)
+[C2,p1] = contour(C,PHI/pi*180,abs(ts).*(imag(ts)==0), [0.1:0.1:1, 1.5, 2]);
 p1.LineWidth = lw;
-clabel(C,p1,'FontSize',17,'Color','black')
+clabel(C2,p1,'FontSize',17,'Color','black')
 xlabel('C_0/\sigma_{zz}')
 ylabel('\phi (degrees)')
 title('Contours of Constant $\tau^*$','Interpreter','Latex')
@@ -473,6 +473,11 @@ title('Contours of Constant $\tau^*$','Interpreter','Latex')
 %ylabel('\tau*')
 %ylim([1e-1, 1e1])
 
+figure
+treal = abs(ts).*(imag(ts) == 0);
+tlog = log10(treal);
+h = pcolor(C,PHI/pi*180,tlog);
+set(h, 'EdgeColor', 'none')
 
 %% Anotations
 subplot(121); hold on;

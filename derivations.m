@@ -46,8 +46,10 @@ solve((2*(- q^2*taup^2 + q + 1)) == 0, taup)
 
 
 %% vary tau
-phi = 35/180*pi;
-C = 0; % this is C0/sigz
+%phi = 35/180*pi;
+phi = 0.001/180*pi;
+
+C = 0.5; % this is C0/sigz
 q = tan(pi/4 + 1/2*phi)^2;
 %pp = 1/2.7;
 pp = 0;
@@ -55,13 +57,15 @@ pp = 0;
 %taus = .365:.0001:.367;
 %taus = 0:.1:.36;
 %taus =  0.6:.05:1;
-taus = [0.6, 0.65];
+%taus = [0.0, 0.1, 0.2, 0.3, 0.35];
+taus = 0.28;
 k = 0:.01:5;
 kk = [k k]; % used for solutions with more than one k value
 %k = 0.5:.001:1.5;
-colors = parula(length(taus));
+%colors = parula(length(taus));
+colors = [0, 0, 0]
 handles = [];
-figure
+%figure
 
 disp("Max tau:"); disp(eval(subs(taustar)));
 
@@ -114,14 +118,34 @@ for i = 1:length(taus)
     %xlim([0,4])
     %ylim([0,4])
     grid on
-    xlabel('k = S/\sigma_{zz}')
+    xlabel('k')
     ylabel('p/\sigma_{zz}')
     
     
 end
+[hleg,icons,plots] = legend(handles);
+title(hleg,'\tau_{rz}/p')
+hleg.Title.Visible = 'on';
+% the addition in height needed for the title:
+title_hight = hleg.Position(4)/numel(plots);
+hleg.Position([2 4]) = [hleg.Position(2)-title_hight hleg.Position(4)+title_hight];
+% calculate new position for the elements in the legeng:
+new_pos = fliplr(0.5/(numel(plots)+1):1/(numel(plots)+1):1);
+hleg.Title.NodeChildren.Position = [0.5 new_pos(1) 0];
+% set the text to the right position:
+leg_txt = findobj(icons,'Type','Text');
+txt_pos = cell2mat({leg_txt.Position}.');
+txt_pos(:,2) = new_pos(2:end);
+set(leg_txt,{'Position'},mat2cell(txt_pos,ones(numel(plots),1),3));
+% set the icons to the right position:
+leg_att = findobj(icons,'Type','Line');
+% set(leg_att,{'YData'},mat2cell(repmat(repelem(new_pos(2:end).',...
+%     numel(plots)),1,2),ones(numel(plots)*2,1),2))
+%set(leg_att,{'YData'},mat2cell(repmat(repelem(new_pos(2:end).',...
+%     2),1,2),ones(numel(plots)*2,1),2))
 
-legend(handles)
-title('MC failure envelope with varying \tau/p')
+
+%title('MC failure envelope with varying \tau/p')
 
 %% vary pp
 phi = 35/180*pi;
@@ -236,5 +260,7 @@ C = 1; % this is C0/sigz
 q = tan(pi/4 + 1/2*phi)^2;
 pp = 1/2.7;
 eval(subs(d))
+
+%% Plot solutions for top and bottom 
 
 

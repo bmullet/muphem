@@ -342,18 +342,18 @@ xlabel('\epsilon_{zz}')
 set(gca,'Ydir','reverse')
 ylabel('z')
 
-Fmg = interphase((ug-um), p, phi, rhog, A);
-figure
-plot(Fmg,z)
-set(gca,'Ydir','reverse')
-xlabel('F_{mg}')
-ylabel('Depth (m)')
-
-figure
-semilogx((ug-um),z)
-set(gca,'Ydir','reverse')
-xlabel('\Delta u')
-ylabel('Depth (m)')
+% Fmg = interphase((ug-um), p, phi, rhog, A);
+% figure
+% plot(Fmg,z)
+% set(gca,'Ydir','reverse')
+% xlabel('F_{mg}')
+% ylabel('Depth (m)')
+% 
+% figure
+% semilogx((ug-um),z)
+% set(gca,'Ydir','reverse')
+% xlabel('\Delta u')
+% ylabel('Depth (m)')
 
 end
 

@@ -58,7 +58,7 @@ end
 % Plot slip directions
 %slip = plotslipsurfaces(zvec,Sprincipal,A,plot);
 porep = -zvec*1000*9.8;
-[shear, no_shear, failure_shear, failure_no_shear] = plotfailureprofiles(A,Srr,Szz,Stt,Srz,zvec,pvec,plot,porep);
+ [with_shear_low, no_shear_low, with_shear_high, no_shear_high, failure_shear, failure_no_shear, failure_mechanisms] = plotfailureprofiles(A,Srr,Szz,Stt,Srz,zvec,pvec,plot,porep);
 
 if plot
 if (failure)
@@ -72,7 +72,7 @@ disp('Pressure at conduit exit:')
 disp(min(pvec));
 end
 
-vargout = {A,zvec,pvec,ugvec,umvec,phivec,rhogvec,chidvec,Qmvec,Qgvec,shear,no_shear,failure_shear, failure_no_shear};
+vargout = {A,zvec,pvec,ugvec,umvec,phivec,rhogvec,chidvec,Qmvec,Qgvec,with_shear_low, no_shear_low, with_shear_high, no_shear_high, failure_shear, failure_no_shear, Srr, Srz, failure_mechanisms};
 
 end
 
