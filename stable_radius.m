@@ -11,6 +11,9 @@
 % Doing the maximum or minimum radius test
 max_or_min = "min";
 
+% 
+vary = "k"; 
+
 
 A = Amodels.initA_paper_dacite;
 A.fragcond = 'phi';
@@ -22,7 +25,7 @@ A.phi0 = 0.75;
 
 options = optimset('TolX',0.0005,'Display','iter');
 
-lambdas = [0.6:.1:1.5];
+lambdas = [0.5:.1:0.7];
 
 rvec = nan(size(lambdas));
 rz = nan(size(lambdas));
@@ -44,21 +47,27 @@ parfor (i = 1:length(lambdas),M)
 %for i = 1:length(lambdas)
      
    B = A;
-   
-   B.lambda = @(x) ones(size(x))*lambdas(i);
-   B.chamber_fac = (2*lambdas(i) + 1)/3;
-   B = Amodels.initA_paper_dacite(B);
+   if vary == "k"
+     B.lambda = @(x) ones(size(x))*lambdas(i);
+     B.chamber_fac = (2*lambdas(i) + 1)/3;
+     x = -lambdas(i)*(33) + 79.8; % with shear minimum
+   else
+     B.chamber_fac = lambdas(i);
+   end
+     B = Amodels.initA_paper_dacite(B);
    
    %x = lambdas(i)*50 + 10;
    %x = 15;
    %x = -lambdas(i)*15 + 45; % minimum
    %x = 30;
    %x = -lambdas(i)*(40) + 90; % no shear minimum
-   x = -lambdas(i)*(33) + 79.8; % with shear minimum
+   
    %x = (lambdas(i) - 2)*(-96.42) + 15 % maximum
    try
+
+   
        [r, mech] = fzero(@(r) failure(r,B,max_or_min), x, options);
-       [stressdiff, mech, out] = failure(r,B,max_or_min)
+       [stressdiff, mech, out] = failure(r,B,max_or_min);
        rvec(i) = r;
        outs{i} = out;
        switch mech
@@ -89,7 +98,7 @@ end
 
 function [stressdiff, mech, out] = failure(r,A,max_or_min)
 
-shear = false;
+shear = true;
 
 A.r = r;
 

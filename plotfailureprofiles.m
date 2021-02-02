@@ -144,7 +144,7 @@ end
 
 % Get failure conditions
 
-[with_shear_low, with_shear_low_mech] = min([min(real(Srr./Szz - frz_low)), min(real(Srr./Szz - frt_right))]);
+[with_shear_low, with_shear_low_mech] = min([min(real(Srr./Szz - frz_low)), min(real(Srr./Szz - frt_right)), min(real(frz_high - Srr./Szz))]);
 [with_shear_high, with_shear_high_mech] = min([min(real(frz_high - Srr./Szz)), min(real(ftz_left - Srr./Szz))]);
 [no_shear_low, no_shear_low_mech] = min([min(real(Srr./Szz - frz_low_notau)), min(real(Srr./Szz - frt_right_notau))]);
 [no_shear_high, no_shear_high_mech] = min([min(real(frz_high_notau - Srr./Szz)), min(real(ftz_left_notau - Srr./Szz))]);
@@ -154,13 +154,15 @@ end
 pz = Srr./Szz;
 if with_shear_low_mech == 0
     with_shear_low_mech = "r/z"; 
-else
+elseif with_shear_low_mech == 1
     [~,I] = min(Srr./Szz - frt_right);
     if pz(I) < 1
         with_shear_low_mech = "r/t";
     else
         with_shear_low_mech = "z/t";
     end
+else
+    with_shear_low_mech = "z/r";
 end
 
 if with_shear_high_mech == 0
