@@ -205,6 +205,7 @@ end
 end
 
 function C = cohesion(zvec)
+    FOS = 1;
     C_surface = 5e6;
     C_bottom = 20e6;
     C_transition_depth = -3000;

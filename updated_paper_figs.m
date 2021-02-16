@@ -39,6 +39,58 @@ set(0, 'defaultFigurePaperPosition', defsize);
 set(0,'DefaultAxesFontName', 'Arial')
 set(0,'DefaultTextFontname', 'Arial')
 
+%%
+% Get data for comsol
+%load("example_eruption.mat")
+% srz and p
+mat = [out{2} out{17}];
+writematrix(mat, 'p50.csv')
+mat = [out{2} out{18}];
+writematrix(mat, 'srz50.csv')
+
+% cohesion
+mat = [out{2} A.mc.C(out{2})];
+writematrix(mat, 'cohesion50.csv')
+
+%% Example eruption
+load("example_eruption.mat")
+colors = lines(4);
+colors = colors(3:end, :);
+A = out{1};
+zvec = out{2};
+pvec = out{3};
+ugvec = out{4};
+umvec = out{5};
+phivec = out{6};
+Srr = out{17};
+Srz = out{18};
+
+figure
+subplot(1,3,1);
+plot(pvec, zvec, "Color", colors(1,:)); hold on;
+plot(Srz, zvec, "Color", colors(2,:)); hold on;
+plot(xlim, [-2252,-2252], '--r', "Linewidth", 1)
+legend("p", "\tau");
+grid on;
+xlabel("Pa")
+ylabel("z (m)")
+subplot(1,3,3);
+semilogx(ugvec, zvec, "Color", colors(1,:)); hold on;
+semilogx(umvec, zvec, "Color", colors(2,:)); hold on;
+grid on;
+plot(xlim, [-2252,-2252], '--r', "Linewidth", 1)
+legend("u_g", "u_m");
+xlabel("m/s");
+ylabel("z (m)");
+set(gca, 'XTick', [10, 100])
+subplot(132);
+plot(Srz./Srr, zvec, "Color", colors(1,:)); hold on; grid on;
+plot(xlim, [-2252,-2252], '--r', "Linewidth", 1)
+xlabel("\tau/p");
+ylabel("z (m)");
+
+
+
 %% Stress regimes
 figure
 subplot(121)
@@ -97,6 +149,85 @@ xlim([0,3]);
 ylim([0,3.5]);
 xl = xlim;
 
+%% Minimum stable radius - vary k
+figure
+colors = parula(2)*0.9;
+
+% r_min v. p
+subplot(2,3,1);
+load("phi_75_with_shear_constant_k.mat")
+plot(lambdas, rvec, 'Color', colors(1,:)); grid on;
+xlabel("p_{chamber}/\sigma_{zz}")
+ylabel("R_{stable}")
+% r_min v. k
+subplot(234)
+load("phi_75_with_shear_minimum_constant_p.mat")
+plot(lambdas, rvec, 'Color', colors(1,:));
+grid on;
+xlabel("k")
+ylabel("R_{stable}")
+
+colors = parula(2)*0.9;
+load("phi_75_with_shear_minimum.mat");
+i = lambdas < 1.28;
+%i(4:2:find(i,1,'last')-1) = 0;
+subplot(2,3,[2,3,5,6])
+plot(lambdas(i), rvec(i), 'Color', colors(1,:)); hold on;
+
+load("phi_75_without_shear_minimum.mat");
+plot(lambdas, rvec, '--', 'Color', colors(1,:), "Linewidth", 2);
+
+load("phi_65_with_shear_minimum.mat");
+plot(lambdas, rvec, 'Color', colors(2,:));
+
+xlabel('k')
+ylabel("R_{stable}")
+xlim([0.5,1.4])
+
+%grid on
+
+
+[hleg,icons,plots] = legend("0.75", "0.75", "0.65");
+title(hleg,'\phi_{frag}')
+hleg.Title.Visible = 'on';
+% the addition in height needed for the title:
+title_hight = hleg.Position(4)/numel(plots);
+hleg.Position([2 4]) = [hleg.Position(2)-title_hight hleg.Position(4)+title_hight];
+% calculate new position for the elements in the legeng:
+new_pos = fliplr(0.5/(numel(plots)+1):1/(numel(plots)+1):1);
+hleg.Title.NodeChildren.Position = [0.5 new_pos(1) 0];
+% set the text to the right position:
+leg_txt = findobj(icons,'Type','Text');
+txt_pos = cell2mat({leg_txt.Position}.');
+txt_pos(:,2) = new_pos(2:end);
+set(leg_txt,{'Position'},mat2cell(txt_pos,ones(numel(plots),1),3));
+% set the icons to the right position:
+leg_att = findobj(icons,'Type','Line');
+% set(leg_att,{'YData'},mat2cell(repmat(repelem(new_pos(2:end).',...
+%     numel(plots)),1,2),ones(numel(plots)*2,1),2))
+set(leg_att,{'YData'},mat2cell(repmat(repelem(new_pos(2:end).',...
+     2),1,2),ones(numel(plots)*2,1),2))
+
+ 
+%% Stable radius eruption progression
+load("phi_75_with_shear_constant_k.mat")
+figure
+subplot(1,2,1)
+plot(lambdas, rvec)
+grid on;
+xlim([0.5, 0.8])
+ylabel('R_{min}'); xlabel("p_{ch}/\sigma_{zz}")
+legend("R_{min}")
+subplot(1,2,2)
+t = [0, 0.5, 1];
+r = [0, 1, 1];
+pch = [1,  0.7, 0.62];
+plot(t, r, '--x','Color','k'); hold on;
+plot(t, pch, '--x','Color','r');
+xlabel("t/t_{collapse}")
+ylabel("Parameter Value")
+legend("R/R_{final}", "P_{chamber}/\sigma_{zz}")
+ylim([0,1.1])
 
 
 function [h] = plot_MC(pp, taup, C_over_sigz,clr,symbl,lw)

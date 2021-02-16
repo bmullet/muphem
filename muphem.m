@@ -10,7 +10,7 @@ function [ varargout ] = muphem( varargin )
 end
 
 function [ vargout ] = multiflow2(op,A,varargin)
-plot = false;
+plot = true;
 
 if length(varargin) > 0
     params = varargin{1};
@@ -28,8 +28,8 @@ end
 % vbounds = [(sqrt(A.r) - 5.2)/1.6];            % Set upper boundary at 10% speed of sound at critical pressure       
 %vbounds = [sqrt(A.r*1.2)/2-2.7]+0.2;
 vbounds = A.u0;
-%options = optimset('Display','iter');
-options = optimset();
+options = optimset('Display','iter');
+%options = optimset();
 v_fzero = fzero(@(v) matchPatm(v,A),vbounds,options);
 %v_fzero = vbounds;
 A.v_chamber_i = v_fzero;

@@ -12,7 +12,7 @@
 max_or_min = "min";
 
 % 
-vary = "k"; 
+vary = "pressure"; 
 
 
 A = Amodels.initA_paper_dacite;
@@ -25,7 +25,7 @@ A.phi0 = 0.75;
 
 options = optimset('TolX',0.0005,'Display','iter');
 
-lambdas = [0.5:.1:0.7];
+lambdas = [0.6:.1:0.7];
 
 rvec = nan(size(lambdas));
 rz = nan(size(lambdas));
@@ -43,8 +43,8 @@ fail = zeros(size(rvec));
 
 %%
 
-parfor (i = 1:length(lambdas),M)
-%for i = 1:length(lambdas)
+%parfor (i = 1:length(lambdas),M)
+for i = 1:length(lambdas)
      
    B = A;
    if vary == "k"
