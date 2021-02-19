@@ -216,8 +216,8 @@ function C = cohesion(zvec)
 end
 
 function k = stressratio(zvec)
-    k_surface = 0.6;
-    k_bottom = 0.6;
+    k_surface = 0.55;
+    k_bottom = 0.55;
     k_transition_depth = -2000;
 
     m = (k_surface - k_bottom)/(0 - k_transition_depth);

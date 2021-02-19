@@ -52,6 +52,90 @@ writematrix(mat, 'srz50.csv')
 mat = [out{2} A.mc.C(out{2})];
 writematrix(mat, 'cohesion50.csv')
 
+%% Comparison to COMSOL
+lw = 3;
+
+load("comsol_failure.mat")
+
+Srr = out{17};
+Srz = out{18};
+zvec = out{2};
+A = out{1};
+Szz = A.k.rho*9.8*abs(zvec);
+
+with_tau = importdata('../COMSOL/mc_failure_with_tau.txt');
+z_tau = with_tau(:,2);
+r_tau = with_tau(:,1);
+no_tau = importdata('../COMSOL/mc_failure_no_tau.txt');
+z_no_tau = no_tau(:,2);
+r_no_tau = no_tau(:,1);
+
+epe = importdata('../COMSOL/epe0.txt');
+z_epe = epe(:,2);
+r_epe = epe(:,1);
+
+
+phi = 30/180*pi;
+pp = abs(zvec)*9.8*1000;
+cohesion = A.mc.C(zvec); 
+mu = tan(phi);
+
+C = 2*cohesion.*((mu^2 + 1)^(1/2) + mu);
+
+q = tan(pi/4 + 1/2*phi)^2;
+
+%rzrf = @(p, sigz, C, lambda) sqrt((p./sigz - lambda)./(1/q - C./(q*sigz) - lambda));
+rzrf = @(p, sigz, C, k, pp) (-(q.*(p - k.*sigz))./(C + pp - sigz - pp.*q + k.*q.*sigz)).^(1/2);
+
+rfailzr = rzrf(Srr, Szz, C, A.lambda(zvec),pp);
+
+hold on
+[z_tau,idx] = sort(z_tau);
+r_tau = r_tau(idx);
+
+[z_no_tau,idx] = sort(z_no_tau);
+r_no_tau = r_no_tau(idx);
+
+%subplot(121)
+% radial comparison of failure
+r_epe = r_epe(z_epe>-1800);
+z_epe = z_epe(z_epe>-1800);
+
+[z_epe,idx] = sort(z_epe);
+r_epe = r_epe(idx);
+rr = smooth(r_epe, 50);
+%p3 = plot(r_epe,z_epe,'-k','LineWidth',1); hold on;
+p3 = plot(rr,z_epe,'-k','LineWidth',1); hold on;
+p1 = plot(rfailzr*A.r, zvec,'--r','DisplayName', 'Analytical','LineWidth',2);
+
+legend([p1,p3],'Analytical','FEM')
+
+xlim([50,60])
+ylim([-2001, -1000])
+
+xlabel('r (m)'); ylabel('z (m)')
+
+grid on;
+
+% subplot(122)
+% % von mises stress
+% vm = importdata('../COMSOL/von_mises.txt');
+% sigma_theta = 2*Szz.*A.lambda(zvec) - Srr;
+% p = 1/3*(sigma_theta + Szz + Srr);
+% von_mises = (3/2*((sigma_theta -p).^2 + (Srr - p).^2 + (Szz - p).^2 + 2*(Srz).^2)).^(1/2);
+% plot(zvec, von_mises); hold on;
+% plot(vm(:,1), vm(:,2))
+
+%%
+dstress = importdata("../COMSOL/diff_stress.txt");
+plot(zvec, Srr - Szz); hold on;
+plot(dstress(:,1), dstress(:,2));
+
+%%
+MC = Szz - pp - (C + q.*(Srr - pp)); hold on;
+plot(MC, zvec);
+plot([0, 0], ylim, '--r')
+
 %% Example eruption
 load("example_eruption.mat")
 colors = lines(4);
@@ -229,6 +313,8 @@ ylabel("Parameter Value")
 legend("R/R_{final}", "P_{chamber}/\sigma_{zz}")
 ylim([0,1.1])
 
+
+%% 
 
 function [h] = plot_MC(pp, taup, C_over_sigz,clr,symbl,lw)
 % taup: tau/p, the shear tractions

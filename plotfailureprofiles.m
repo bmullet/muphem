@@ -1,12 +1,11 @@
 function [with_shear_low, no_shear_low, with_shear_high, no_shear_high, failure_shear, failure_no_shear, failure_mechanisms] = plotfailureprofiles(A,Srr,Szz,~,Srz,zvec,~,plotfigs,porep)
 
-
-tau = Srz./Szz;
+Srz = Srz.*0;
+tau = Srz./Szz*0;
 taup = Srz./Srr; % normalized by pressure
 pp = porep./Szz;
 phi = A.mc.phi;
 cohesion = A.mc.C(zvec); mu = tan(phi); c = 2*cohesion*((mu^2 + 1)^(1/2) + mu)./Szz;
-C = 2*cohesion*((mu^2 + 1)^(1/2) + mu);
 
 q = tan(pi/4 + 1/2*phi)^2;
 
