@@ -27,7 +27,7 @@ if (~exist('A'))
     A.Patm_ = 1.013e5;     % pascals
     A.vchamber_ = [];
     A.Ptop_ = [];
-    A.r = 50;             % Conduit radius
+    A.r = 30;             % Conduit radius
     A.depth = 5000;          % Length
     A.chamber_fac = (2*A.lambda(-A.depth) + 1)/3;
     A.Bchm = 1e-10;      % Chamber compressibility (sphere)
@@ -64,7 +64,7 @@ if (~exist('A'))
     %A.T = 1200;         % K (temperature of magma) (BASALT)
     
     %A.T = 1100;          % K (temperature of magma) (ANDESITE)
-    A.T = 1100;          % K (temperature of magma) (DACITE) (1000-1300) (was 1150)
+    A.T = 1159;          % K (temperature of magma) (DACITE) (1000-1300) (was 1150)
     
     %A.T = 900;          % K (temperature of magma) (RHYOLITE)
     %A.T = 886;
@@ -138,8 +138,8 @@ if (~exist('A'))
     A.mu0 = A.mu;
     
     
-    xc0 = 0.30; % Crystal content (was 0.30)
-    xcmax = 0.30;
+    xc0 = 0.40; % Crystal content (was 0.30)
+    xcmax = 0.40;
     A.xcmax = xcmax;
     A.xc0 = xc0;
     A.xcexp = -0.5226;
@@ -216,8 +216,8 @@ function C = cohesion(zvec)
 end
 
 function k = stressratio(zvec)
-    k_surface = 0.55;
-    k_bottom = 0.55;
+    k_surface = 0.7;
+    k_bottom = 0.7;
     k_transition_depth = -2000;
 
     m = (k_surface - k_bottom)/(0 - k_transition_depth);

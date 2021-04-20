@@ -1,7 +1,6 @@
 function [with_shear_low, no_shear_low, with_shear_high, no_shear_high, failure_shear, failure_no_shear, failure_mechanisms] = plotfailureprofiles(A,Srr,Szz,~,Srz,zvec,~,plotfigs,porep)
 
-Srz = Srz.*0;
-tau = Srz./Szz*0;
+tau = Srz./Szz;
 taup = Srz./Srr; % normalized by pressure
 pp = porep./Szz;
 phi = A.mc.phi;

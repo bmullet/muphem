@@ -49,7 +49,7 @@ solve((2*(- q^2*taup^2 + q + 1)) == 0, taup)
 phi = 35/180*pi;
 %phi = 0.001/180*pi;
 
-C = 0; % this is C0/sigz
+C = 1.24; % this is C0/sigz
 q = tan(pi/4 + 1/2*phi)^2;
 pp = 1/2.7;
 %pp = 0;
@@ -58,7 +58,7 @@ pp = 1/2.7;
 %taus = 0:.1:.36;
 %taus =  0.6:.05:1;
 %taus = [0.0, 0.1, 0.2, 0.3, 0.35];
-taus = 0;
+taus = 0.39;
 k = 0:.01:5;
 kk = [k k]; % used for solutions with more than one k value
 %k = 0.5:.001:1.5;
@@ -153,7 +153,7 @@ C = 0; % this is C0/sigz
 q = tan(pi/4 + 1/2*phi)^2;
 taup = 0.0;
 
-pps = 0;
+pps = 1/2.7;
 
 
 colors = parula(length(pps));

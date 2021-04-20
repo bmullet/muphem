@@ -188,7 +188,7 @@ set(ht,'FontSize',20)
 
 %% FIGURE - Failure and stable regions
 clrs = parula(3);
-phi = 38/180*pi;
+phi = 35/180*pi;
 figure
 
 set(0,'defaultFigurePosition', [defpos(1) defpos(2) 2.2*width*100, height*100]);

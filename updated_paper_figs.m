@@ -44,9 +44,9 @@ set(0,'DefaultTextFontname', 'Arial')
 %load("example_eruption.mat")
 % srz and p
 mat = [out{2} out{17}];
-writematrix(mat, 'p50.csv')
+writematrix(mat, 'p_k_.csv')
 mat = [out{2} out{18}];
-writematrix(mat, 'srz50.csv')
+writematrix(mat, 'srz.csv')
 
 % cohesion
 mat = [out{2} A.mc.C(out{2})];
@@ -61,22 +61,25 @@ Srr = out{17};
 Srz = out{18};
 zvec = out{2};
 A = out{1};
-Szz = A.k.rho*9.8*abs(zvec);
+Szz = A.k.rho*9.806*abs(zvec);
 
-with_tau = importdata('../COMSOL/mc_failure_with_tau.txt');
+with_tau = importdata('../COMSOL/first_draft/mc_failure_with_tau.txt');
 z_tau = with_tau(:,2);
 r_tau = with_tau(:,1);
-no_tau = importdata('../COMSOL/mc_failure_no_tau.txt');
+no_tau = importdata('../COMSOL/first_draft/mc_failure_no_tau.txt');
 z_no_tau = no_tau(:,2);
 r_no_tau = no_tau(:,1);
 
-epe = importdata('../COMSOL/epe0.txt');
+epe = importdata('../COMSOL/first_draft/epe0.txt');
 z_epe = epe(:,2);
 r_epe = epe(:,1);
 
+elastic = importdata('../COMSOL/first_draft/elastic_soln.txt');
+z_el = elastic(:,2);
+r_el = elastic(:,1);
 
 phi = 30/180*pi;
-pp = abs(zvec)*9.8*1000;
+pp = abs(zvec)*9.806*1000;
 cohesion = A.mc.C(zvec); 
 mu = tan(phi);
 
@@ -105,10 +108,26 @@ z_epe = z_epe(z_epe>-1800);
 r_epe = r_epe(idx);
 rr = smooth(r_epe, 50);
 %p3 = plot(r_epe,z_epe,'-k','LineWidth',1); hold on;
-p3 = plot(rr,z_epe,'-k','LineWidth',1); hold on;
-p1 = plot(rfailzr*A.r, zvec,'--r','DisplayName', 'Analytical','LineWidth',2);
+p3 = plot(rr,z_epe,'-k','LineWidth',2); hold on;
 
-legend([p1,p3],'Analytical','FEM')
+r_epe = r_epe(z_epe>-1800);
+z_epe = z_epe(z_epe>-1800);
+
+[z_el,idx] = sort(z_el);
+r_el = r_el(idx);
+rr = smooth(r_el, 50);
+%p3 = plot(r_el,z_el,'-k','LineWidth',1); hold on;
+
+rr = rr(z_el>-1800);
+z_el = z_el(z_el>-1800);
+
+p2 = plot(rr,z_el,'-b','LineWidth',2); hold on;
+
+
+
+p1 = plot(rfailzr*A.r, zvec,'--r','DisplayName', 'Analytical','LineWidth',3);
+
+legend([p1,p2,p3],'Analytical','FEM Elastic','FEM Elastoplastic')
 
 xlim([50,60])
 ylim([-2001, -1000])
@@ -127,14 +146,57 @@ grid on;
 % plot(vm(:,1), vm(:,2))
 
 %%
-dstress = importdata("../COMSOL/diff_stress.txt");
-plot(zvec, Srr - Szz); hold on;
-plot(dstress(:,1), dstress(:,2));
+dstress = importdata("../COMSOL/first_draft/differential_stress.txt");
+
+dstress_no_shear = importdata("../COMSOL/first_draft/differential_stress_no_shear.txt");
+
+Srz_mod = Srz;
+Szz = Szz;
+SR = 1/2*(Srr + Szz) + ((1/2*(Srr - Szz)).^2 + Srz_mod.^2).^(1/2);
+SZ = 1/2*(Srr + Szz) - ((1/2*(Srr - Szz)).^2 + Srz_mod.^2).^(1/2);
+
+Stheta = 2*A.lambda(zvec).*Szz - Srr;
+
+S1 = max(max(SR,SZ), Stheta);
+S3 = min(min(SR,SZ), Stheta);
+
+% plot(zvec, Srr - Szz); hold on;
+% plot(zvec, S3 - S1);
+% plot(dstress_no_shear(:,1), dstress_no_shear(:,2));
+% plot(dstress(:,1), dstress(:,2));
+% legend('No shear', 'With shear', "COMSOL no shear", "COMSOL with shear")
+% xlabel("z(m)"); ylabel("Differential stress")
+
+
+mc_with_shear = importdata("../COMSOL/first_draft/mc_criteria.txt");
+mc = (S3-S1)/2 + (S1+S3 -2*pp)/2*sin(phi) + A.mc.C(zvec)*cos(phi);
+
+plot(mc_with_shear(:,1), mc_with_shear(:,2));hold on;
+plot(zvec, mc); 
+legend("COMSOL","analytical" )
 
 %%
 MC = Szz - pp - (C + q.*(Srr - pp)); hold on;
 plot(MC, zvec);
 plot([0, 0], ylim, '--r')
+
+%% Srz as a function of radial coordinate
+radial = importdata("../COMSOL/first_draft/srz_vary_radial.txt");
+r = radial(:,1);
+srz = radial(:,2)/5.5e6;
+ind = (r>0);
+r = r(ind);
+srz = srz(ind);
+
+f = fit(r, srz, 'b*(x)^m');
+
+%options = fitoptions('gauss2', 'Lower', [-Inf, -Inf, -Inf], "StartPoint", [.5, -0.45, -0.32]);
+%f = fit(r, srz, 'b*(x)^m+a', options);
+%f = fit(r, srz, 'b*exp(-x/t)+a');
+
+plot(r,srz); hold on;
+plot(r,f(r));
+
 
 %% Example eruption
 load("example_eruption.mat")
