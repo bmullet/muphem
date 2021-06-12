@@ -104,6 +104,7 @@ grid on
 %% Analytical comparison at the fragmentation depth
 frag_depths = 1000*[-1.4243 ,  -1.3589,   -1.2940 ,  -1.2296 ,  -1.1662 ,  -1.1035 ,  -1.0415  , -0.9803 ,  -0.9202 ,  -0.8608  , -0.8024 ,  -0.7449 ,  -0.6885 ,  -0.6333 ,  -0.5791 ,  -0.5262];
 COHESION = 10e6; % MPa
+
 A = Amodels.initA_paper_MSH_A;
 label = 'A';
 chamber_fac_vec = [0.7:.02:1];
@@ -213,8 +214,6 @@ xlabel("f_y(\sigma') (Pa)")
 ylim(1e3*[-1.4750, -0.7510])
 xlim(1e6*[-5.7216, 5.4715])
 grid on;
-
-
 
 % annotate a grid
 subplot(224)
@@ -955,7 +954,7 @@ for i = 1:length(radius_vec)
     phi = 35/180*pi;
     pp = abs(zvec)*9.806*1000;
     cohesion = COHESION; % COMPARISON TO COMSOL ADDS 2MPa
-
+    
     Stheta = 2*k.*Szz - Srr;
     
     SR = Srr;
@@ -963,7 +962,7 @@ for i = 1:length(radius_vec)
     
     S1 = max(max(SR,SZ), Stheta);
     S3 = min(min(SR,SZ), Stheta);
-  
+    
     mc_an_i = -1*((S3-S1)/2 + (S1+S3 -2*pp)/2*sin(phi) + cohesion*cos(phi));
     
     ch = ch_com{i};
@@ -1036,10 +1035,216 @@ plot(radius_vec, mc_com-mc_an, "*", "Color", "#0384fc")
 ylabel("f_y(\sigma')_{FEM} - f_y(\sigma')_{an}")
 xlabel("R (m)")
 ylim([0, 3.5e6])
- yyaxis right
+yyaxis right
 plot(radius_vec, tauzplot, 'Color', '#fc6703');
 xlabel("R (m)")
 ylabel("\tau_{rz}/S_z at fragmentation")
 text(0.025,0.95,'(b)','Units','normalized','FontSize',20)
 
 ylim([0.05, 0.25])
+
+%% Reduced crystal fraction
+
+frag_depths_E = [-947.1435, -875.0623, -804.5345, -735.8145, -668.4268, -602.5728, -538.9385, -476.9399, -417.4253, -360.4384, -306.3012, -255.613, -208.9285, -167.3586, -132.2345, -104.9263];
+frag_depths_A = 1000*[-1.4243 ,  -1.3589,   -1.2940 ,  -1.2296 ,  -1.1662 ,  -1.1035 ,  -1.0415  , -0.9803 ,  -0.9202 ,  -0.8608  , -0.8024 ,  -0.7449 ,  -0.6885 ,  -0.6333 ,  -0.5791 ,  -0.5262];
+
+[chamber_fac_vec, min_an_with_shear_E, min_an_no_shear_E, pzE] = analytical_mins('E', frag_depths_E, true); title("E")
+figure
+[chamber_fac_vec, min_an_with_shear_A, min_an_no_shear_A, pzA] = analytical_mins('A', frag_depths_A, true); title("A")
+
+figure; subplot(141)
+h1 = plot(chamber_fac_vec, -min_an_with_shear_E); hold on;
+h2 = plot(chamber_fac_vec, -min_an_with_shear_A);
+plot(xlim, [0,0], '--r')
+xlabel("p_{ch}/S_z(z_{ch})")
+ylabel("Max(f_y(\sigma') (Pa)")
+
+legend([h1, h2], "X_c = 0.20", "X_c = 0.40", "Location", "North")
+text(0.02,0.95,'(a)','Units','normalized','FontSize',20)
+legend show
+
+subplot(142)
+h1 = plot(chamber_fac_vec, frag_depths_E); hold on;
+h2 = plot(chamber_fac_vec, frag_depths_A);
+
+xlabel("p_{ch}/S_z(z_{ch})")
+ylabel("fragmentation depth (m)")
+xl = xlim;
+
+patch([xl(1), xl(1), xl(2), xl(2)],[-1000, -250, -250, -1000],'o','FaceAlpha',.1,'LineStyle', 'none');
+legend([h1, h2], "X_c = 0.20", "X_c = 0.40", "Location", "North")
+text(0.02,0.95,'(b)','Units','normalized','FontSize',20)
+
+subplot(143)
+h1 = plot(frag_depths_E, -min_an_with_shear_E); hold on;
+h2 = plot(frag_depths_A, -min_an_with_shear_A);
+yl = ylim;
+patch([-1000, -250, -250, -1000],[yl(1), yl(1), yl(2), yl(2)],'o','FaceAlpha',.1,'LineStyle', 'none');
+plot(xlim, [0,0], '--r')
+legend([h1, h2], "X_c = 0.20", "X_c = 0.40", "Location", "North")
+ylabel("Max(f_y(\sigma') (Pa)")
+xlabel("fragmentation depth (m)")
+text(0.02,0.95,'(c)','Units','normalized','FontSize',20)
+
+
+subplot(144)
+h1 = plot(frag_depths_E, pzE); hold on;
+h2 = plot(frag_depths_A, pzA);
+yl = ylim;
+patch([-1000, -250, -250, -1000],[yl(1), yl(1), yl(2), yl(2)],'o','FaceAlpha',.1,'LineStyle', 'none');
+legend([h1, h2], "X_c = 0.20", "X_c = 0.40", "Location", "North")
+ylabel("p/S_z at fragmentation")
+xlabel("fragmentation depth (m)")
+text(0.02,0.95,'(d)','Units','normalized','FontSize',20)
+ylim(yl);
+
+
+
+%%
+h2 = plot(chamber_fac_vec, -min_an_with_shear);
+h3 = plot(chamber_fac_vec, -min_an_no_shear);
+
+xlabel("p_{ch}/S_z(z_{ch})")
+ylabel("Max(f_y(\sigma') (Pa)")
+plot(xlim, [0,0], '--r')
+
+legend([h3, h2], "Analytical - no shear", "Analytical - with shear", "FEM");
+title("\phi_{frag} = 0.80")
+grid on;
+
+text(0.9,0.95,'(a)','Units','normalized','FontSize',20)
+
+% set(gcf, 'PaperPosition', [0 0 9 4]); %Position plot at left hand corner with width 5 and height 5.
+% set(gcf, 'PaperSize', [9 4]); %Set the paper to have width 5 and height 5.
+% saveas(gcf, './Figures/min_mc_over_pch', 'pdf') %Save figure
+
+%% Compare models with different E and different cohesion
+
+COHESION = 10e6;
+
+frag_depths = [-1661.3, -1596.5, -1534.1, -1470.9, -1409.3, -1348.1, -1288,  -1228.3, -1169.3, -1111,  -1053.5,  -997.3,  -941.6,  -886.5,  -832.5,  -779.4]; % model B
+
+A = Amodels.initA_paper_MSH_B;
+label = 'B';
+chamber_fac_vec = [0.7:.02:1];
+k = 0.70; % needs to be set lower too
+
+comsol_data_cell{1} = importdata("./COMSOL_output/B_mc_full_wall_k_70_3.txt");
+comsol_data_cell{2} = importdata("./COMSOL_output/B_mc_full_wall_k_70_low_E.txt");
+comsol_data_cell{3} = importdata("./COMSOL_output/B_mc_full_wall_k_70_low_C.txt");
+min_com_cell = {};
+
+for k = 1:3
+comsol_data = comsol_data_cell{k};
+
+% prune data
+ch_com = cell(length(chamber_fac_vec),1);
+
+idx = find(diff(comsol_data(:,1)) < 0);
+idx = [1; idx];
+idx = [idx; length(comsol_data)];
+
+for i = 1:length(ch_com)
+    ch_com{i} = comsol_data(idx(i)+1:idx(i+1),:);
+end
+
+min_com = zeros(size(ch_com));
+
+for i = 1:length(ch_com)
+    ch = ch_com{i};
+    fd = frag_depths(i);
+    fdidx = (ch(:,1) > (fd - 50 + 5000)) & (ch(:,1) < (fd + 50 + 5000));
+    min_com(i) = min(ch(fdidx,2)) - (15e6-COHESION)*cos(phi);
+    %min_com(i) = min(ch(:,2));
+end
+
+min_com_cell{k} = min_com;
+end
+
+figure
+h1 = plot(chamber_fac_vec, -min_com_cell{1}, "*k"); hold on;
+h2 = plot(chamber_fac_vec, -min_com_cell{2}, ".r", "MarkerSize", 10); hold on;
+h3 = plot(chamber_fac_vec, -min_com_cell{3}, "*b"); hold on;
+
+xlabel("p_{ch}/S_z(z_{ch})")
+ylabel("Max(f_y(\sigma') (Pa)")
+plot(xlim, [0,0], '--r')
+
+legend([h1, h2, h3], "c = 10 MPa, E = 60 GPa", "c = 10 MPa, E = 6 GPa", "c = 1 MPa, E = 60 GPa", "Location", "NorthEast");
+grid on;
+
+% set(gcf, 'PaperPosition', [0 0 9 4]); %Position plot at left hand corner with width 5 and height 5.
+% set(gcf, 'PaperSize', [9 4]); %Set the paper to have width 5 and height 5.
+% saveas(gcf, './Figures/min_mc_over_pch', 'pdf') %Save figure
+
+
+function [chamber_fac_vec, min_an_with_shear, min_an_no_shear, pz_frag] = analytical_mins(label, frag_depths, plot_profiles)
+    COHESION = 10e6;
+    k = 0.74; % needs to be set lower too
+    
+    chamber_fac_vec = [0.7:.02:1];
+  
+    min_an_with_shear = zeros(size(chamber_fac_vec));
+    min_an_no_shear = zeros(size(chamber_fac_vec));
+    pz_frag = zeros(size(chamber_fac_vec));
+
+    for j = 1:length(chamber_fac_vec)
+        chamber_fac = chamber_fac_vec(j);
+
+        % Load .mat file
+        load(sprintf(['./COMSOL_input/p_MSH_' label '_ch_%2d.mat'], chamber_fac*100))
+
+        Srr = out{17};
+        Srz = out{18};
+        Srz = Srz;
+        zvec = out{2};
+
+        A = out{1};
+        Szz = A.k.rho*9.806*abs(zvec)+1.01e5;
+        phi = 35/180*pi;
+        pp = abs(zvec)*9.806*1000;
+        cohesion = COHESION;
+
+        SR = 1/2*(Srr + Szz) + ((1/2*(Srr - Szz)).^2 + Srz.^2).^(1/2);
+        SZ = 1/2*(Srr + Szz) - ((1/2*(Srr - Szz)).^2 + Srz.^2).^(1/2);
+
+        Stheta = 2*k.*Szz - Srr;
+
+        S1 = max(max(SR,SZ), Stheta);
+        S3 = min(min(SR,SZ), Stheta);
+        mc = (S3-S1)/2 + (S1+S3 -2*pp)/2*sin(phi) + cohesion.*cos(phi);
+
+        
+        % get min around fragmentation depth
+        fd = frag_depths(j);
+       % fdidx = (zvec > (fd - 50)) & (zvec < (fd + 50));
+        
+        %fdidx = (zvec > (fd -1000));
+         
+        %min_an_with_shear(j) = min(mc(fdidx));
+        min_an_with_shear(j) = min(mc);
+
+        S1 = max(max(Srr,Szz), Stheta);
+        S3 = min(min(Srr,Szz), Stheta);
+        mc = (S3-S1)/2 + (S1+S3 -2*pp)/2*sin(phi) + cohesion.*cos(phi);
+
+        % get min around fragmentation depth
+        fd = frag_depths(j);
+        %fdidx = (zvec > (fd - 50)) & (zvec < (fd + 50));
+        %min_an_no_shear(j) = min(mc(fdidx));
+        min_an_no_shear(j) = min(mc);
+        
+
+        if (plot_profiles)
+            plot(mc, zvec, "DisplayName", num2str(chamber_fac)); hold on
+        end
+        
+        % get ratio of p to sigz at the fragmentation depth
+        fdidx = find(zvec < fd,1,'last');
+        pz_frag(j) = Srr(fdidx)/Szz(fdidx);
+        
+    end
+    if (plot_profiles)
+        legend show
+    end
+end

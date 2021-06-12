@@ -2,14 +2,15 @@
 % Last edited: 4 March 2021
 
 % Get model
-A = Amodels.initA_paper_MSH_A;
-label = 'C';
+A = Amodels.initA_paper_MSH_E;
+label = 'E';
 chamber_fac_vec = [0.7:.02:1];
 
 for i = 1:length(chamber_fac_vec)
+   disp(["Working on ", num2str(i)])
    chamber_fac = chamber_fac_vec(i);
    A.chamber_fac = chamber_fac;
-   A = Amodels.initA_paper_MSH_B(A);
+   A = Amodels.initA_paper_MSH_E(A);
    
    out = muphem("multiflow2",0,A);
    
@@ -31,7 +32,7 @@ for i = 1:length(chamber_fac_vec)
 end
 
 %% Get fragmentation depths
-label = 'A';
+label = 'E';
 chamber_fac_vec = [0.7:.02:1];
 frags = zeros(1,length(chamber_fac_vec));
 

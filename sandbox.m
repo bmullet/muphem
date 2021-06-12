@@ -1,13 +1,24 @@
 %% Distribute solution
-A = out{1}; zvec = out{2}; pvec = out{3}; ugvec = out{4}; umvec = out{5};
-phivec = out{6}; rhogvec = out{7}; chidvec = out{8}; Qmvec = out{9}; Qgvec = out{10}; 
-with_shear_low = out{11}; no_shear_low = out{12}; with_shear_high = out{13};
-no_shear_high = out{14}; failure_shear = out{15}; failure_no_shear  = out{16};
 
-Srz = nan(size(phivec));
-    mu = A.mu(phivec,pvec);
-    Srz(zvec<A.fragdepth) = 4*mu(zvec<A.fragdepth).*umvec(zvec<A.fragdepth)/A.r;
-    Srz(zvec>=A.fragdepth) = A.f0*rhogvec(zvec>=A.fragdepth).*ugvec(zvec>=A.fragdepth).^2./2;
+A = out{1};
+zvec= out{2};
+pvec= out{3};
+ugvec= out{4};
+umvec= out{5};
+phivec= out{6};
+rhogvec= out{7};
+chidvec= out{8};
+Qmvec= out{9};
+Qgvec= out{10};
+with_shear_low= out{11};
+no_shear_low= out{12};
+with_shear_high= out{13};
+no_shear_high= out{14};
+failure_shear= out{15};
+failure_no_shear= out{16};
+Srr= out{17};
+Srz= out{18};
+failure_mechanisms= out{19};
 
 %% Test 1 - Test for uniqueness
 A = initA();
