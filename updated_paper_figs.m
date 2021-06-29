@@ -63,6 +63,7 @@ zvec = out{2};
 A = out{1};
 Szz = A.k.rho*9.806*abs(zvec);
 
+
 with_tau = importdata('../COMSOL/first_draft/mc_failure_with_tau.txt');
 z_tau = with_tau(:,2);
 r_tau = with_tau(:,1);
@@ -78,9 +79,10 @@ elastic = importdata('../COMSOL/first_draft/elastic_soln.txt');
 z_el = elastic(:,2);
 r_el = elastic(:,1);
 
-phi = 30/180*pi;
+phi = 35/180*pi;
 pp = abs(zvec)*9.806*1000;
 cohesion = A.mc.C(zvec); 
+%cohesion = 10e6;
 mu = tan(phi);
 
 C = 2*cohesion.*((mu^2 + 1)^(1/2) + mu);
@@ -90,7 +92,7 @@ q = tan(pi/4 + 1/2*phi)^2;
 %rzrf = @(p, sigz, C, lambda) sqrt((p./sigz - lambda)./(1/q - C./(q*sigz) - lambda));
 rzrf = @(p, sigz, C, k, pp) (-(q.*(p - k.*sigz))./(C + pp - sigz - pp.*q + k.*q.*sigz)).^(1/2);
 
-rfailzr = rzrf(Srr, Szz, C, A.lambda(zvec),pp);
+rfailzr = rzrf(Srr, Szz, C, 0.55,pp);
 
 hold on
 [z_tau,idx] = sort(z_tau);
@@ -123,14 +125,12 @@ z_el = z_el(z_el>-1800);
 
 p2 = plot(rr,z_el,'-b','LineWidth',2); hold on;
 
-
-
 p1 = plot(rfailzr*A.r, zvec,'--r','DisplayName', 'Analytical','LineWidth',3);
 
 legend([p1,p2,p3],'Analytical','FEM Elastic','FEM Elastoplastic')
 
-xlim([50,60])
-ylim([-2001, -1000])
+%xlim([50,60])
+%ylim([-2001, -1000])
 
 xlabel('r (m)'); ylabel('z (m)')
 

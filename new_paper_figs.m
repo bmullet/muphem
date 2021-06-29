@@ -103,16 +103,16 @@ grid on
 
 %% Analytical comparison at the fragmentation depth
 frag_depths = 1000*[-1.4243 ,  -1.3589,   -1.2940 ,  -1.2296 ,  -1.1662 ,  -1.1035 ,  -1.0415  , -0.9803 ,  -0.9202 ,  -0.8608  , -0.8024 ,  -0.7449 ,  -0.6885 ,  -0.6333 ,  -0.5791 ,  -0.5262];
-COHESION = 10e6; % MPa
+COHESION = 5e6; % MPa
 
 A = Amodels.initA_paper_MSH_A;
 label = 'A';
 chamber_fac_vec = [0.7:.02:1];
-plot_chamber_fac_idx =[1,6,11];
+plot_chamber_fac_idx =[6,11,16];
 
-k = 0.74; % needs to be set lower too
+k = 0.80; % needs to be set lower too
 
-comsol_data = importdata("./COMSOL_output/A_mc_full_wall_k_74.txt");
+comsol_data = importdata("./COMSOL_output/A_mc_full_wall_k_80.txt");
 
 % prune data
 ch_com = cell(length(chamber_fac_vec),1);
@@ -132,7 +132,7 @@ handles = [];
 for i=plot_chamber_fac_idx
     ch = ch_com{i};
     mci = ch(1:end,2) - (15e6-COHESION)*cosd(35); %need to subtract this because in comsol we used 15MPa cohesion
-    h = plot(-mci, ch(1:end,1)-5000); hold on;
+    h = plot(-mci/1e6, ch(1:end,1)-5000); hold on;
     handles = [handles h];
     
 end
@@ -143,7 +143,7 @@ handles = [];
 for i=plot_chamber_fac_idx
     ch = ch_com{i};
     mci = ch(1:end,2) - (15e6-COHESION)*cosd(35); %need to subtract this because in comsol we used 15MPa cohesion
-    h = plot(-mci, ch(1:end,1)-5000); hold on;
+    h = plot(-mci/1e6, ch(1:end,1)-5000); hold on;
     handles = [handles h];
     
 end
@@ -177,12 +177,19 @@ for j = plot_chamber_fac_idx
     
     S1 = max(max(SR,SZ), Stheta);
     S3 = min(min(SR,SZ), Stheta);
+    
+    S1_no_theta = max(SR,SZ);
+    S3_no_theta = min(SR,SZ);
+    
     mc = (S3-S1)/2 + (S1+S3 -2*pp)/2*sin(phi) + cohesion.*cos(phi);
+    mc_no_theta = (S3_no_theta-S1_no_theta)/2 + (S1_no_theta+S3_no_theta -2*pp)/2*sin(phi) + cohesion.*cos(phi); 
     
     subplot(222)
-    plot(-mc, zvec, '-k', "LineWidth", 1);
+    plot(-mc/1e6, zvec, '-k', "LineWidth", 1);
+    %plot(-mc_no_theta/1e6, zvec, '--k', "LineWidth", 1);
     subplot(224)
-    plot(-mc, zvec, '-k', "LineWidth", 1);
+    plot(-mc/1e6, zvec, '-k', "LineWidth", 1);
+    %plot(-mc_no_theta/1e6, zvec, '--k', "LineWidth", 1);
     
     
     % get min around fragmentation depth
@@ -201,7 +208,7 @@ end
 subplot(222)
 ylabel("z(m)")
 plot([0, 0],ylim, '--r',  "LineWidth", 2)
-xlabel("f_y(\sigma') (Pa)")
+xlabel("f_y(\sigma') (MPa)")
 
 ylim([-5000, 0])
 grid on;
@@ -209,10 +216,10 @@ grid on;
 subplot(224)
 ylabel("z(m)")
 plot([0, 0],ylim, '--r',  "LineWidth", 2)
-xlabel("f_y(\sigma') (Pa)")
+xlabel("f_y(\sigma') (MPa)")
 
-ylim(1e3*[-1.4750, -0.7510])
-xlim(1e6*[-5.7216, 5.4715])
+ylim(1e3*[-1.2045,   -0.4435])
+xlim([ -0.9297,    6.6126])
 grid on;
 
 % annotate a grid
@@ -238,7 +245,7 @@ plot(x, y, 'g--', 'LineWidth', 1);
 hold on;
 legend(handles, "0.7","0.8", "0.9");
 
-[hleg,icons,plots] = legend("0.7", "0.8", "0.9","Location","SouthWest");
+[hleg,icons,plots] = legend("0.8", "0.9", "1.0","Location","SouthWest");
 title(hleg,'p_{ch}/S_{z}(z_{ch})')
 hleg.Title.Visible = 'on';
 % the addition in height needed for the title:
@@ -267,16 +274,16 @@ text(0.025,0.95,'(d)','Units','normalized','FontSize',12)
 
 frag_depths = [-1661.3, -1596.5, -1534.1, -1470.9, -1409.3, -1348.1, -1288,  -1228.3, -1169.3, -1111,  -1053.5,  -997.3,  -941.6,  -886.5,  -832.5,  -779.4]; % model B
 
-COHESION = 10e6; % MPa
+COHESION = 5e6; % MPa
 
 
 A = Amodels.initA_paper_MSH_B;
 label = 'B';
 chamber_fac_vec = [0.7:.02:1];
-plot_chamber_fac_idx =[1,6,11];
-k = 0.74; % needs to be set lower too
+plot_chamber_fac_idx =[6,11,16];
+k = 0.80; 
 
-comsol_data = importdata("./COMSOL_output/B_mc_full_wall_k_74.txt");
+comsol_data = importdata("./COMSOL_output/B_mc_full_wall_k_80.txt");
 
 
 % prune data
@@ -296,7 +303,7 @@ handles = [];
 for i=plot_chamber_fac_idx
     ch = ch_com{i};
     mci = ch(1:end,2) - (15e6-COHESION)*cosd(35); %need to subtract this because in comsol we used 15MPa cohesion
-    h = plot(-mci, ch(1:end,1)-5000); hold on;
+    h = plot(-mci/1e6, ch(1:end,1)-5000); hold on;
     handles = [handles h];
 end
 grid on
@@ -307,12 +314,13 @@ handles = [];
 for i=plot_chamber_fac_idx
     ch = ch_com{i};
     mci = ch(1:end,2) - (15e6-COHESION)*cosd(35); %need to subtract this because in comsol we used 15MPa cohesion
-    h = plot(-mci, ch(1:end,1)-5000); hold on;
+    h = plot(-mci/1e6, ch(1:end,1)-5000); hold on;
     handles = [handles h];
     
 end
 
-ylim([-1710, -1000])
+ylim(1e3*[-1.4576, -0.5999])
+xlim([-4.3757,   5.3332])
 
 
 min_an = zeros(size(chamber_fac_vec));
@@ -344,9 +352,9 @@ for j = plot_chamber_fac_idx
     mc = (S3-S1)/2 + (S1+S3 -2*pp)/2*sin(phi) + cohesion.*cos(phi);
     
     subplot(221)
-    plot(-mc, zvec, '-k', "LineWidth", 1); hold on;
+    plot(-mc/1e6, zvec, '-k', "LineWidth", 1); hold on;
     subplot(223)
-    plot(-mc, zvec, '-k', "LineWidth", 1); hold on;
+    plot(-mc/1e6, zvec, '-k', "LineWidth", 1); hold on;
     
     % get min around fragmentation depth
     fd = frag_depths(j);
@@ -362,7 +370,7 @@ plot([0, 0],ylim, '--r', "LineWidth", 2)
 
 %legend("0.70","0.72","0.74","0.76","0.78","0.80","0.82","0.84","0.86","0.88","0.90","0.92","0.94","0.96","0.98","1.00")
 ylabel("z(m)")
-xlabel("f_y(\sigma') (Pa)")
+xlabel("f_y(\sigma') (MPa)")
 grid on;
 
 subplot(221)
@@ -370,7 +378,7 @@ ylabel("z(m)")
 
 plot([0, 0],ylim, '--r', "LineWidth", 2)
 
-xlabel("f_y(\sigma') (Pa)")
+xlabel("f_y(\sigma') (MPa)")
 ylim([-5000, 0])
 text(0.025,0.95,'(a)','Units','normalized','FontSize',12)
 grid on;
@@ -403,13 +411,13 @@ text(0.025,0.95,'(c)','Units','normalized','FontSize',12)
 
 %% Analytical comparison with COMSOL for model A
 frag_depths = 1000*[-1.4243 ,  -1.3589,   -1.2940 ,  -1.2296 ,  -1.1662 ,  -1.1035 ,  -1.0415  , -0.9803 ,  -0.9202 ,  -0.8608  , -0.8024 ,  -0.7449 ,  -0.6885 ,  -0.6333 ,  -0.5791 ,  -0.5262];
-COHESION = 10e6; % MPa
+COHESION = 5e6; % MPa
 A = Amodels.initA_paper_MSH_A;
 label = 'A';
 chamber_fac_vec = [0.7:.02:1];
-k = 0.74; % needs to be set lower too
+k = 0.80; % needs to be set lower too
 
-comsol_data = importdata("./COMSOL_output/A_mc_full_wall_k_74.txt");
+comsol_data = importdata("./COMSOL_output/A_mc_full_wall_k_80.txt");
 
 
 
@@ -507,21 +515,23 @@ h2 = plot(chamber_fac_vec, -min_an_with_shear);
 h3 = plot(chamber_fac_vec, -min_an_no_shear);
 
 xlabel("p_{ch}/S_z(z_{ch})")
-ylabel("Max(f_y(\sigma') (Pa)")
+ylabel("Max(f_y(\sigma')) (Pa)")
 plot(xlim, [0,0], '--r')
+
 
 legend([h3, h2, h1], "Analytical - no shear", "Analytical - with shear", "FEM");
 title("\phi_{frag} = 0.80")
 text(0.9,0.95,'(b)','Units','normalized','FontSize',20)
 grid on;
 
+xlim([0.8, 1])
 
 
 %% Compare across k
 label = 'A';
 comsol_data = importdata("./COMSOL_output/A_mc_full_wall_all_k.txt");
 frag_depths = 1000*[-1.4243 ,  -1.3589,   -1.2940 ,  -1.2296 ,  -1.1662 ,  -1.1035 ,  -1.0415  , -0.9803 ,  -0.9202 ,  -0.8608  , -0.8024 ,  -0.7449 ,  -0.6885 ,  -0.6333 ,  -0.5791 ,  -0.5262];
-COHESION = 10e6; % MPa
+COHESION = 5e6; % MPa
 chamber_fac_vec = [0.7, 0.8, 0.9];
 
 idx = [1,6,11];
@@ -539,7 +549,7 @@ figure(6);
 subplot(122)
 for i=1:length(ch_com)
     ch = ch_com{i};
-    plot(ch(1:end,1), -(ch(1:end,3) - (15e6-COHESION)*cosd(35))); hold on;
+    plot(ch(1:end,1), -(ch(1:end,3) - (15e6-COHESION)*cosd(35))/1e6); hold on;
     chamber_fac_vec(i) = ch(1,2);
 end
 
@@ -580,15 +590,15 @@ for j = 1:length(chamber_fac_vec)
         
     end
     
-    plot(kk, -mcvec, "Color", colors(j,:), "LineStyle", "--")
+    plot(kk, -mcvec/1e6, "Color", colors(j,:), "LineStyle", "--")
     
 end
 
 xlabel('k')
-ylabel("Max(f_y(\sigma') (Pa)")
+ylabel("Max(f_y(\sigma')) (MPa)")
 
 grid on;
-ylim([-5e6,10e6])
+
 xlim([0.5, 1])
 title("\phi_{frag} = 0.8")
 
@@ -624,9 +634,9 @@ frag_depths = [-1661.3, -1596.5, -1534.1, -1470.9, -1409.3, -1348.1, -1288,  -12
 A = Amodels.initA_paper_MSH_B;
 label = 'B';
 chamber_fac_vec = [0.7:.02:1];
-k = 0.70; % needs to be set lower too
+k = 0.8; % needs to be set lower too
 
-comsol_data = importdata("./COMSOL_output/B_mc_full_wall_k_70_3.txt");
+comsol_data = importdata("./COMSOL_output/B_mc_full_wall_k_80.txt");
 
 
 % prune data
@@ -724,7 +734,7 @@ h2 = plot(chamber_fac_vec, -min_an_with_shear);
 h3 = plot(chamber_fac_vec, -min_an_no_shear);
 
 xlabel("p_{ch}/S_z(z_{ch})")
-ylabel("Max(f_y(\sigma') (Pa)")
+ylabel("Max(f_y(\sigma')) (Pa)")
 plot(xlim, [0,0], '--r')
 
 legend([h3, h2, h1], "Analytical - no shear", "Analytical - with shear", "FEM");
@@ -732,6 +742,8 @@ title("\phi_{frag} = 0.70")
 grid on;
 
 text(0.9,0.95,'(a)','Units','normalized','FontSize',20)
+
+xlim([0.8,1])
 
 % set(gcf, 'PaperPosition', [0 0 9 4]); %Position plot at left hand corner with width 5 and height 5.
 % set(gcf, 'PaperSize', [9 4]); %Set the paper to have width 5 and height 5.
@@ -742,7 +754,7 @@ label = 'B';
 comsol_data = importdata("./COMSOL_output/B_mc_frag_depth_all_k.txt");
 frag_depths = [-1661.3, -1596.5, -1534.1, -1470.9, -1409.3, -1348.1, -1288,  -1228.3, -1169.3, -1111,  -1053.5,  -997.3,  -941.6,  -886.5,  -832.5,  -779.4]; % model B
 
-COHESION = 10e6; % MPa
+COHESION = 5e6; % MPa
 chamber_fac_vec = [0.7, 0.8, 0.9];
 
 idx = [1,6,11];
@@ -763,7 +775,7 @@ title('\phi_{frag} = 0.7'); hold on;
 handles = [];
 for i=1:length(ch_com)
     ch = ch_com{i};
-    h = plot(ch(1:end,1), -(ch(1:end,3) - (15e6-COHESION)*cosd(35))); hold on;
+    h = plot(ch(1:end,1), -(ch(1:end,3) - (15e6-COHESION)*cosd(35))/1e6); hold on;
     handles = [handles h];
     chamber_fac_vec(i) = ch(1,2);
 end
@@ -804,15 +816,14 @@ for j = 1:length(chamber_fac_vec)
         
     end
     
-    plot(kk, -mcvec, "Color", colors(j,:), "LineStyle", "--")
+    plot(kk, -mcvec/1e6, "Color", colors(j,:), "LineStyle", "--")
     
 end
 
 xlabel('k')
 legend(handles, "0.7", "0.8", "0.9", "Location", "SouthWest");
-ylim([-5e6,10e6])
 xlim([0.5,1])
-ylabel("Max(f_y(\sigma') (Pa)")
+ylabel("Max(f_y(\sigma')) (MPa)")
 grid on
 
 text(0.025,0.95,'(a)','Units','normalized','FontSize',20)
@@ -1048,9 +1059,12 @@ ylim([0.05, 0.25])
 frag_depths_E = [-947.1435, -875.0623, -804.5345, -735.8145, -668.4268, -602.5728, -538.9385, -476.9399, -417.4253, -360.4384, -306.3012, -255.613, -208.9285, -167.3586, -132.2345, -104.9263];
 frag_depths_A = 1000*[-1.4243 ,  -1.3589,   -1.2940 ,  -1.2296 ,  -1.1662 ,  -1.1035 ,  -1.0415  , -0.9803 ,  -0.9202 ,  -0.8608  , -0.8024 ,  -0.7449 ,  -0.6885 ,  -0.6333 ,  -0.5791 ,  -0.5262];
 
-[chamber_fac_vec, min_an_with_shear_E, min_an_no_shear_E, pzE] = analytical_mins('E', frag_depths_E, true); title("E")
+[chamber_fac_vec, min_an_with_shear_E, min_an_no_shear_E, pzE] = analytical_mins('E', frag_depths_E, true, 0.8); title("E")
+title("MC stability for different P_{ch}/S_z, X_c = 0.2")
+xlabel("Mohr Coulomb Function")
+ylabel("Depth")
 figure
-[chamber_fac_vec, min_an_with_shear_A, min_an_no_shear_A, pzA] = analytical_mins('A', frag_depths_A, true); title("A")
+[chamber_fac_vec, min_an_with_shear_A, min_an_no_shear_A, pzA] = analytical_mins('A', frag_depths_A, true, 0.8); title("A")
 
 figure; subplot(141)
 h1 = plot(chamber_fac_vec, -min_an_with_shear_E); hold on;
@@ -1069,8 +1083,7 @@ h2 = plot(chamber_fac_vec, frag_depths_A);
 
 xlabel("p_{ch}/S_z(z_{ch})")
 ylabel("fragmentation depth (m)")
-xl = xlim;
-
+xl = xlim();
 patch([xl(1), xl(1), xl(2), xl(2)],[-1000, -250, -250, -1000],'o','FaceAlpha',.1,'LineStyle', 'none');
 legend([h1, h2], "X_c = 0.20", "X_c = 0.40", "Location", "North")
 text(0.02,0.95,'(b)','Units','normalized','FontSize',20)
@@ -1100,27 +1113,83 @@ ylim(yl);
 
 
 
-%%
-h2 = plot(chamber_fac_vec, -min_an_with_shear);
-h3 = plot(chamber_fac_vec, -min_an_no_shear);
+%% Reduced xstal fraction, focus on one chamber pressure
+clear all;
 
-xlabel("p_{ch}/S_z(z_{ch})")
-ylabel("Max(f_y(\sigma') (Pa)")
-plot(xlim, [0,0], '--r')
+label = 'A';
+chamber_fac = 0.8;
+k = 0.65;
 
-legend([h3, h2], "Analytical - no shear", "Analytical - with shear", "FEM");
-title("\phi_{frag} = 0.80")
-grid on;
+% Load .mat file
+load(sprintf(['./COMSOL_input/p_MSH_' label '_ch_%2d.mat'], chamber_fac*100))
 
-text(0.9,0.95,'(a)','Units','normalized','FontSize',20)
+Srr = out{17};
+Srz = out{18};
+zvec = out{2};
 
-% set(gcf, 'PaperPosition', [0 0 9 4]); %Position plot at left hand corner with width 5 and height 5.
-% set(gcf, 'PaperSize', [9 4]); %Set the paper to have width 5 and height 5.
-% saveas(gcf, './Figures/min_mc_over_pch', 'pdf') %Save figure
+A = out{1};
+Szz = A.k.rho*9.806*abs(zvec)+1.01e5;
+phi = 35/180*pi;
+pp = abs(zvec)*9.806*1000;
+cohesion = 5e6;
+
+SR = 1/2*(Srr + Szz) + ((1/2*(Srr - Szz)).^2 + Srz.^2).^(1/2);
+SZ = 1/2*(Srr + Szz) - ((1/2*(Srr - Szz)).^2 + Srz.^2).^(1/2);
+
+Stheta = 2*k.*Szz - Srr;
+
+S1 = max(max(SR,SZ), Stheta);
+S3 = min(min(SR,SZ), Stheta);
+mc = (S3-S1)/2 + (S1+S3 -2*pp)/2*sin(phi) + cohesion.*cos(phi);
+
+figure(1)
+subplot(131)
+h11 = plot(Srr, zvec); hold on;
+subplot(132)
+h21 = plot(Srz, zvec); hold on;
+subplot(133)
+h31 = plot(-mc, zvec); hold on;
+
+
+
+label = 'E';
+chamber_fac = 0.8;
+k = 0.65;
+
+% Load .mat file
+load(sprintf(['./COMSOL_input/p_MSH_' label '_ch_%2d.mat'], chamber_fac*100))
+
+Srr = out{17};
+Srz = out{18};
+zvec = out{2};
+
+A = out{1};
+Szz = A.k.rho*9.806*abs(zvec)+1.01e5;
+phi = 35/180*pi;
+pp = abs(zvec)*9.806*1000;
+cohesion = 5e6;
+
+SR = 1/2*(Srr + Szz) + ((1/2*(Srr - Szz)).^2 + Srz.^2).^(1/2);
+SZ = 1/2*(Srr + Szz) - ((1/2*(Srr - Szz)).^2 + Srz.^2).^(1/2);
+
+Stheta = 2*k.*Szz - Srr;
+
+S1 = max(max(SR,SZ), Stheta);
+S3 = min(min(SR,SZ), Stheta);
+mc = (S3-S1)/2 + (S1+S3 -2*pp)/2*sin(phi) + cohesion.*cos(phi);
+
+figure(1)
+subplot(131)
+h11 = plot(Srr, zvec); hold on;
+subplot(132)
+h21 = plot(Srz, zvec); hold on;
+subplot(133)
+h31 = plot(-mc, zvec); hold on;
+
 
 %% Compare models with different E and different cohesion
 
-COHESION = 10e6;
+COHESION = 5e6;
 
 frag_depths = [-1661.3, -1596.5, -1534.1, -1470.9, -1409.3, -1348.1, -1288,  -1228.3, -1169.3, -1111,  -1053.5,  -997.3,  -941.6,  -886.5,  -832.5,  -779.4]; % model B
 
@@ -1167,7 +1236,7 @@ h2 = plot(chamber_fac_vec, -min_com_cell{2}, ".r", "MarkerSize", 10); hold on;
 h3 = plot(chamber_fac_vec, -min_com_cell{3}, "*b"); hold on;
 
 xlabel("p_{ch}/S_z(z_{ch})")
-ylabel("Max(f_y(\sigma') (Pa)")
+ylabel("Max(f_y(\sigma')) (Pa)")
 plot(xlim, [0,0], '--r')
 
 legend([h1, h2, h3], "c = 10 MPa, E = 60 GPa", "c = 10 MPa, E = 6 GPa", "c = 1 MPa, E = 60 GPa", "Location", "NorthEast");
@@ -1178,9 +1247,66 @@ grid on;
 % saveas(gcf, './Figures/min_mc_over_pch', 'pdf') %Save figure
 
 
-function [chamber_fac_vec, min_an_with_shear, min_an_no_shear, pz_frag] = analytical_mins(label, frag_depths, plot_profiles)
-    COHESION = 10e6;
-    k = 0.74; % needs to be set lower too
+%% Check out choked depth
+label = 'A';
+chamber_fac_vec = [0.7:0.02:1];
+ptop = zeros(length(chamber_fac_vec),1);
+ugtop = zeros(length(chamber_fac_vec),1);
+umtop = zeros(length(chamber_fac_vec),1);
+
+    for j = 1:length(chamber_fac_vec)
+        chamber_fac = chamber_fac_vec(j);
+
+        % Load .mat file
+        load(sprintf(['./COMSOL_input/p_MSH_' label '_ch_%2d.mat'], chamber_fac*100));
+        Srr = out{17};
+        zvec = out{2};
+        ug = out{4};
+        um = out{5};
+        ptop(j) = Srr(end);
+        ugtop(j) = ug(end);
+        umtop(j) = um(end);
+        
+    end
+
+figure
+subplot(131)
+plot(chamber_fac_vec, ptop./A.Patm_); hold on;
+subplot(132)
+plot(chamber_fac_vec, ugtop); hold on;
+subplot(133)
+plot(chamber_fac_vec, umtop); hold on;
+
+
+label = 'E';
+chamber_fac_vec = [0.7:0.02:1];
+ptop = zeros(length(chamber_fac_vec),1);
+
+    for j = 1:length(chamber_fac_vec)
+        chamber_fac = chamber_fac_vec(j);
+
+        % Load .mat file
+        load(sprintf(['./COMSOL_input/p_MSH_' label '_ch_%2d.mat'], chamber_fac*100));
+        Srr = out{17};
+        zvec = out{2};
+        ptop(j) = Srr(end);
+        
+    end
+subplot(131)
+plot(chamber_fac_vec, ptop./A.Patm_); hold on;
+plot(xlim, [1, 1], '--r')
+xlabel("P_{ch}/S_z")
+ylabel("P_{top} (atms)")
+legend("Xc = 0.4", "Xc = 0.2")
+xlim([0.7, 1])
+subplot(132)
+plot(chamber_fac_vec, ugtop); hold on;
+subplot(133)
+plot(chamber_fac_vec, umtop); hold on;
+
+%% Functions
+function [chamber_fac_vec, min_an_with_shear, min_an_no_shear, pz_frag] = analytical_mins(label, frag_depths, plot_profiles, k)
+    COHESION = 5e6;
     
     chamber_fac_vec = [0.7:.02:1];
   
@@ -1236,7 +1362,7 @@ function [chamber_fac_vec, min_an_with_shear, min_an_no_shear, pz_frag] = analyt
         
 
         if (plot_profiles)
-            plot(mc, zvec, "DisplayName", num2str(chamber_fac)); hold on
+            plot(-mc, zvec, "DisplayName", num2str(chamber_fac)); hold on
         end
         
         % get ratio of p to sigz at the fragmentation depth

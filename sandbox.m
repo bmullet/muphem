@@ -804,3 +804,38 @@ end
 figure
 plot(xc0s, tauoverp)
 
+%%
+k = 0.6
+load("comsol_failure.mat")
+
+Srr = out{17};
+Srz = out{18};
+zvec = out{2};
+A = out{1};
+
+Szz = A.k.rho*9.806*abs(zvec);
+phi = 35/180*pi;
+pp = abs(zvec)*9.806*1000;
+%cohesion = A.mc.C(zvec) + 2e6; % COMPARISON TO COMSOL ADDS 2MPa
+cohesion = 5e6;
+
+SR = 1/2*(Srr + Szz) + ((1/2*(Srr - Szz)).^2 + Srz.^2).^(1/2);
+SZ = 1/2*(Srr + Szz) - ((1/2*(Srr - Szz)).^2 + Srz.^2).^(1/2);
+
+Stheta = 2*k.*Szz - Srr;
+
+S1 = max(max(SR,SZ), Stheta);
+S3 = min(min(SR,SZ), Stheta);
+
+S1_no_theta = max(SR,SZ);
+S3_no_theta = min(SR,SZ);
+
+mc = (S3-S1)/2 + (S1+S3 -2*pp)/2*sin(phi) + cohesion.*cos(phi);
+mc_no_theta = (S3_no_theta-S1_no_theta)/2 + (S1_no_theta+S3_no_theta -2*pp)/2*sin(phi) + cohesion.*cos(phi);
+
+subplot(222)
+plot(-mc/1e6, zvec, '-k', "LineWidth", 1); hold on
+plot(-mc_no_theta/1e6, zvec, '--k', "LineWidth", 1);
+subplot(224)
+plot(-mc/1e6, zvec, '-k', "LineWidth", 1); hold on;
+plot(-mc_no_theta/1e6, zvec, '--k', "LineWidth", 1);
